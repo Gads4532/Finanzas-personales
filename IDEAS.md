@@ -17,10 +17,14 @@ internet y sin Claude. Mismo sistema que el Habit Tracker: un solo `index.html`,
 | Rial | Aquí | Estado |
 |---|---|---|
 | Saldo consolidado USD + Bs + USDT | «Saldo total» arriba; tocarlo cambia entre $ y Bs | ✅ |
-| Widget con la tasa BCV | Tasa BCV / paralelo arriba a la derecha, sola una vez al día; calculadora $ ⇄ Bs | ✅ |
+| Widget con la tasa BCV | Tasa arriba a la derecha con la hora de la última actualización | ✅ |
+| Tasas en tiempo real (BCV, USDT, euro) y calculadora | Pantalla «Tasas»: dólar BCV, USDT Binance P2P, euro BCV y paralelo, con ▲▼ frente al valor anterior. Se refrescan solas cada minuto mientras la app está a la vista, al volver a ella y al recuperar la red; sin intervención. Fuentes públicas con CORS abierto: ve.dolarapi.com (USD/EUR) y criptoya.com (USDT). Calculadora: escribes un monto en $, USDT, € o Bs y ves los otros tres; «Calcular bolívares con» BCV, USDT o paralelo. Por si no hay red: «Escribir tasas a mano» | ✅ |
 | Registro por voz con IA («Gasté 5$ en café») | Barra «Anotar rápido» + micrófono del navegador; un analizador local saca monto, moneda, tipo, cuenta, categoría y fecha. Sin IA, sin Claude | ✅ |
 | — | Fechas relativas («ayer», «antier», «hace 3 días», «el lunes», «la semana pasada», «mañana») y concretas («el 15», «15/10», «3/9/2025», «5 de octubre») | ✅ |
 | Gráficos por categoría e historial mensual | Barras finas por categoría en Presupuesto y «gastaste X% más/menos que el mes pasado». Se quitaron la dona y las barras de 6 meses: menos, pero mejor | ✅ |
+| Historial | Tocar el nombre del mes en Movimientos abre el historial: un renglón por mes con ingresos, gastos y balance, y el total de todo. En Presupuesto, cada categoría enseña sus últimos 6 meses | ✅ |
+| Pestaña Análisis | Mes · 3 meses · Año: ahorro y tasa de ahorro, gasto por día, comparación con el periodo anterior y qué categoría subió más, día más caro, gastos por categoría con barras, últimos 6 meses y mayores gastos | ✅ |
+| Categorías propias | Se crean desde el propio formulario de movimiento («+ Nueva» entre las categorías, y vuelve con ella elegida) o desde Ajustes → Categorías, donde también se editan | ✅ |
 | Calendario de movimientos, totales por día, filtros, búsqueda | Todos · Gastos · Ingresos; calendario y buscador escondidos tras un icono; el calendario tiñe cada día según lo gastado | ✅ |
 | Presupuestos, gasto libre, compromisos del mes | Plan del mes: **ingresos esperados** por categoría (recibido de esperado, barra verde) y **límite de gasto** por categoría (ámbar al 80%, rojo al pasarse). «Por asignar» = esperado − previsto (dale un destino a cada dólar). «Libre para gastar» = ingresos − gastos − por pagar, también por día | ✅ |
 | Pagos programados (semanal, quincenal…) | Semanal, quincenal, mensual, anual; botón «Pagar» que anota el gasto y pasa al siguiente | ✅ |

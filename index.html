@@ -109,6 +109,18 @@
   .late { color: var(--red); }
 
   .bar { height: 6px; border-radius: 999px; background: var(--empty); overflow: hidden; margin-top: 8px; }
+  /* Análisis: barras finas de 6 meses */
+  .months { display: flex; align-items: flex-end; gap: 10px; height: 110px; margin: 14px 0 4px; }
+  .mcol { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .mbars { display: flex; gap: 3px; align-items: flex-end; height: 100%; }
+  .mbars i { width: 8px; border-radius: 4px 4px 0 0; min-height: 2px; background: var(--empty); transform-origin: bottom; }
+  .mbars .ing { background: var(--green); } .mbars .gas { background: var(--red); }
+  .mcol span { font-size: .72rem; color: var(--muted); }
+  .mcol.now span { color: var(--text); font-weight: 600; }
+  .mlegend { display: flex; gap: 16px; justify-content: center; font-size: .8rem; color: var(--muted); margin-bottom: 8px; }
+  .mlegend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
+  .insight { color: var(--muted); font-size: .9rem; margin: 6px 0; }
+  .insight b { color: var(--text); font-weight: 500; }
   .bar i { display: block; height: 100%; border-radius: inherit; background: var(--c); width: var(--w); transform-origin: left; }
   .bar.warn i { background: var(--warn); } .bar.over i { background: var(--red); }
 
@@ -133,6 +145,7 @@
   .chip.on svg { color: var(--c); }
   .month { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .month h2 { font-size: 1.15rem; font-weight: 600; margin: 0; }
+  .month h2 button { font: inherit; border-bottom: 1.5px dotted var(--muted); padding-bottom: 1px; }
   .month button { width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; color: var(--muted); }
   .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px 6px; text-align: center; margin-bottom: 8px; }
   .wd { font-size: .72rem; color: var(--muted); padding-bottom: 4px; }
@@ -187,6 +200,8 @@
   .swatch { display: block; width: 28px; height: 28px; border-radius: 50%; background: var(--sw); cursor: pointer; border: 2px solid transparent; }
   input:checked + .swatch { border: 2px solid var(--sw); box-shadow: inset 0 0 0 3px var(--bg); }
   .catpick .chip { cursor: pointer; }
+  .catpick button.chip { color: var(--text); }
+  h3.sec { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
   input:checked + .chip { border-color: var(--c); color: var(--text); }
   input:checked + .chip svg { color: var(--c); }
   input:focus-visible + .icon-pick, input:focus-visible + .swatch, input:focus-visible + .chip { outline: 2px solid var(--muted); outline-offset: 2px; }
@@ -244,6 +259,8 @@
     .pop .amt { animation: bump-spring .9s var(--spring-pop) .1s; }
     .hero-total.bump { animation: bump-spring .9s var(--spring-pop); }
     .bar i { animation: grow .9s var(--spring-soft) both; }
+    .mbars i { animation: up .9s var(--spring-soft) both; }
+    @keyframes up { from { transform: scaleY(0); } }
     .toast { animation: rise-spring .6s var(--spring-pop); }
     .fab { transition: transform .1s; }
     .day { animation: day-in .35s cubic-bezier(.2, 1.4, .4, 1) both; animation-delay: calc(var(--i) * 12ms); }
@@ -280,6 +297,7 @@
   <div id="view-movs" hidden></div>
   <div id="view-pres" hidden></div>
   <div id="view-metas" hidden></div>
+  <div id="view-ana" hidden></div>
 </main>
 
 <button class="fab" id="fab" aria-label="Nuevo movimiento">
@@ -300,6 +318,9 @@
   <button class="tab" data-view="metas">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>Metas
   </button>
+  <button class="tab" data-view="ana">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5h16M6 16v-5M11 16V7M16 16v-3M21 16V5"/></svg>Análisis
+  </button>
 </nav>
 
 <dialog id="form-dialog"><form id="form" method="dialog"></form></dialog>
@@ -308,7 +329,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.4.0';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -393,7 +414,8 @@ function normalize(s) {
   s ||= {};
   s.cuentas ||= []; s.movs ||= []; s.metas ||= []; s.programados ||= []; s.presupuestos ||= {};
   s.categorias ||= structuredClone(DEFAULT_CATS); s.esperado ||= {};
-  s.tasa ||= {}; s.tasa.bcv ||= 0; s.tasa.paralelo ||= 0; s.tasa.uso ||= 'bcv'; s.tasa.fecha ||= '';
+  s.tasa ||= {}; for (const k of ['bcv', 'paralelo', 'usdt', 'eur', 'eurParalelo']) s.tasa[k] ||= 0;
+  s.tasa.uso ||= 'bcv'; s.tasa.fecha ||= ''; s.tasa.prev ||= {}; s.tasa.hora ||= 0;
   s.verEn ||= 'USD'; s.perfil ||= { nombre: '', apellido: '' };
   return s;
 }
@@ -592,7 +614,8 @@ const longDate = day => parseDay(day).toLocaleDateString('es', { weekday: 'long'
 const cuenta = id => state.cuentas.find(c => c.id === id);
 const categoria = id => state.categorias.find(c => c.id === id) || { id, nombre: 'Sin categoría', icono: 'punto', color: '' };
 const meta = id => state.metas.find(m => m.id === id);
-const rate = () => state.tasa[state.tasa.uso] || state.tasa.bcv || state.tasa.paralelo || 0;
+const rate = () => state.tasa[state.tasa.uso] || state.tasa.bcv || state.tasa.usdt || state.tasa.paralelo || 0;
+const USO = { bcv: 'BCV', paralelo: 'Paralelo', usdt: 'USDT' };
 // USD y USDT van 1 a 1; los bolívares, con la tasa guardada en el movimiento (o la de hoy).
 const toUSD = (monto, mon, t = rate()) => mon === 'VES' ? (t ? monto / t : 0) : monto;
 const fromUSD = (usd, mon, t = rate()) => mon === 'VES' ? usd * t : usd;
@@ -640,23 +663,42 @@ function nextDate(day, freq) {
 }
 
 // ---------- Tasa del dólar: se pide sola una vez al día; si no hay internet, se usa la última o la que escribas.
+// Tres fuentes públicas, todas con CORS abierto: dólar y euro BCV (dolarapi) y USDT de Binance P2P (criptoya).
+// Se piden solas al abrir, cada minuto mientras la app está a la vista, al volver a ella y al recuperar la red.
+const RATE_SRC = {
+  usd: ['https://ve.dolarapi.com/v1/dolares', d => ({ bcv: d.find(x => x.fuente === 'oficial')?.promedio, paralelo: d.find(x => x.fuente === 'paralelo')?.promedio })],
+  eur: ['https://ve.dolarapi.com/v1/euros', d => ({ eur: d.find(x => x.fuente === 'oficial')?.promedio, eurParalelo: d.find(x => x.fuente === 'paralelo')?.promedio })],
+  usdt: ['https://criptoya.com/api/binancep2p/usdt/ves/1', d => ({ usdt: d.ask || d.bid })],
+};
+let ratesBusy = false;
 async function fetchRate(manual = false) {
-  try {
-    const r = await fetch('https://ve.dolarapi.com/v1/dolares', { cache: 'no-store' });
-    const data = await r.json();
-    const of = data.find(x => x.fuente === 'oficial')?.promedio, pa = data.find(x => x.fuente === 'paralelo')?.promedio;
-    if (!of) throw 0;
-    state.tasa.bcv = of; state.tasa.paralelo = pa || state.tasa.paralelo; state.tasa.fecha = today(); state.tasa.auto = true;
-    save(); renderAll();
-    if (manual) toast(`Tasa BCV: Bs ${fmtNum(of)}`);
-  } catch {
-    if (manual) toast('Sin conexión: escribe la tasa a mano.');
-  }
+  if (ratesBusy) return;
+  ratesBusy = true;
+  const got = {};
+  await Promise.allSettled(Object.values(RATE_SRC).map(async ([url, pick]) => {
+    const r = await fetch(url, { cache: 'no-store' });
+    Object.assign(got, pick(await r.json()));
+  }));
+  ratesBusy = false;
+  const keys = Object.keys(got).filter(k => got[k] > 0);
+  if (!keys.length) { if (manual) toast('Sin conexión: las tasas se quedan como estaban.'); setRatesStatus('Sin conexión'); return; }
+  // Guarda el valor anterior para enseñar si subió o bajó.
+  for (const k of keys) { if (state.tasa[k] && state.tasa[k] !== got[k]) state.tasa.prev[k] = state.tasa[k]; state.tasa[k] = got[k]; }
+  state.tasa.fecha = today(); state.tasa.hora = Date.now(); state.tasa.auto = true;
+  save(); renderAll();
+  if ($('#form-dialog').open && formKind === 'tasa') FORMS.tasa.refresh();
+  if (manual) toast(`Tasas al día · BCV Bs ${fmtNum(state.tasa.bcv)}`);
 }
+const setRatesStatus = t => { const el = $('#rates-status'); if (el) el.textContent = t; };
+const ratesStale = () => Date.now() - (state.tasa.hora || 0) > 55000;
+setInterval(() => { if (document.visibilityState === 'visible' && navigator.onLine && ratesStale()) fetchRate(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && ratesStale()) fetchRate(); });
+addEventListener('online', () => fetchRate());
+const fmtHora = ms => new Date(ms).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
 
 // ---------- Pantallas
 let view = 'inicio';
-const TITLES = { inicio: 'Inicio', movs: 'Movimientos', pres: 'Presupuesto', metas: 'Metas' };
+const TITLES = { inicio: 'Inicio', movs: 'Movimientos', pres: 'Presupuesto', metas: 'Metas', ana: 'Análisis' };
 let justAdded = null;
 
 function renderHeader() {
@@ -666,7 +708,7 @@ function renderHeader() {
   const t = rate();
   const old = state.tasa.fecha && state.tasa.fecha !== today();
   $('#global').innerHTML = t
-    ? `<div class="g-rate">Bs ${fmtNum(t)}</div><div class="g-sub">${state.tasa.uso === 'bcv' ? 'BCV' : 'Paralelo'}${state.tasa.fecha ? ' · ' + (old ? shortDate(state.tasa.fecha) : 'hoy') : ''}</div>`
+    ? `<div class="g-rate">Bs ${fmtNum(t)}</div><div class="g-sub">${USO[state.tasa.uso]}${state.tasa.hora ? ' · ' + (old ? shortDate(state.tasa.fecha) : fmtHora(state.tasa.hora)) : ''}</div>`
     : `<div class="g-rate">Bs —</div><div class="g-sub">Toca para poner la tasa</div>`;
 }
 
@@ -750,8 +792,10 @@ function renderInicio() {
     <div class="list">
       <section class="item"><button class="row" style="width:100%" data-act="perfil">
         <span class="title"><div class="name">${esc([state.perfil.nombre, state.perfil.apellido].filter(Boolean).join(' ') || 'Tu nombre')}</div><div class="sub">Nombre y apellido</div></span></button></section>
+      <section class="item"><button class="row" style="width:100%" data-act="cats">
+        <span class="title"><div class="name">Categorías</div><div class="sub">${state.categorias.filter(c => c.tipo === 'gasto').length} de gastos · ${state.categorias.filter(c => c.tipo === 'ingreso').length} de ingresos · crea o edita las tuyas</div></span></button></section>
       <section class="item"><button class="row" style="width:100%" data-act="tasa">
-        <span class="title"><div class="name">Tasa del dólar</div><div class="sub">${rate() ? `Bs ${fmtNum(rate())} · ${state.tasa.uso === 'bcv' ? 'BCV' : 'Paralelo'}` : 'Sin tasa'}</div></span></button></section>
+        <span class="title"><div class="name">Tasas y calculadora</div><div class="sub">${state.tasa.bcv ? `BCV ${fmtNum(state.tasa.bcv)} · USDT ${fmtNum(state.tasa.usdt)} · EUR ${fmtNum(state.tasa.eur)}` : 'Sin tasas aún'}</div></span></button></section>
       ${window.claude?.use ? '' : `<section class="item"><button class="row" style="width:100%" data-act="${auth ? 'acct-out' : 'acct-in'}">
         <span class="title"><div class="name">${auth ? esc(auth.email || 'Cuenta') : 'Crear cuenta o iniciar sesión'}</div><div class="sub">${auth ? 'Tus datos se guardan en la nube · toca para cerrar sesión' : 'Con una cuenta, tus datos se guardan en la nube y los ves en cualquier teléfono'}</div></span></button></section>`}
     </div>
@@ -768,7 +812,7 @@ function renderInicio() {
 }
 
 // ---------- Movimientos
-let movMonth = thisMonth(), movTipo = '', movAcc = '', movDay = '', movQuery = '', movCal = false, movSearch = false;
+let movMonth = thisMonth(), movTipo = '', movAcc = '', movDay = '', movQuery = '', movCal = false, movSearch = false, movHist = false;
 function movLabel(mv) {
   if (mv.tipo === 'transfer') return `${cuenta(mv.cuenta)?.nombre || '¿?'} → ${cuenta(mv.destino)?.nombre || '¿?'}`;
   if (mv.tipo === 'meta') return `${mv.monto < 0 ? 'Retiro de' : 'Ahorro para'} ${meta(mv.meta)?.nombre || 'una meta'}`;
@@ -791,7 +835,33 @@ function movHTML(mv) {
   </section>`;
 }
 
+// Historial: un renglón por mes desde el primer movimiento, con ingresos, gastos y balance.
+function renderHist() {
+  const first = state.movs.length ? state.movs.map(m => m.fecha.slice(0, 7)).sort()[0] : thisMonth();
+  const months = [];
+  for (let mk = thisMonth(); mk >= first; mk = shiftMonth(mk, -1)) months.push(mk);
+  const tot = months.map(monthTotals);
+  const allIng = tot.reduce((s, t) => s + t.ing, 0), allGas = tot.reduce((s, t) => s + t.gas, 0);
+  $('#view-movs').innerHTML = `
+    <div class="month">
+      <button data-hist="0" aria-label="Volver al mes">‹</button>
+      <h2>Historial</h2>
+      <button disabled style="visibility:hidden">›</button>
+    </div>
+    <div class="summary">
+      <div><b class="pos">${view$(allIng)}</b><span>ingresos</span></div>
+      <div><b class="neg">${view$(allGas)}</b><span>gastos</span></div>
+      <div><b>${view$(allIng - allGas)}</b><span>ahorro total</span></div>
+    </div>
+    <div class="list">${months.map((mk, i) => `<section class="item"><button class="row" style="width:100%" data-goto="${mk}">
+      <span class="title"><div class="name">${monthName(mk)}</div>
+        <div class="sub"><span class="pos">+${view$(tot[i].ing)}</span> · <span class="neg">−${view$(tot[i].gas)}</span></div></span>
+      <span class="amt${tot[i].ing - tot[i].gas < 0 ? ' neg' : ''}">${view$(tot[i].ing - tot[i].gas)}</span>
+    </button></section>`).join('')}</div>`;
+}
+
 function renderMovs() {
+  if (movHist) return renderHist();
   const mk = movMonth;
   const [y, m] = mk.split('-').map(Number);
   let list = inMonth(mk);
@@ -838,7 +908,7 @@ function renderMovs() {
   $('#view-movs').innerHTML = `
     <div class="month">
       <button data-month="-1" aria-label="Mes anterior">‹</button>
-      <h2>${monthName(mk)}</h2>
+      <h2><button data-hist="1" title="Ver historial">${monthName(mk)}</button></h2>
       <button data-month="1" aria-label="Mes siguiente" ${mk >= thisMonth() ? 'disabled style="visibility:hidden"' : ''}>›</button>
     </div>
     <div class="summary">
@@ -868,6 +938,8 @@ $('#view-movs').addEventListener('click', e => {
   const b = e.target.closest('button');
   if (!b || b.disabled) return;
   if (b.dataset.month) { movMonth = shiftMonth(movMonth, +b.dataset.month); movDay = ''; }
+  else if (b.dataset.hist !== undefined) movHist = b.dataset.hist === '1';
+  else if (b.dataset.goto) { movMonth = b.dataset.goto; movHist = false; movDay = ''; }
   else if (b.dataset.day !== undefined) movDay = movDay === b.dataset.day ? '' : b.dataset.day;
   else if (b.dataset.tipo !== undefined) movTipo = b.dataset.tipo;
   else if (b.dataset.acc !== undefined) movAcc = b.dataset.acc;
@@ -942,6 +1014,68 @@ function renderPres() {
         <span class="sub">Al día</span></div></section>`).join('')
       : '<p class="empty">Alquiler, internet, el colegio… Anótalos una vez y te avisan cada mes.</p>'}</div>`;
 }
+// ---------- Análisis: qué pasó con el dinero en un periodo, sin adornos.
+let anaPeriodo = 1;
+function renderAna() {
+  const n = anaPeriodo;
+  const months = Array.from({ length: n }, (_, i) => shiftMonth(thisMonth(), -i));
+  const prevMonths = Array.from({ length: n }, (_, i) => shiftMonth(thisMonth(), -n - i));
+  const inRange = ms => state.movs.filter(mv => ms.includes(mv.fecha.slice(0, 7)));
+  const sum = (list, tipo) => list.reduce((s, mv) => s + (mv.tipo === tipo ? movUSD(mv) : 0), 0);
+  const cur = inRange(months), prev = inRange(prevMonths);
+  const ing = sum(cur, 'ingreso'), gas = sum(cur, 'gasto'), gasPrev = sum(prev, 'gasto');
+  const tasa = ing ? Math.round((ing - gas) / ing * 100) : null;
+  // Por categoría, con lo del periodo anterior para ver qué subió.
+  const byCat = {}, byCatPrev = {};
+  for (const mv of cur) if (mv.tipo === 'gasto') byCat[mv.categoria] = (byCat[mv.categoria] || 0) + movUSD(mv);
+  for (const mv of prev) if (mv.tipo === 'gasto') byCatPrev[mv.categoria] = (byCatPrev[mv.categoria] || 0) + movUSD(mv);
+  const cats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+  const maxCat = cats[0]?.[1] || 1;
+  // Días con gasto, promedio diario y el día más caro.
+  const perDay = {};
+  for (const mv of cur) if (mv.tipo === 'gasto') perDay[mv.fecha] = (perDay[mv.fecha] || 0) + movUSD(mv);
+  const days = Object.entries(perDay).sort((a, b) => b[1] - a[1]);
+  const now = new Date();
+  const daysElapsed = n === 1 ? now.getDate() : months.reduce((s, mk) => s + (mk === thisMonth() ? now.getDate() : new Date(+mk.slice(0, 4), +mk.slice(5, 7), 0).getDate()), 0);
+  const top = cur.filter(mv => mv.tipo === 'gasto').sort((a, b) => movUSD(b) - movUSD(a)).slice(0, 5);
+  const grew = cats.map(([id, v]) => [id, v - (byCatPrev[id] || 0)]).filter(([, d]) => d > 0).sort((a, b) => b[1] - a[1])[0];
+  // Evolución: 6 meses siempre, para ver la tendencia.
+  const six = Array.from({ length: 6 }, (_, i) => shiftMonth(thisMonth(), i - 5)), t6 = six.map(monthTotals);
+  const max6 = Math.max(1, ...t6.flatMap(x => [x.ing, x.gas]));
+  const label = n === 1 ? monthName(thisMonth(), { month: 'long' }).toLowerCase() : n === 3 ? 'los últimos 3 meses' : 'los últimos 12 meses';
+  $('#view-ana').innerHTML = `
+    <div class="filters" style="margin:-8px 0 22px"><div class="seg">${[[1, 'Mes'], [3, '3 meses'], [12, 'Año']].map(([v, l]) => `<button class="${n === v ? 'on' : ''}" data-periodo="${v}">${l}</button>`).join('')}</div></div>
+    <div class="hero">
+      <div class="hero-label">Ahorro de ${label}</div>
+      <div class="hero-total" style="${ing - gas < 0 ? 'color:var(--red)' : ''}">${view$(ing - gas)}</div>
+      <div class="hero-alt">${tasa === null ? 'Sin ingresos en el periodo' : `Tasa de ahorro: ${tasa}% de lo que entró`}</div>
+    </div>
+    <div class="summary">
+      <div><b class="pos">${view$(ing)}</b><span>ingresos</span></div>
+      <div><b class="neg">${view$(gas)}</b><span>gastos</span></div>
+      <div><b>${view$(daysElapsed ? gas / daysElapsed : 0)}</b><span>al día</span></div>
+    </div>
+    ${gasPrev ? `<p class="insight">Gastaste <b>${Math.abs(Math.round((gas - gasPrev) / gasPrev * 100))}% ${gas > gasPrev ? 'más' : 'menos'}</b> que en el periodo anterior${grew ? `; lo que más subió fue <b>${esc(categoria(grew[0]).nombre)}</b> (+${view$(grew[1])})` : ''}.</p>` : ''}
+    ${days.length ? `<p class="insight">El día más caro fue el <b>${shortDate(days[0][0])}</b>: ${view$(days[0][1])}.</p>` : ''}
+    <h2 class="sec">Gastos por categoría</h2>
+    <div class="list">${cats.length ? cats.map(([id, v]) => { const c = categoria(id); return `<section class="item" style="${colorVar(c)}">
+      <div class="row"><span class="dot">${icon(c.icono)}</span>
+        <span class="title"><div class="name">${esc(c.nombre)}</div><div class="sub">${Math.round(v / gas * 100)}% del gasto</div></span>
+        <span class="amt">${view$(v)}</span></div>
+      <div class="bar" style="margin-left:54px"><i style="--w:${v / maxCat * 100}%"></i></div></section>`; }).join('')
+      : '<p class="empty">Sin gastos en este periodo.</p>'}</div>
+    <h2 class="sec">Últimos 6 meses</h2>
+    <div class="months">${six.map((mk, i) => `<div class="mcol${mk === thisMonth() ? ' now' : ''}">
+      <div class="mbars"><i class="ing" style="height:${t6[i].ing / max6 * 100}%"></i><i class="gas" style="height:${t6[i].gas / max6 * 100}%"></i></div>
+      <span>${monthName(mk, { month: 'short' }).replace('.', '')}</span></div>`).join('')}</div>
+    <div class="mlegend"><span><i style="background:var(--green)"></i>Ingresos</span><span><i style="background:var(--red)"></i>Gastos</span></div>
+    ${top.length ? `<h2 class="sec">Mayores gastos</h2><div class="list">${top.map(movHTML).join('')}</div>` : ''}`;
+}
+$('#view-ana').addEventListener('click', e => {
+  const b = e.target.closest('button[data-periodo]');
+  if (b) { anaPeriodo = +b.dataset.periodo; renderAna(); }
+});
+
 // ---------- Metas de ahorro
 function ringSVG(pct) {
   const r = 18.5, c = 2 * Math.PI * r;
@@ -992,7 +1126,7 @@ function renderMetas() {
 
 function renderAll() {
   renderHeader();
-  ({ inicio: renderInicio, movs: renderMovs, pres: renderPres, metas: renderMetas })[view]();
+  ({ inicio: renderInicio, movs: renderMovs, pres: renderPres, metas: renderMetas, ana: renderAna })[view]();
   $('#fab').hidden = !state.cuentas.length;
 }
 
@@ -1020,6 +1154,7 @@ document.querySelector('main').addEventListener('click', e => {
     case 'edit-prog': openForm('prog', state.programados.find(p => p.id === id)); break;
     case 'budget': openForm('budget', categoria(id)); break;
     case 'new-cat': openForm('cat'); break;
+    case 'cats': catList(); break;
     case 'new-meta': openForm('meta'); break;
     case 'edit-meta': openForm('meta', meta(id)); break;
     case 'aportar': openForm('aporte', meta(id)); break;
@@ -1202,7 +1337,8 @@ const seg = (name, opts, sel) => `<div class="seg">${opts.map(([v, l]) =>
 const accOptions = (sel, skip) => state.cuentas.filter(c => c.id !== skip).map(c =>
   `<option value="${c.id}" ${c.id === sel ? 'selected' : ''}>${esc(c.nombre)} · ${c.moneda === 'VES' ? 'Bs' : c.moneda}</option>`).join('');
 const catChips = (tipo, sel) => `<div class="picker catpick">${state.categorias.filter(c => c.tipo === tipo).map(c =>
-  `<label><input type="radio" name="categoria" value="${c.id}" ${c.id === sel ? 'checked' : ''}><span class="chip" style="${colorVar(c)}">${icon(c.icono)}${esc(c.nombre)}</span></label>`).join('')}</div>`;
+  `<label><input type="radio" name="categoria" value="${c.id}" ${c.id === sel ? 'checked' : ''}><span class="chip" style="${colorVar(c)}">${icon(c.icono)}${esc(c.nombre)}</span></label>`).join('')}
+  <button type="button" class="chip" data-f="new-cat" data-tipo="${tipo}">+ Nueva</button></div>`;
 const actions = (canDelete, label = 'Guardar') => `<div class="dialog-actions">
   ${canDelete ? '<button type="button" class="link danger" data-f="delete">Borrar</button>' : ''}
   <button type="button" class="link" data-f="cancel">Cancelar</button>
@@ -1214,18 +1350,19 @@ const FORMS = {
     html: (mv, o) => {
       const tipo = mv?.tipo || o.tipo || 'gasto';
       const acc = mv?.cuenta || o.cuenta || state.cuentas[0]?.id;
+      const pre = { monto: mv?.monto ?? o.monto, fecha: mv?.fecha || o.fecha || today(), nota: mv?.nota ?? o.nota ?? '', categoria: mv?.categoria || o.categoria };
       const c = cuenta(acc);
       return `<h2>${mv ? 'Editar movimiento' : 'Nuevo movimiento'}</h2>
         ${mv?.tipo === 'meta' ? '' : seg('tipo', [['gasto', 'Gasto'], ['ingreso', 'Ingreso'], ['transfer', 'Transferir']], tipo)}
         <label>Monto</label>
-        <div class="big-input"><input name="monto" inputmode="decimal" placeholder="0,00" required value="${toInput(Math.abs(mv?.monto || 0))}" autocomplete="off"><span id="f-sym">${sym(c?.moneda)}</span></div>
+        <div class="big-input"><input name="monto" inputmode="decimal" placeholder="0,00" required value="${toInput(Math.abs(pre.monto || 0))}" autocomplete="off"><span id="f-sym">${sym(c?.moneda)}</span></div>
         <div class="hint" id="f-eq"></div>
         <div class="two"><div><label id="f-acc-l">${tipo === 'transfer' ? 'Desde' : 'Cuenta'}</label><select name="cuenta">${accOptions(acc)}</select></div>
           <div id="f-dest" ${tipo === 'transfer' ? '' : 'hidden'}><label>Hacia</label><select name="destino">${accOptions(mv?.destino || state.cuentas.find(x => x.id !== acc)?.id, '')}</select></div></div>
         <div id="f-dest-amt" hidden><label>Llega a destino</label><div class="big-input"><input name="montoDestino" inputmode="decimal" value="${toInput(mv?.montoDestino)}"><span id="f-sym2"></span></div></div>
-        <div id="f-cat" ${tipo === 'transfer' || mv?.tipo === 'meta' ? 'hidden' : ''}><label>Categoría</label><div id="f-cats">${catChips(tipo === 'transfer' ? 'gasto' : tipo, mv?.categoria || (tipo === 'ingreso' ? 'sueldo' : 'comida'))}</div></div>
-        <div class="two"><div><label>Fecha</label><input type="date" name="fecha" value="${mv?.fecha || today()}" max="${dayKey(addDays(new Date(), 366))}" required></div>
-          <div><label>Nota</label><input name="nota" placeholder="Opcional" value="${esc(mv?.nota)}"></div></div>
+        <div id="f-cat" ${tipo === 'transfer' || mv?.tipo === 'meta' ? 'hidden' : ''}><label>Categoría</label><div id="f-cats">${catChips(tipo === 'transfer' ? 'gasto' : tipo, pre.categoria || (tipo === 'ingreso' ? 'sueldo' : 'comida'))}</div></div>
+        <div class="two"><div><label>Fecha</label><input type="date" name="fecha" value="${pre.fecha}" max="${dayKey(addDays(new Date(), 366))}" required></div>
+          <div><label>Nota</label><input name="nota" placeholder="Opcional" value="${esc(pre.nota)}"></div></div>
         ${actions(!!mv)}`;
     },
     wire: () => {
@@ -1338,6 +1475,9 @@ const FORMS = {
       <p class="meta">Este mes ${c.tipo === 'ingreso' ? 'has recibido' : 'llevas'} <b>${view$((c.tipo === 'ingreso' ? incomeByCat : spentByCat)(thisMonth())[c.id] || 0)}</b>. Se pone en dólares.</p>
       <label>${c.tipo === 'ingreso' ? 'Cuánto esperas recibir al mes' : 'Límite mensual'}</label><div class="big-input"><input name="limite" inputmode="decimal" placeholder="Sin plan" value="${toInput((c.tipo === 'ingreso' ? state.esperado : state.presupuestos)[c.id])}"><span>$</span></div>
       <div class="hint" id="f-eq"></div>
+      <ul class="mini" style="margin-top:14px">${Array.from({ length: 6 }, (_, i) => shiftMonth(thisMonth(), -i)).map(mk => {
+        const v = (c.tipo === 'ingreso' ? incomeByCat : spentByCat)(mk)[c.id] || 0;
+        return `<li><span>${monthName(mk, { month: 'long' })}</span><b>${view$(v)}</b></li>`; }).join('')}</ul>
       <div class="actions"><button type="button" class="link" data-f="edit-cat">Editar categoría</button></div>
       ${actions(false)}`,
     wire: () => {
@@ -1354,17 +1494,23 @@ const FORMS = {
   },
 
   cat: {
-    html: c => `<h2>${c ? 'Editar categoría' : 'Nueva categoría'}</h2>
+    html: (c, o) => `<h2>${c ? 'Editar categoría' : 'Nueva categoría'}</h2>
       <label>Nombre</label><input name="nombre" required value="${esc(c?.nombre)}" placeholder="Mascotas">
-      ${c ? '' : `<label>Tipo</label>${seg('tipo', [['gasto', 'Gasto'], ['ingreso', 'Ingreso']], 'gasto')}`}
+      ${c ? '' : `<label>Tipo</label>${seg('tipo', [['gasto', 'Gasto'], ['ingreso', 'Ingreso']], o.tipo || 'gasto')}`}
       <label>Palabras para anotar rápido · separadas por espacios</label><input name="palabras" value="${esc(c?.palabras)}" placeholder="perro gato veterinario">
       <label>Símbolo</label>${iconPicker(c?.icono || 'punto')}
       <label>Color</label>${colorPicker(c?.color)}
       ${actions(!!c && state.categorias.filter(x => x.tipo === c.tipo).length > 1)}`,
-    save: (f, c) => {
+    wire: () => setTimeout(() => $('#form').elements.nombre.focus(), 50),
+    save: (f, c, o) => {
       const data = { nombre: f.elements.nombre.value.trim(), palabras: f.elements.palabras.value.trim(), icono: f.elements.icono.value, color: f.elements.color.value };
-      if (c) Object.assign(c, data); else state.categorias.push({ id: uid(), tipo: f.elements.tipo.value, ...data });
-      save(); renderAll(); return true;
+      let id = c?.id;
+      if (c) Object.assign(c, data); else { id = uid(); state.categorias.push({ id, tipo: f.elements.tipo.value, ...data }); }
+      save(); renderAll();
+      // Si vino desde «Nuevo movimiento», vuelve allí con la categoría nueva ya elegida.
+      if (o.back) setTimeout(() => openForm(o.back.kind, o.back.obj, { ...o.back.opts, categoria: id }), 0);
+      else if (o.list) setTimeout(catList, 0);
+      return true;
     },
     remove: c => confirmMsg('¿Borrar la categoría?', `Sus movimientos pasan a «Otros».`, () => {
       const other = c.tipo === 'ingreso' ? 'otros-in' : 'otros';
@@ -1442,25 +1588,58 @@ const FORMS = {
   },
 
   tasa: {
-    html: () => `<h2>Tasa del dólar</h2>
-      <p class="meta">${state.tasa.fecha ? `Actualizada el ${longDate(state.tasa.fecha)}.` : 'Aún no hay tasa.'} Se usa para pasar bolívares a dólares.</p>
-      <div class="two"><div><label>BCV · Bs por $</label><input name="bcv" inputmode="decimal" value="${toInput(state.tasa.bcv)}"></div>
-        <div><label>Paralelo · Bs por $</label><input name="paralelo" inputmode="decimal" value="${toInput(state.tasa.paralelo)}"></div></div>
-      <label>Calcular con</label>${seg('uso', [['bcv', 'BCV'], ['paralelo', 'Paralelo']], state.tasa.uso)}
+    html: () => `<h2>Tasas</h2>
+      <p class="meta" id="rates-status"></p>
+      <div class="list" id="rates"></div>
+      <label>Calcular bolívares con</label>${seg('uso', [['bcv', 'BCV'], ['usdt', 'USDT'], ['paralelo', 'Paralelo']], state.tasa.uso)}
       <label>Calculadora</label>
-      <div class="two"><div><input name="calc-usd" inputmode="decimal" placeholder="$"></div><div><input name="calc-bs" inputmode="decimal" placeholder="Bs"></div></div>
-      <div class="actions"><button type="button" class="link" data-f="refresh">Actualizar desde internet</button></div>
-      ${actions(false)}`,
+      <div class="big-input"><input name="calc" inputmode="decimal" placeholder="0,00" autocomplete="off"><span id="calc-sym">$</span></div>
+      ${seg('de', [['USD', '$'], ['USDT', 'USDT'], ['EUR', '€'], ['VES', 'Bs']], 'USD')}
+      <ul class="mini" id="calc-out" style="margin-top:12px"></ul>
+      <details style="margin-top:18px"><summary class="link">Escribir tasas a mano</summary>
+        <div class="two"><div><label>Dólar BCV</label><input name="bcv" inputmode="decimal" value="${toInput(state.tasa.bcv)}"></div><div><label>USDT</label><input name="usdt" inputmode="decimal" value="${toInput(state.tasa.usdt)}"></div></div>
+        <div class="two"><div><label>Euro BCV</label><input name="eur" inputmode="decimal" value="${toInput(state.tasa.eur)}"></div><div><label>Paralelo</label><input name="paralelo" inputmode="decimal" value="${toInput(state.tasa.paralelo)}"></div></div>
+      </details>
+      <div class="actions"><button type="button" class="link" data-f="refresh">Actualizar ahora</button></div>
+      ${actions(false, 'Listo')}`,
+    // Las filas de tasas se vuelven a pintar solas con cada actualización.
+    refresh: () => {
+      const f = $('#form'); if (!f.elements.calc) return;
+      const rows = [['bcv', 'Dólar BCV', 'oficial'], ['usdt', 'USDT', 'Binance P2P'], ['eur', 'Euro BCV', 'oficial'], ['paralelo', 'Dólar paralelo', 'promedio']];
+      $('#rates').innerHTML = rows.map(([k, n, src]) => {
+        const v = state.tasa[k], p = state.tasa.prev[k];
+        const d = v && p ? (v - p) / p * 100 : 0;
+        return `<section class="item"><div class="row"><span class="title"><div class="name">${n}</div><div class="sub">${src}${d ? ` · <span class="${d > 0 ? 'neg' : 'pos'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(2)}%</span>` : ''}</div></span>
+          <span class="amt">${v ? 'Bs ' + fmtNum(v) : '—'}</span></div></section>`; }).join('');
+      setRatesStatus(state.tasa.hora ? `Actualizadas a las ${fmtHora(state.tasa.hora)} · se refrescan solas cada minuto` : 'Buscando tasas…');
+      for (const k of ['bcv', 'usdt', 'eur', 'paralelo']) if (!f.elements[k].dataset.touched) f.elements[k].value = toInput(state.tasa[k]);
+      FORMS.tasa.calc();
+    },
+    // Todo a dólares y de ahí a lo demás: USDT vale lo que diga Binance, el euro lo que diga el BCV.
+    calc: () => {
+      const f = $('#form'), n = parseAmount(f.elements.calc.value), de = f.elements.de.value;
+      const t = state.tasa, bs = rate();
+      $('#calc-sym').textContent = de === 'VES' ? 'Bs' : de === 'EUR' ? '€' : de === 'USDT' ? 'USDT' : '$';
+      if (!(n > 0) || !bs) { $('#calc-out').innerHTML = ''; return; }
+      // Valor en bolívares del monto escrito, según su moneda.
+      const inBs = de === 'VES' ? n : de === 'EUR' ? n * (t.eur || 0) : de === 'USDT' ? n * (t.usdt || bs) : n * bs;
+      const out = [['VES', 'Bolívares', inBs ? 'Bs ' + fmtNum(inBs) : '—'], ['USD', 'Dólares (' + USO[t.uso] + ')', '$ ' + fmtNum(inBs / bs)],
+        ['USDT', 'USDT', t.usdt ? fmtNum(inBs / t.usdt) + ' USDT' : '—'], ['EUR', 'Euros', t.eur ? '€ ' + fmtNum(inBs / t.eur) : '—']];
+      $('#calc-out').innerHTML = out.filter(([k]) => k !== de).map(([, l, v]) => `<li><span>${l}</span><b>${v}</b></li>`).join('');
+    },
     wire: () => {
       const f = $('#form');
-      const t = () => parseAmount(f.elements[f.elements.uso.value].value) || 0;
-      f.elements['calc-usd'].oninput = e => f.elements['calc-bs'].value = toInput(parseAmount(e.target.value) * t());
-      f.elements['calc-bs'].oninput = e => f.elements['calc-usd'].value = t() ? toInput(parseAmount(e.target.value) / t()) : '';
+      FORMS.tasa.refresh();
+      if (ratesStale() && navigator.onLine) fetchRate();
+      f.oninput = f.onchange = e => {
+        if (['bcv', 'usdt', 'eur', 'paralelo'].includes(e.target.name)) e.target.dataset.touched = 1;
+        if (e.target.name === 'uso') { state.tasa.uso = e.target.value; }
+        FORMS.tasa.calc();
+      };
+      setTimeout(() => f.elements.calc.focus(), 50);
     },
     save: f => {
-      const bcv = parseAmount(f.elements.bcv.value), pa = parseAmount(f.elements.paralelo.value);
-      if (bcv > 0 && bcv !== state.tasa.bcv) { state.tasa.bcv = bcv; state.tasa.fecha = today(); state.tasa.auto = false; }
-      if (pa > 0) state.tasa.paralelo = pa;
+      for (const k of ['bcv', 'usdt', 'eur', 'paralelo']) { const v = parseAmount(f.elements[k].value); if (v > 0 && f.elements[k].dataset.touched) { state.tasa[k] = v; state.tasa.auto = false; } }
       state.tasa.uso = f.elements.uso.value;
       save(); renderAll(); return true;
     },
@@ -1492,9 +1671,25 @@ $('#form').addEventListener('click', e => {
   if (k === 'cancel') $('#form-dialog').close();
   if (k === 'delete') { const o = editing; $('#form-dialog').close(); FORMS[formKind].remove(o); }
   if (k === 'edit-cat') { const c = editing; $('#form-dialog').close(); openForm('cat', c); }
-  if (k === 'refresh') { $('#form-dialog').close(); fetchRate(true); }
+  if (k === 'new-cat') {
+    const f = $('#form'), t = e.target.closest('[data-tipo]').dataset.tipo;
+    const back = { kind: formKind, obj: editing, opts: { ...formOpts, tipo: f.elements.tipo?.value, cuenta: f.elements.cuenta?.value, monto: parseAmount(f.elements.monto?.value) || 0, fecha: f.elements.fecha?.value, nota: f.elements.nota?.value } };
+    $('#form-dialog').close();
+    openForm('cat', null, { tipo: t, back });
+  }
+  if (k === 'refresh') { setRatesStatus('Buscando tasas…'); fetchRate(true); }
 });
 
+// Lista de categorías: tocar una la edita; «+ Nueva» crea otra y vuelve aquí.
+function catList() {
+  const block = tipo => `<h3 class="sec" style="margin:18px 0 4px">${tipo === 'gasto' ? 'Gastos' : 'Ingresos'}</h3>
+    <div class="picker catpick">${state.categorias.filter(c => c.tipo === tipo).map(c =>
+      `<button class="chip" data-edit-cat="${c.id}" style="${colorVar(c)}">${icon(c.icono)}${esc(c.nombre)}</button>`).join('')}
+      <button class="chip" data-new-cat="${tipo}">+ Nueva</button></div>`;
+  showMsg(`<h2>Categorías</h2><p class="meta">Toca una para cambiarle nombre, símbolo, color o palabras clave.</p>
+    ${block('gasto')}${block('ingreso')}
+    <div class="dialog-actions"><button class="primary" data-close>Listo</button></div>`);
+}
 function showMsg(html) {
   $('#msg').innerHTML = html;
   $('#msg-dialog').showModal();
@@ -1511,6 +1706,9 @@ $('#msg-dialog').addEventListener('click', e => {
   const t = e.target;
   if (t === $('#msg-dialog') || t.hasAttribute('data-close')) $('#msg-dialog').close();
   if (t.hasAttribute('data-confirm')) { $('#msg-dialog').close(); confirmFn?.(); confirmFn = null; }
+  const ec = t.closest('[data-edit-cat]'), nc = t.closest('[data-new-cat]');
+  if (ec) { $('#msg-dialog').close(); openForm('cat', categoria(ec.dataset.editCat), { list: true }); }
+  if (nc) { $('#msg-dialog').close(); openForm('cat', null, { tipo: nc.dataset.newCat, list: true }); }
 });
 
 // ---------- Meta cumplida: la pantalla entera lo celebra.
@@ -1648,7 +1846,7 @@ renderAll();
 if (!state.perfil.nombre) openForm('perfil', null, { bienvenida: true });
 setSync('local');
 connectCloud();
-if (state.tasa.fecha !== today() || !state.tasa.bcv) fetchRate();
+if (navigator.onLine) fetchRate();
 </script>
 </body>
 </html>

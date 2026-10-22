@@ -7,8 +7,8 @@ programados y metas de ahorro. Un solo archivo, sin dependencias.
 
 Se instala desde Chrome («Instalar aplicación») y funciona sin conexión y sin Claude.
 Los datos se guardan en el teléfono; «Guardar copia» exporta todo a un archivo .json y
-«Exportar a Excel» saca los movimientos en .csv. La tasa del dólar se actualiza sola
-una vez al día desde ve.dolarapi.com cuando hay internet; si no, se escribe a mano.
+«Exportar a Excel» saca los movimientos en .csv. Las tasas (dólar BCV, USDT Binance, euro BCV y paralelo) se actualizan solas cada
+minuto desde ve.dolarapi.com y criptoya.com; sin internet se escriben a mano.
 
 Con una cuenta (correo y contraseña) los datos se sincronizan entre teléfonos a
 través de Supabase; `supabase.sql` prepara la tabla `finanzas` una sola vez (mismo
