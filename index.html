@@ -145,8 +145,8 @@
   .chip.on svg { color: var(--c); }
   .month { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .month h2 { font-size: 1.15rem; font-weight: 600; margin: 0; }
-  .month h2 button { font: inherit; border-bottom: 1.5px dotted var(--muted); padding-bottom: 1px; }
-  .month button { width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; color: var(--muted); }
+  .month h2 button { font: inherit; color: inherit; border-bottom: 1.5px dotted var(--muted); padding-bottom: 1px; }
+  .month > button { width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; color: var(--muted); }
   .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px 6px; text-align: center; margin-bottom: 8px; }
   .wd { font-size: .72rem; color: var(--muted); padding-bottom: 4px; }
   .day { aspect-ratio: 1; width: 100%; max-width: 44px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center;
@@ -329,7 +329,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.4.3';
+const APP_VERSION = '1.4.4';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
