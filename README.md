@@ -19,3 +19,5 @@ la nube de Claude.
 Desarrollada con Claude con la misma estructura que
 [Habit-tracker](https://github.com/Gads4532/Habit-tracker); el banco de ideas vive en
 [Gads4532/Skills](https://github.com/Gads4532/Skills/tree/main/apps/finanzas).
+Instalable desde https://gads4532.github.io/finanzas-personales/ (repo público
+[Gads4532/finanzas-personales](https://github.com/Gads4532/finanzas-personales)).
