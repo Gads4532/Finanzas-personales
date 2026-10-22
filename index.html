@@ -329,7 +329,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.4.2';
+const APP_VERSION = '1.4.3';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -708,8 +708,14 @@ let view = 'inicio';
 const TITLES = { inicio: 'Inicio', movs: 'Movimientos', pres: 'Presupuesto', metas: 'Metas', ana: 'Análisis' };
 let justAdded = null;
 
+// Saludo según la hora, con el primer nombre (sin apellido): antes de las 12, antes de las 19, después.
+const firstName = v => String(v || '').trim().split(/\s+/)[0] || '';
+function saludo() {
+  const h = new Date().getHours(), n = firstName(state.perfil.nombre);
+  return (h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches') + (n ? `, ${n}` : '');
+}
 function renderHeader() {
-  if (view === 'inicio' && state.perfil.nombre) $('h1').textContent = `Hola, ${state.perfil.nombre}`;
+  if (view === 'inicio') $('h1').textContent = saludo();
   const fecha = new Date().toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
   $('#today').textContent = fecha[0].toUpperCase() + fecha.slice(1);
   const t = rate();
@@ -1174,7 +1180,7 @@ function setView(v) {
   $('#toast').hidden = true;
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x.dataset.view === v));
   for (const k of Object.keys(TITLES)) $('#view-' + k).hidden = k !== v;
-  $('h1').textContent = v === 'inicio' && state.perfil.nombre ? `Hola, ${state.perfil.nombre}` : TITLES[v];
+  $('h1').textContent = v === 'inicio' ? saludo() : TITLES[v];
   renderAll();
   scrollTo(0, 0);
 }
