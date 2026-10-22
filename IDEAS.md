@@ -39,6 +39,11 @@ internet y sin Claude. Mismo sistema que el Habit Tracker: un solo `index.html`,
 | Perfil financiero con IA | Dentro de Claude se podría pedir con `claude.use` | ⏳ |
 | Histórico del dólar con gráfico | Guardar la tasa de cada día y dibujarla | ⏳ |
 
+## Instalación en el teléfono
+
+- Chrome → ⋮ → «Instalar aplicación». En Samsung Galaxy, borrar el icono de la pantalla de inicio no desinstala la app: queda en Ajustes → Aplicaciones.
+- Si Chrome dice que ya está instalada y no ofrece reinstalar: borrar la página `gads4532.github.io` del **Historial** de Chrome lo arregla (probado). También sirve Configuración → Configuración de sitios → Datos almacenados → borrar.
+
 ## Diseño
 
 **Muy minimalista**: cada pantalla enseña tres cifras y una lista; lo demás aparece al tocar.
