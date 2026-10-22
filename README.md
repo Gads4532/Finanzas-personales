@@ -1,4 +1,4 @@
-# Finanzas en Claro
+# Finanzas Personales
 
 Finanzas personales para quien maneja dólares, bolívares y USDT a la vez, inspirada en
 [Rial](https://apps.apple.com/us/app/rial-finanzas-personales/id6755372307): saldo total

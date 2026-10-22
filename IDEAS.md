@@ -1,4 +1,4 @@
-# Finanzas en Claro — banco de ideas
+# Finanzas Personales — banco de ideas
 
 Referencia: **Rial – Finanzas Personales** (App Store, pensada para Venezuela). Rial
 pide cuenta y tiene suscripción Plus; esta versión es gratis, sin registro, funciona sin
