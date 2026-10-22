@@ -329,7 +329,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.4.1';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -415,7 +415,7 @@ function normalize(s) {
   s.cuentas ||= []; s.movs ||= []; s.metas ||= []; s.programados ||= []; s.presupuestos ||= {};
   s.categorias ||= structuredClone(DEFAULT_CATS); s.esperado ||= {};
   s.tasa ||= {}; for (const k of ['bcv', 'paralelo', 'usdt', 'eur', 'eurParalelo']) s.tasa[k] ||= 0;
-  s.tasa.uso ||= 'bcv'; s.tasa.fecha ||= ''; s.tasa.prev ||= {}; s.tasa.hora ||= 0;
+  s.tasa.uso ||= 'bcv'; s.tasa.fecha ||= ''; s.tasa.prev ||= {}; s.tasa.hora ||= 0; s.tasa.at ||= {};
   s.verEn ||= 'USD'; s.perfil ||= { nombre: '', apellido: '' };
   return s;
 }
@@ -666,24 +666,28 @@ function nextDate(day, freq) {
 // Tres fuentes públicas, todas con CORS abierto: dólar y euro BCV (dolarapi) y USDT de Binance P2P (criptoya).
 // Se piden solas al abrir, cada minuto mientras la app está a la vista, al volver a ella y al recuperar la red.
 const RATE_SRC = {
-  usd: ['https://ve.dolarapi.com/v1/dolares', d => ({ bcv: d.find(x => x.fuente === 'oficial')?.promedio, paralelo: d.find(x => x.fuente === 'paralelo')?.promedio })],
-  eur: ['https://ve.dolarapi.com/v1/euros', d => ({ eur: d.find(x => x.fuente === 'oficial')?.promedio, eurParalelo: d.find(x => x.fuente === 'paralelo')?.promedio })],
-  usdt: ['https://criptoya.com/api/binancep2p/usdt/ves/1', d => ({ usdt: d.ask || d.bid })],
+  usd: ['https://ve.dolarapi.com/v1/dolares', d => { const o = d.find(x => x.fuente === 'oficial'), p = d.find(x => x.fuente === 'paralelo');
+    return { bcv: o?.promedio, paralelo: p?.promedio, at: { bcv: o?.fechaActualizacion, paralelo: p?.fechaActualizacion } }; }],
+  eur: ['https://ve.dolarapi.com/v1/euros', d => { const o = d.find(x => x.fuente === 'oficial'), p = d.find(x => x.fuente === 'paralelo');
+    return { eur: o?.promedio, eurParalelo: p?.promedio, at: { eur: o?.fechaActualizacion, eurParalelo: p?.fechaActualizacion } }; }],
+  usdt: ['https://criptoya.com/api/binancep2p/usdt/ves/1', d => ({ usdt: d.ask || d.bid, at: { usdt: d.time ? new Date(d.time * 1000).toISOString() : '' } })],
 };
 let ratesBusy = false;
 async function fetchRate(manual = false) {
   if (ratesBusy) return;
   ratesBusy = true;
   const got = {};
+  const at = {};
   await Promise.allSettled(Object.values(RATE_SRC).map(async ([url, pick]) => {
     const r = await fetch(url, { cache: 'no-store' });
-    Object.assign(got, pick(await r.json()));
+    const { at: when, ...vals } = pick(await r.json());
+    Object.assign(got, vals); Object.assign(at, when);
   }));
   ratesBusy = false;
   const keys = Object.keys(got).filter(k => got[k] > 0);
   if (!keys.length) { if (manual) toast('Sin conexión: las tasas se quedan como estaban.'); setRatesStatus('Sin conexión'); return; }
   // Guarda el valor anterior para enseñar si subió o bajó.
-  for (const k of keys) { if (state.tasa[k] && state.tasa[k] !== got[k]) state.tasa.prev[k] = state.tasa[k]; state.tasa[k] = got[k]; }
+  for (const k of keys) { if (state.tasa[k] && state.tasa[k] !== got[k]) state.tasa.prev[k] = state.tasa[k]; state.tasa[k] = got[k]; if (at[k]) state.tasa.at[k] = at[k]; }
   state.tasa.fecha = today(); state.tasa.hora = Date.now(); state.tasa.auto = true;
   save(); renderAll();
   if ($('#form-dialog').open && formKind === 'tasa') FORMS.tasa.refresh();
@@ -695,6 +699,9 @@ setInterval(() => { if (document.visibilityState === 'visible' && navigator.onLi
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && ratesStale()) fetchRate(); });
 addEventListener('online', () => fetchRate());
 const fmtHora = ms => new Date(ms).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+// «22 oct, 17:49»; si es de hoy, solo la hora.
+const fmtCuando = iso => { if (!iso) return ''; const d = new Date(iso); if (isNaN(d)) return '';
+  return (dayKey(d) === today() ? 'hoy' : d.toLocaleDateString('es', { day: 'numeric', month: 'short' }).replace('.', '')) + ', ' + fmtHora(d); };
 
 // ---------- Pantallas
 let view = 'inicio';
@@ -1609,9 +1616,10 @@ const FORMS = {
       $('#rates').innerHTML = rows.map(([k, n, src]) => {
         const v = state.tasa[k], p = state.tasa.prev[k];
         const d = v && p ? (v - p) / p * 100 : 0;
-        return `<section class="item"><div class="row"><span class="title"><div class="name">${n}</div><div class="sub">${src}${d ? ` · <span class="${d > 0 ? 'neg' : 'pos'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(2)}%</span>` : ''}</div></span>
+        const when = fmtCuando(state.tasa.at[k]);
+        return `<section class="item"><div class="row"><span class="title"><div class="name">${n}</div><div class="sub">${src}${when ? ' · ' + when : ''}${d ? ` · <span class="${d > 0 ? 'neg' : 'pos'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(2)}%</span>` : ''}</div></span>
           <span class="amt">${v ? 'Bs ' + fmtNum(v) : '—'}</span></div></section>`; }).join('');
-      setRatesStatus(state.tasa.hora ? `Actualizadas a las ${fmtHora(state.tasa.hora)} · se refrescan solas cada minuto` : 'Buscando tasas…');
+      setRatesStatus(state.tasa.hora ? `Última actualización: ${longDate(dayKey(new Date(state.tasa.hora)))}, ${fmtHora(state.tasa.hora)}. Se refrescan solas cada minuto.` : 'Buscando tasas…');
       for (const k of ['bcv', 'usdt', 'eur', 'paralelo']) if (!f.elements[k].dataset.touched) f.elements[k].value = toInput(state.tasa[k]);
       FORMS.tasa.calc();
     },
