@@ -54,3 +54,7 @@ Idéntico al Habit Tracker: líneas finas, sin tarjetas, símbolo y color por cu
 categoría y meta, diálogos que suben con resorte, barra inferior, modo oscuro,
 animaciones con resortes `linear()` que se apagan con «reducir movimiento». El color
 de la app es verde (`--accent: #12a150`) en lugar del naranja del fuego.
+
+## Regla para todas las apps
+
+- **Sin borde blanco**: `html` y `body` llevan el fondo del tema (`var(--bg)`) a todo el alto, `<meta name="color-scheme" content="light dark">`, y en el manifiesto `background_color` y `theme_color` son `#0e0e0e`. Así en modo oscuro no aparece ninguna franja blanca arriba, abajo ni al rebotar. Igual que el Habit Tracker desde la 2.3.1/2.4.1; se aplica a cualquier app nueva.
