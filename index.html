@@ -383,7 +383,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.8.1';
+const APP_VERSION = '1.8.2';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -425,7 +425,8 @@ const colorVar = x => x?.color ? `--c:${x.color}` : '';
 const MONEDAS = { USD: 'Dólares', VES: 'Bolívares', USDT: 'USDT' };
 const nf = new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtNum = n => nf.format(Math.abs(n) < .005 ? 0 : n);
-const money = (n, mon = 'USD') => mon === 'USDT' ? `${fmtNum(n)} USDT` : `${mon === 'VES' ? 'Bs' : '$'} ${fmtNum(n)}`;
+// El símbolo va delante y pegado al número: «$623,48»; en bolívares, «Bs 15.000,00».
+const money = (n, mon = 'USD') => mon === 'USDT' ? `${fmtNum(n)} USDT` : mon === 'VES' ? `Bs ${fmtNum(n)}` : `$${fmtNum(n)}`;
 const signed = (n, mon) => (n < 0 ? '−' : '+') + money(Math.abs(n), mon);
 // Acepta «1.234,56», «1234.56», «1,5» o «1.200» (miles).
 function parseAmount(s) {
@@ -541,7 +542,7 @@ function needPlus(feature) {
   plusDialog(feature);
   return true;
 }
-const fmtPrice = n => '$ ' + n.toFixed(2).replace('.', ',');
+const fmtPrice = n => '$' + n.toFixed(2).replace('.', ',');
 function plusDialog(feature) {
   const act = isPlus();
   showMsg(`<h2>Finanzas Plus</h2>
@@ -1773,8 +1774,8 @@ const FORMS = {
       if (!(n > 0) || !bs) { $('#calc-out').innerHTML = ''; return; }
       // Valor en bolívares del monto escrito, según su moneda.
       const inBs = de === 'VES' ? n : de === 'EUR' ? n * (t.eur || 0) : de === 'USDT' ? n * (t.usdt || bs) : n * bs;
-      const out = [['VES', 'Bolívares', inBs ? 'Bs ' + fmtNum(inBs) : '—'], ['USD', 'Dólares (' + USO[t.uso] + ')', '$ ' + fmtNum(inBs / bs)],
-        ['USDT', 'USDT', t.usdt ? fmtNum(inBs / t.usdt) + ' USDT' : '—'], ['EUR', 'Euros', t.eur ? '€ ' + fmtNum(inBs / t.eur) : '—']];
+      const out = [['VES', 'Bolívares', inBs ? 'Bs ' + fmtNum(inBs) : '—'], ['USD', 'Dólares (' + USO[t.uso] + ')', '$' + fmtNum(inBs / bs)],
+        ['USDT', 'USDT', t.usdt ? fmtNum(inBs / t.usdt) + ' USDT' : '—'], ['EUR', 'Euros', t.eur ? '€' + fmtNum(inBs / t.eur) : '—']];
       $('#calc-out').innerHTML = out.filter(([k]) => k !== de).map(([, l, v]) => `<li><span>${l}</span><b>${v}</b></li>`).join('');
     },
     wire: () => {
