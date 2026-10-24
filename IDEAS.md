@@ -23,11 +23,11 @@ internet y sin Claude. Mismo sistema que el Habit Tracker: un solo `index.html`,
 | — | Fechas relativas («ayer», «antier», «hace 3 días», «el lunes», «la semana pasada», «mañana») y concretas («el 15», «15/10», «3/9/2025», «5 de octubre») | ✅ |
 | Gráficos por categoría e historial mensual | Barras finas por categoría en Presupuesto y «gastaste X% más/menos que el mes pasado». Se quitaron la dona y las barras de 6 meses: menos, pero mejor | ✅ |
 | Historial | Tocar el nombre del mes en Movimientos abre el historial: un renglón por mes con ingresos, gastos y balance, y el total de todo. En Presupuesto, cada categoría enseña sus últimos 6 meses | ✅ |
-| Pestaña Análisis | Mes · 3 meses · Año: ahorro y tasa de ahorro, gasto por día, comparación con el periodo anterior y qué categoría subió más, día más caro, gastos por categoría con barras, últimos 6 meses y mayores gastos | ✅ |
+| Pestaña Análisis | Mes · 3 meses · Año · Fechas (rango a medida, comparado con el periodo anterior de igual duración): ahorro y tasa de ahorro, gasto por día, comparación con el periodo anterior y qué categoría subió más, día más caro, gastos por categoría con barras, últimos 6 meses y mayores gastos | ✅ |
 | Categorías propias | Se crean desde el propio formulario de movimiento («+ Nueva» entre las categorías, y vuelve con ella elegida) o desde Ajustes → Categorías, donde también se editan | ✅ |
 | Calendario de movimientos, totales por día, filtros, búsqueda | Todos · Gastos · Ingresos; calendario y buscador escondidos tras un icono; el calendario tiñe cada día según lo gastado | ✅ |
 | Presupuestos, gasto libre, compromisos del mes | Plan del mes: **ingresos esperados** por categoría (recibido de esperado, barra verde) y **límite de gasto** por categoría (ámbar al 80%, rojo al pasarse). «Por asignar» = esperado − previsto (dale un destino a cada dólar). «Libre para gastar» = ingresos − gastos − por pagar, también por día | ✅ |
-| Pagos programados (semanal, quincenal…) | Semanal, quincenal, mensual, anual; botón «Pagar» que anota el gasto y pasa al siguiente | ✅ |
+| Pagos programados (semanal, quincenal…) | **Ingresos y gastos periódicos**: tipo, categoría, cuenta y frecuencia (semanal, quincenal, mensual, anual). Cuando toca, botón «Cobrar» o «Pagar» que registra el movimiento y pasa a la siguiente fecha. Los ingresos pendientes suman al presupuesto; los gastos pendientes lo comprometen | ✅ |
 | Metas y ahorros con aportes y retiros desde cualquier cuenta | Metas con anillo de progreso, cuota mensual hasta la fecha y celebración al cumplirla | ✅ |
 | Cuenta y nube propia | Igual que el Habit Tracker 2.x: «Crear cuenta o iniciar sesión» en Ajustes, con correo y contraseña (Supabase). Los datos van a la tabla `finanzas` del mismo proyecto (una fila por persona, protegida por RLS). La cuenta manda siempre, sin preguntar. Sin conexión sigue guardando en el teléfono y sube al volver la red. Con cuenta, la copia local se oculta. SQL en `supabase.sql` | ✅ |
 | Actualizaciones | Versión al pie de Inicio, «Buscar actualización» y aviso «Hay una versión nueva lista» con botón Actualizar. Los datos viven aparte y nunca se tocan al actualizar | ✅ |
@@ -46,7 +46,7 @@ internet y sin Claude. Mismo sistema que el Habit Tracker: un solo `index.html`,
 
 ## Diseño
 
-**Pulido 1.7.0**: tipografía Inter, rellenos suaves (`--soft`) en barra de anotar, chips y selectores (estilo segmentos iOS), símbolos sobre fondo teñido del color de la categoría, verde como único acento (botón +, pestaña activa, botón de enviar), barra de pestañas translúcida y diálogos que suben desde abajo como una hoja en el teléfono. Sigue sin tarjetas ni sombras de adorno.
+**Pulido 1.7.0**: tipografía del sistema (se probó Inter y se descartó), rellenos suaves (`--soft`) en barra de anotar, chips y selectores (estilo segmentos iOS), símbolos sobre fondo teñido del color de la categoría, verde como único acento (botón +, pestaña activa, botón de enviar), barra de pestañas translúcida y diálogos que suben desde abajo como una hoja en el teléfono. Sigue sin tarjetas ni sombras de adorno.
 
 **Muy minimalista**: cada pantalla enseña tres cifras y una lista; lo demás aparece al tocar.
 Sin tarjetas ni gráficos de adorno; las categorías sin plan se resumen en una línea de enlaces.
@@ -60,6 +60,7 @@ de la app es verde (`--accent: #12a150`) en lugar del naranja del fuego.
 ## Finanzas Plus (modelo de ingresos, como Rial Plus)
 
 - **Gratis**: cuentas, movimientos, tasas, presupuesto, 1 meta, Análisis del mes, historial de 3 meses.
+- **Apagado por ahora** (`PLUS_ON = false`): todo abierto para todos y sin rastro en pantalla, hasta que exista el cobro. Encenderlo es cambiar esa constante.
 - **Plus** ($ 2,99/mes o $ 19,99 de por vida): Análisis de 3 meses y año, historial completo, categorías propias, metas ilimitadas, exportar a Excel. Sin anuncios nunca.
 - Bloqueo suave: la función se ve; al tocarla sale la ficha de Plus con lo que incluye y el precio.
 - Plus vive en la tabla `plus` de Supabase (`plus.sql`), ligada a la cuenta; la app solo la lee. Se activa a mano desde el SQL Editor (hay plantillas en `plus.sql`) o, más adelante, desde el webhook de la pasarela de pago. Sin cuenta no hay Plus: eso empuja al registro.
@@ -68,6 +69,8 @@ de la app es verde (`--accent: #12a150`) en lugar del naranja del fuego.
 - Play Store y Android: reglas fijas en `ANDROID.md`. `applicationId` `io.github.gads4532.finanzas` para siempre; Play App Signing desde el primer día; un solo APK para todos los canales (el universal firmado que descarga Play Console), clave de carga con tres copias y nunca en Git; verificación de desarrollador registrando el package name aunque se distribuya fuera de Play (ya vigente en Brasil, Indonesia, Singapur y Tailandia; global en 2027). Cuenta personal, no de organización; mirar la cuenta de distribución limitada. Prueba cerrada: 12 testers reales, 14 días.
 
 ## Regla para todas las apps
+
+- **Registro formal**: textos en registro formal y vocabulario financiero estándar (Ingresos, Gastos, Balance, Saldo, Presupuesto, Disponible, Por pagar, Tasa de ahorro). Nada de «toca aquí», «dale un destino», «ponle nombre». Las tasas se escriben «$ = 886,23 Bs», fuentes con mayúscula («Oficial», «Binance P2P») y horas en 12 h con AM/PM. Al cerrar sesión el dispositivo queda vacío; los datos siguen en la cuenta.
 
 - **La cuenta manda, nunca se pregunta**: jamás un diálogo de «¿qué datos conservar?». Al abrir, si la nube tiene datos, se adoptan en silencio; lo único que sube del teléfono es lo que aún no se había subido (cambios sin red), y la app insiste cada 15 s hasta subirlo. El teléfono recuerda qué versión de la nube ya tiene (`finanzas-seen`) para no volver a compararla. Igual que el Habit Tracker 2.6.x.
 
