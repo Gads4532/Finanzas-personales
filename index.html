@@ -332,7 +332,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.4.5';
+const APP_VERSION = '1.5.0';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -433,17 +433,23 @@ let cloudRef = null, writing = false, dirty = false, pending = false;
 const SYNC_TEXT = { ok: '· Guardado en la nube', local: '· Guardado en este teléfono', error: '· Sin conexión; se guarda aquí y se sube luego', wait: '· Conectando…', notable: '· Falta preparar la base de datos' };
 const setSync = st => { $('#sync').textContent = SYNC_TEXT[st]; };
 
+let retryTimer = 0;
 async function pushCloud() {
   if (!cloudRef) return;
   if (writing) { dirty = true; return; }
   writing = true;
   try { await cloudRef.set(JSON.parse(JSON.stringify(state))); pending = false; setSync('ok'); }
-  catch (e) { pending = true; setSync(e?.code === 'notable' ? 'notable' : 'error'); }
+  catch (e) {
+    pending = true; setSync(e?.code === 'notable' ? 'notable' : 'error');
+    clearTimeout(retryTimer); retryTimer = setTimeout(() => { if (pending) pushCloud(); }, 15000);   // insiste hasta que suba
+  }
   writing = false;
   if (dirty) { dirty = false; pushCloud(); }
 }
-// Lo que no pudo subirse (sin red) se reintenta al volver la conexión.
+// Lo que no pudo subirse se reintenta al volver la conexión y al volver a la app.
 addEventListener('online', () => { if (pending) pushCloud(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && pending) pushCloud(); });
+addEventListener('beforeunload', e => { if (pending || writing) { e.preventDefault(); e.returnValue = ''; } });
 
 // ---------- Cuenta: registro e inicio de sesión con Supabase (correo y contraseña).
 // La clave de abajo es la pública («anon»): solo permite lo que las reglas de la base de datos dejan.
@@ -529,12 +535,13 @@ function accountForm(mode = 'in') {
 
 async function signOut() {
   try { await supa('/auth/v1/logout', { method: 'POST' }); } catch {}
-  saveAuth(null); cloudRef = null; clearInterval(pollTimer); pollTimer = 0;
+  saveAuth(null); cloudRef = null; clearInterval(pollTimer); pollTimer = 0; lastSeen = ''; localStorage.removeItem(SEEN_KEY);
   renderAll(); setSync('local');
 }
 
 // Un registro por persona en la tabla «finanzas»: {user_id, data, updated_at}.
 let pollTimer = 0, lastSeen = '';
+const SEEN_KEY = 'finanzas-seen';   // qué versión de la nube ya tiene este teléfono
 const hasData = st => st.cuentas.length || st.movs.length || st.metas.length;
 async function connectSupabase() {
   setSync('wait');
@@ -544,31 +551,28 @@ async function connectSupabase() {
     if (!(await ensureToken())) throw new Error('sin sesión');
     const rows = await supa(`/rest/v1/${TABLE}`, { method: 'POST', body: { user_id: uid, data, updated_at: new Date().toISOString() },
       headers: { Prefer: 'resolution=merge-duplicates,return=representation' } }).catch(e => { if (e.code === '42P01' || e.status === 404) e.code = 'notable'; throw e; });
-    lastSeen = rows?.[0]?.updated_at || lastSeen;
+    lastSeen = rows?.[0]?.updated_at || lastSeen; try { localStorage.setItem(SEEN_KEY, lastSeen); } catch {}
   } };
-  const pull = async (first = false) => {
-    if (!auth || writing || dirty || pending || !navigator.onLine) return;
+  lastSeen = localStorage.getItem(SEEN_KEY) || '';
+  // La cuenta manda, siempre y sin preguntar. Lo único que va del teléfono a la nube es lo que aún no se subió.
+  const pull = async () => {
+    if (!auth || writing || dirty || !navigator.onLine) return;
+    if (pending) { pushCloud(); return; }
     if (!(await ensureToken())) return;
     let rows;
     try { rows = await supa(`/rest/v1/${TABLE}?select=data,updated_at&user_id=eq.${uid}`); }
     catch (e) { setSync(e.code === '42P01' || e.status === 404 ? 'notable' : 'error'); return; }
     const row = rows?.[0];
-    if (!row) { if (first && hasData(state)) pushCloud(); else setSync('ok'); return; }
+    if (!row) { if (hasData(state)) pushCloud(); else setSync('ok'); return; }   // cuenta nueva: sube lo del teléfono
     if (row.updated_at === lastSeen) { setSync('ok'); return; }
-    const remote = normalize(row.data);
-    if (first && hasData(state) && JSON.stringify(remote) !== JSON.stringify(state)) {
-      // Hay datos en los dos sitios: que decida la persona, nunca pisar en silencio.
-      showMsg(`<h2>¿Qué datos conservar?</h2>
-        <p class="meta" style="margin-top:12px">Tu cuenta tiene ${remote.cuentas.length} ${remote.cuentas.length === 1 ? 'cuenta' : 'cuentas'} y ${remote.movs.length} movimientos; este teléfono tiene ${state.cuentas.length} y ${state.movs.length}.</p>
-        <div class="dialog-actions"><button class="link" id="keep-local">Subir los de este teléfono</button><button class="primary" id="keep-remote">Usar los de la cuenta</button></div>`);
-      $('#keep-remote').onclick = () => { adopt(remote, row.updated_at); $('#msg-dialog').close(); };
-      $('#keep-local').onclick = () => { $('#msg-dialog').close(); pushCloud(); };
-      return;
-    }
-    adopt(remote, row.updated_at);
+    adopt(normalize(row.data), row.updated_at);
   };
-  const adopt = (remote, at) => { state = remote; lastSeen = at; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} renderAll(); setSync('ok'); };
-  await pull(true);
+  const adopt = (remote, at) => {
+    lastSeen = at; try { localStorage.setItem(SEEN_KEY, lastSeen); } catch {}
+    if (JSON.stringify(remote) !== JSON.stringify(state)) { state = remote; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} renderAll(); }
+    setSync('ok');
+  };
+  await pull();
   clearInterval(pollTimer);
   pollTimer = setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 30000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pull(); });

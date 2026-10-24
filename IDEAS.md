@@ -29,7 +29,7 @@ internet y sin Claude. Mismo sistema que el Habit Tracker: un solo `index.html`,
 | Presupuestos, gasto libre, compromisos del mes | Plan del mes: **ingresos esperados** por categoría (recibido de esperado, barra verde) y **límite de gasto** por categoría (ámbar al 80%, rojo al pasarse). «Por asignar» = esperado − previsto (dale un destino a cada dólar). «Libre para gastar» = ingresos − gastos − por pagar, también por día | ✅ |
 | Pagos programados (semanal, quincenal…) | Semanal, quincenal, mensual, anual; botón «Pagar» que anota el gasto y pasa al siguiente | ✅ |
 | Metas y ahorros con aportes y retiros desde cualquier cuenta | Metas con anillo de progreso, cuota mensual hasta la fecha y celebración al cumplirla | ✅ |
-| Cuenta y nube propia | Igual que el Habit Tracker 2.x: «Crear cuenta o iniciar sesión» en Ajustes, con correo y contraseña (Supabase). Los datos van a la tabla `finanzas` del mismo proyecto (una fila por persona, protegida por RLS). Si hay datos en los dos sitios, la app pregunta cuáles conservar. Sin conexión sigue guardando en el teléfono y sube al volver la red. Con cuenta, la copia local se oculta. SQL en `supabase.sql` | ✅ |
+| Cuenta y nube propia | Igual que el Habit Tracker 2.x: «Crear cuenta o iniciar sesión» en Ajustes, con correo y contraseña (Supabase). Los datos van a la tabla `finanzas` del mismo proyecto (una fila por persona, protegida por RLS). La cuenta manda siempre, sin preguntar. Sin conexión sigue guardando en el teléfono y sube al volver la red. Con cuenta, la copia local se oculta. SQL en `supabase.sql` | ✅ |
 | Actualizaciones | Versión al pie de Inicio, «Buscar actualización» y aviso «Hay una versión nueva lista» con botón Actualizar. Los datos viven aparte y nunca se tocan al actualizar | ✅ |
 | Registro con nombre | Bienvenida la primera vez con nombre y apellido; Inicio saluda «Hola, Gerardo». Se cambian en Ajustes (al final de Inicio), junto a la tasa y las copias | ✅ |
 | Transferencias entre cuentas | Con conversión automática si cambian de moneda (editable) | ✅ |
@@ -56,5 +56,7 @@ animaciones con resortes `linear()` que se apagan con «reducir movimiento». El
 de la app es verde (`--accent: #12a150`) en lugar del naranja del fuego.
 
 ## Regla para todas las apps
+
+- **La cuenta manda, nunca se pregunta**: jamás un diálogo de «¿qué datos conservar?». Al abrir, si la nube tiene datos, se adoptan en silencio; lo único que sube del teléfono es lo que aún no se había subido (cambios sin red), y la app insiste cada 15 s hasta subirlo. El teléfono recuerda qué versión de la nube ya tiene (`finanzas-seen`) para no volver a compararla. Igual que el Habit Tracker 2.6.x.
 
 - **Sin borde blanco**: `html` y `body` llevan el fondo del tema (`var(--bg)`) a todo el alto, `<meta name="color-scheme" content="light dark">`, y en el manifiesto `background_color` y `theme_color` son `#0e0e0e`. Así en modo oscuro no aparece ninguna franja blanca arriba, abajo ni al rebotar. Igual que el Habit Tracker desde la 2.3.1/2.4.1; se aplica a cualquier app nueva.
