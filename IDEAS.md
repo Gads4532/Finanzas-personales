@@ -18,7 +18,7 @@ internet y sin Claude. Mismo sistema que el Habit Tracker: un solo `index.html`,
 |---|---|---|
 | Saldo consolidado USD + Bs + USDT | «Saldo total» arriba; tocarlo cambia entre $ y Bs | ✅ |
 | Widget con la tasa BCV | Tasa arriba a la derecha con la hora de la última actualización | ✅ |
-| Tasas en tiempo real (BCV, USDT, euro) y calculadora | Pantalla «Tasas»: dólar BCV, USDT Binance P2P, euro BCV y paralelo, con ▲▼ frente al valor anterior. Se refrescan solas cada minuto mientras la app está a la vista, al volver a ella y al recuperar la red; sin intervención. Fuentes públicas con CORS abierto: ve.dolarapi.com (USD/EUR) y criptoya.com (USDT). Calculadora: escribes un monto en $, USDT, € o Bs y ves los otros tres; «Calcular bolívares con» BCV, USDT o paralelo. Por si no hay red: «Escribir tasas a mano» | ✅ |
+| Tasas en tiempo real (BCV, USDT, euro) y calculadora | Pantalla «Tasas»: dólar BCV, USDT Binance P2P y euro BCV (el paralelo se quitó en 1.7.0), con ▲▼ frente al valor anterior. Se refrescan solas cada minuto mientras la app está a la vista, al volver a ella y al recuperar la red; sin intervención. Fuentes públicas con CORS abierto: ve.dolarapi.com (USD/EUR) y criptoya.com (USDT). Calculadora: escribes un monto en $, USDT, € o Bs y ves los otros tres; «Calcular bolívares con» BCV, USDT o paralelo. Por si no hay red: «Escribir tasas a mano» | ✅ |
 | Registro por voz con IA («Gasté 5$ en café») | Barra «Anotar rápido» + micrófono del navegador; un analizador local saca monto, moneda, tipo, cuenta, categoría y fecha. Sin IA, sin Claude | ✅ |
 | — | Fechas relativas («ayer», «antier», «hace 3 días», «el lunes», «la semana pasada», «mañana») y concretas («el 15», «15/10», «3/9/2025», «5 de octubre») | ✅ |
 | Gráficos por categoría e historial mensual | Barras finas por categoría en Presupuesto y «gastaste X% más/menos que el mes pasado». Se quitaron la dona y las barras de 6 meses: menos, pero mejor | ✅ |
@@ -45,6 +45,8 @@ internet y sin Claude. Mismo sistema que el Habit Tracker: un solo `index.html`,
 - Si Chrome dice que ya está instalada y no ofrece reinstalar: borrar la página `gads4532.github.io` del **Historial** de Chrome lo arregla (probado). También sirve Configuración → Configuración de sitios → Datos almacenados → borrar.
 
 ## Diseño
+
+**Pulido 1.7.0**: tipografía Inter, rellenos suaves (`--soft`) en barra de anotar, chips y selectores (estilo segmentos iOS), símbolos sobre fondo teñido del color de la categoría, verde como único acento (botón +, pestaña activa, botón de enviar), barra de pestañas translúcida y diálogos que suben desde abajo como una hoja en el teléfono. Sigue sin tarjetas ni sombras de adorno.
 
 **Muy minimalista**: cada pantalla enseña tres cifras y una lista; lo demás aparece al tocar.
 Sin tarjetas ni gráficos de adorno; las categorías sin plan se resumen en una línea de enlaces.

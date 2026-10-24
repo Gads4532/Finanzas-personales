@@ -9,11 +9,15 @@
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e0e0e" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
   :root {
-    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --soft: color-mix(in srgb, var(--text) 5%, transparent);   /* relleno suave para barras, chips y selectores */
     --bg: #ffffff; --text: #111111; --muted: #8a8a8a; --line: #ededed; --empty: #e6e6e6;
     --green: #1f9d55; --red: #d64545; --warn: #b7791f;
     --accent: #12a150; --accent-dark: #0c7a3c;
@@ -73,7 +77,7 @@
   .round.rec { background: var(--red); color: #fff; }
 
   .summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--line); padding-top: 18px; margin-bottom: 30px; }
-  .summary > div:last-child { text-align: right; } .summary > div:nth-child(2) { text-align: center; }
+  .summary > div:last-child { text-align: right; } .summary > div:nth-child(2) { text-align: center; } .summary span { display: block; }
   .summary b { display: block; white-space: nowrap; font-size: clamp(.9rem, 4.2vw, 1.25rem); font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
   .summary span { color: var(--muted); font-size: .8rem; }
   .pos { color: var(--green); } .neg { color: var(--red); }
@@ -284,6 +288,57 @@
     @keyframes day-in { from { transform: scale(.4); opacity: 0; } }
   }
   .toast { --tx: -50%; }
+
+  /* ---------- Pulido: más aire, rellenos suaves y el verde como único acento. Sigue siendo minimalista. */
+  body { font-feature-settings: "cv11", "ss01"; }
+  h1 { font-size: 1.9rem; font-weight: 700; letter-spacing: -.03em; }
+  .date { font-size: .9rem; margin-bottom: 30px; }
+  .g-rate { font-weight: 700; }
+  .hero-label { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  .hero-total { font-weight: 800; letter-spacing: -.045em; margin-top: 2px; }
+  .quick { background: var(--soft); border-color: transparent; padding: 6px 6px 6px 18px; }
+  .quick:focus-within { border-color: transparent; box-shadow: 0 0 0 1.5px var(--text); }
+  .round.go { background: var(--accent); color: #fff; }
+  .summary { border-top: 0; padding-top: 0; }
+  .summary span { font-size: .78rem; }
+  h2.sec { font-size: .74rem; letter-spacing: .08em; margin-top: 34px; }
+  .item { padding: 14px 0; }
+  .dot { border: 0; background: color-mix(in srgb, var(--c) 12%, transparent); color: var(--c); }
+  .dot.fill { background: var(--c); color: var(--bg); }
+  .name { font-weight: 600; letter-spacing: -.01em; }
+  .amt { font-weight: 600; letter-spacing: -.01em; }
+  .bar { height: 8px; }
+  .pay { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .pay:active { background: var(--accent); color: #fff; }
+  .chip { background: var(--soft); border-color: transparent; }
+  .chip.on, input:checked + .chip { background: color-mix(in srgb, var(--c) 14%, transparent); border-color: transparent; color: var(--text); }
+  /* Selectores como segmentos iOS: fondo suave y la opción activa en una píldora */
+  .seg { background: var(--soft); border: 0; padding: 3px; gap: 2px; }
+  .seg label, .seg button { border-radius: 999px; padding: 6px 14px; }
+  .seg label:has(input:checked), .seg button.on { background: var(--bg); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); }
+  .round.on { background: var(--soft); }
+  .fab { background: var(--accent); color: #fff; box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .tab.on { color: var(--accent); }
+  .tab.on svg { stroke-width: 2; }
+  .tabs { border-top-color: transparent; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .toast { border-radius: 16px; }
+  .upd { border: 0; background: var(--soft); border-radius: 14px; }
+  dialog { border-radius: 22px; padding: 26px 24px; }
+  dialog h2 { font-weight: 700; letter-spacing: -.02em; }
+  .primary { font-weight: 600; padding: 11px 20px; }
+  .big-input input { font-weight: 700; letter-spacing: -.03em; }
+  .mini li b { font-weight: 600; }
+  .upd .primary, .cele-go { background: var(--accent); }
+  /* En el teléfono, los diálogos suben desde abajo como una hoja */
+  @media (max-width: 600px) {
+    dialog { margin: auto 0 0; width: 100vw; max-width: none; border-radius: 22px 22px 0 0;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); max-height: calc(100dvh - 40px); }
+    dialog::before { content: ""; display: block; width: 36px; height: 4px; border-radius: 2px; background: var(--empty); margin: -8px auto 18px; }
+    @media (prefers-reduced-motion: no-preference) {
+      dialog[open] { animation: sheet .42s var(--spring-soft); }
+      @keyframes sheet { from { transform: translateY(40px); opacity: 0; } }
+    }
+  }
 </style>
 </head>
 <body>
@@ -332,7 +387,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.6.0';
+const APP_VERSION = '1.7.0';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -417,7 +472,8 @@ function normalize(s) {
   s ||= {};
   s.cuentas ||= []; s.movs ||= []; s.metas ||= []; s.programados ||= []; s.presupuestos ||= {};
   s.categorias ||= structuredClone(DEFAULT_CATS); s.esperado ||= {};
-  s.tasa ||= {}; for (const k of ['bcv', 'paralelo', 'usdt', 'eur', 'eurParalelo']) s.tasa[k] ||= 0;
+  s.tasa ||= {}; for (const k of ['bcv', 'usdt', 'eur']) s.tasa[k] ||= 0;
+  if (!['bcv', 'usdt'].includes(s.tasa.uso)) s.tasa.uso = 'bcv';   // el paralelo se quitó en 1.7.0
   s.tasa.uso ||= 'bcv'; s.tasa.fecha ||= ''; s.tasa.prev ||= {}; s.tasa.hora ||= 0; s.tasa.at ||= {};
   s.verEn ||= 'USD'; s.perfil ||= { nombre: '', apellido: '' };
   return s;
@@ -668,8 +724,8 @@ const longDate = day => parseDay(day).toLocaleDateString('es', { weekday: 'long'
 const cuenta = id => state.cuentas.find(c => c.id === id);
 const categoria = id => state.categorias.find(c => c.id === id) || { id, nombre: 'Sin categoría', icono: 'punto', color: '' };
 const meta = id => state.metas.find(m => m.id === id);
-const rate = () => state.tasa[state.tasa.uso] || state.tasa.bcv || state.tasa.usdt || state.tasa.paralelo || 0;
-const USO = { bcv: 'BCV', paralelo: 'Paralelo', usdt: 'USDT' };
+const rate = () => state.tasa[state.tasa.uso] || state.tasa.bcv || state.tasa.usdt || 0;
+const USO = { bcv: 'BCV', usdt: 'USDT' };
 // USD y USDT van 1 a 1; los bolívares, con la tasa guardada en el movimiento (o la de hoy).
 const toUSD = (monto, mon, t = rate()) => mon === 'VES' ? (t ? monto / t : 0) : monto;
 const fromUSD = (usd, mon, t = rate()) => mon === 'VES' ? usd * t : usd;
@@ -720,10 +776,8 @@ function nextDate(day, freq) {
 // Tres fuentes públicas, todas con CORS abierto: dólar y euro BCV (dolarapi) y USDT de Binance P2P (criptoya).
 // Se piden solas al abrir, cada minuto mientras la app está a la vista, al volver a ella y al recuperar la red.
 const RATE_SRC = {
-  usd: ['https://ve.dolarapi.com/v1/dolares', d => { const o = d.find(x => x.fuente === 'oficial'), p = d.find(x => x.fuente === 'paralelo');
-    return { bcv: o?.promedio, paralelo: p?.promedio, at: { bcv: o?.fechaActualizacion, paralelo: p?.fechaActualizacion } }; }],
-  eur: ['https://ve.dolarapi.com/v1/euros', d => { const o = d.find(x => x.fuente === 'oficial'), p = d.find(x => x.fuente === 'paralelo');
-    return { eur: o?.promedio, eurParalelo: p?.promedio, at: { eur: o?.fechaActualizacion, eurParalelo: p?.fechaActualizacion } }; }],
+  usd: ['https://ve.dolarapi.com/v1/dolares/oficial', d => ({ bcv: d.promedio, at: { bcv: d.fechaActualizacion } })],
+  eur: ['https://ve.dolarapi.com/v1/euros/oficial', d => ({ eur: d.promedio, at: { eur: d.fechaActualizacion } })],
   usdt: ['https://criptoya.com/api/binancep2p/usdt/ves/1', d => ({ usdt: d.ask || d.bid, at: { usdt: d.time ? new Date(d.time * 1000).toISOString() : '' } })],
 };
 let ratesBusy = false;
@@ -1664,21 +1718,21 @@ const FORMS = {
     html: () => `<h2>Tasas</h2>
       <p class="meta" id="rates-status"></p>
       <div class="list" id="rates"></div>
-      <label>Calcular bolívares con</label>${seg('uso', [['bcv', 'BCV'], ['usdt', 'USDT'], ['paralelo', 'Paralelo']], state.tasa.uso)}
+      <label>Calcular bolívares con</label>${seg('uso', [['bcv', 'BCV'], ['usdt', 'USDT']], state.tasa.uso)}
       <label>Calculadora</label>
       <div class="big-input"><input name="calc" inputmode="decimal" placeholder="0,00" autocomplete="off"><span id="calc-sym">$</span></div>
       ${seg('de', [['USD', '$'], ['USDT', 'USDT'], ['EUR', '€'], ['VES', 'Bs']], 'USD')}
       <ul class="mini" id="calc-out" style="margin-top:12px"></ul>
       <details style="margin-top:18px"><summary class="link">Escribir tasas a mano</summary>
         <div class="two"><div><label>Dólar BCV</label><input name="bcv" inputmode="decimal" value="${toInput(state.tasa.bcv)}"></div><div><label>USDT</label><input name="usdt" inputmode="decimal" value="${toInput(state.tasa.usdt)}"></div></div>
-        <div class="two"><div><label>Euro BCV</label><input name="eur" inputmode="decimal" value="${toInput(state.tasa.eur)}"></div><div><label>Paralelo</label><input name="paralelo" inputmode="decimal" value="${toInput(state.tasa.paralelo)}"></div></div>
+        <div class="two"><div><label>Euro BCV</label><input name="eur" inputmode="decimal" value="${toInput(state.tasa.eur)}"></div><div></div></div>
       </details>
       <div class="actions"><button type="button" class="link" data-f="refresh">Actualizar ahora</button></div>
       ${actions(false, 'Listo')}`,
     // Las filas de tasas se vuelven a pintar solas con cada actualización.
     refresh: () => {
       const f = $('#form'); if (!f.elements.calc) return;
-      const rows = [['bcv', 'Dólar BCV', 'oficial'], ['usdt', 'USDT', 'Binance P2P'], ['eur', 'Euro BCV', 'oficial'], ['paralelo', 'Dólar paralelo', 'promedio']];
+      const rows = [['bcv', 'Dólar BCV', 'oficial'], ['usdt', 'USDT', 'Binance P2P'], ['eur', 'Euro BCV', 'oficial']];
       $('#rates').innerHTML = rows.map(([k, n, src]) => {
         const v = state.tasa[k], p = state.tasa.prev[k];
         const d = v && p ? (v - p) / p * 100 : 0;
@@ -1686,7 +1740,7 @@ const FORMS = {
         return `<section class="item"><div class="row"><span class="title"><div class="name">${n}</div><div class="sub">${src}${when ? ' · ' + when : ''}${d ? ` · <span class="${d > 0 ? 'neg' : 'pos'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(2)}%</span>` : ''}</div></span>
           <span class="amt">${v ? 'Bs ' + fmtNum(v) : '—'}</span></div></section>`; }).join('');
       setRatesStatus(state.tasa.hora ? `Última actualización: ${longDate(dayKey(new Date(state.tasa.hora)))}, ${fmtHora(state.tasa.hora)}. Se refrescan solas cada minuto.` : 'Buscando tasas…');
-      for (const k of ['bcv', 'usdt', 'eur', 'paralelo']) if (!f.elements[k].dataset.touched) f.elements[k].value = toInput(state.tasa[k]);
+      for (const k of ['bcv', 'usdt', 'eur']) if (!f.elements[k].dataset.touched) f.elements[k].value = toInput(state.tasa[k]);
       FORMS.tasa.calc();
     },
     // Todo a dólares y de ahí a lo demás: USDT vale lo que diga Binance, el euro lo que diga el BCV.
@@ -1706,14 +1760,14 @@ const FORMS = {
       FORMS.tasa.refresh();
       if (ratesStale() && navigator.onLine) fetchRate();
       f.oninput = f.onchange = e => {
-        if (['bcv', 'usdt', 'eur', 'paralelo'].includes(e.target.name)) e.target.dataset.touched = 1;
+        if (['bcv', 'usdt', 'eur'].includes(e.target.name)) e.target.dataset.touched = 1;
         if (e.target.name === 'uso') { state.tasa.uso = e.target.value; }
         FORMS.tasa.calc();
       };
       setTimeout(() => f.elements.calc.focus(), 50);
     },
     save: f => {
-      for (const k of ['bcv', 'usdt', 'eur', 'paralelo']) { const v = parseAmount(f.elements[k].value); if (v > 0 && f.elements[k].dataset.touched) { state.tasa[k] = v; state.tasa.auto = false; } }
+      for (const k of ['bcv', 'usdt', 'eur']) { const v = parseAmount(f.elements[k].value); if (v > 0 && f.elements[k].dataset.touched) { state.tasa[k] = v; state.tasa.auto = false; } }
       state.tasa.uso = f.elements.uso.value;
       save(); renderAll(); return true;
     },
