@@ -384,10 +384,10 @@
   .rates-sm .item { padding: 10px 0; }
   .rates-sm .amt { font-size: .92rem; }
   .rates-sm .sub { white-space: normal; }
-  .cbadge { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.3), transparent 62%) var(--cb); box-shadow: inset 0 -1px 0 rgba(0,0,0,.12); font-size: .7rem; font-weight: 700; line-height: 1; letter-spacing: -.02em; flex: none; vertical-align: middle; font-variant-numeric: normal; }
-  .cbadge.sm { width: 16px; height: 16px; font-size: .5rem; }
-  .acc .flag .cbadge, .sub .cbadge, .curpill .cbadge { color: #fff; }
-  .cbadge.lg { width: 36px; height: 36px; font-size: 1rem; margin-right: 2px; }
+  .cbadge { display: inline-block; width: 24px; height: 24px; flex: none; vertical-align: middle; line-height: 0; }
+  .cbadge svg { width: 100%; height: 100%; display: block; font-family: inherit; }
+  .cbadge.sm { width: 16px; height: 16px; }
+  .cbadge.lg { width: 36px; height: 36px; margin-right: 2px; }
   .curwrap { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; background: var(--bg); padding: 4px 4px 4px 5px; }
   .curwrap .cur { background-color: transparent; padding-left: 0; }
 </style>
@@ -438,7 +438,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.9.1';
+const APP_VERSION = '1.9.2';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -480,7 +480,7 @@ const colorVar = x => x?.color ? `--c:${x.color}` : '';
 const MONEDAS = { USD: 'Dólares', VES: 'Bolívares', USDT: 'USDT', EUR: 'Euros' };
 // Insignias circulares por moneda (sin emojis: se ven igual en todos los teléfonos).
 const CUR = { USD: { sym: '$', col: '#1f8a4c' }, VES: { sym: 'Bs', col: '#1e5bd8' }, EUR: { sym: '€', col: '#5b4fcf' }, USDT: { sym: '₮', col: '#26a17b' } };
-const badge = (k, cls = '') => `<span class="cbadge ${cls}" style="--cb:${CUR[k].col}">${CUR[k].sym}</span>`;
+const badge = (k, cls = '') => `<span class="cbadge ${cls}" style="--cb:${CUR[k].col}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="var(--cb)"/><text x="12" y="12.5" text-anchor="middle" dominant-baseline="central" font-size="${CUR[k].sym.length > 1 ? 10 : 12}" font-weight="600" fill="#fff">${CUR[k].sym}</text></svg></span>`;
 const nf = new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtNum = n => nf.format(Math.abs(n) < .005 ? 0 : n);
 // El símbolo va delante y pegado al número: «$623,48»; en bolívares, «Bs 15.000,00».
@@ -1907,7 +1907,7 @@ const FORMS = {
       if (f.elements.a.value === de) f.elements.a.value = de === 'USD' ? 'VES' : 'USD';
       const a = f.elements.a.value;
       calcDe = de; calcA = a; calcVal = n;
-      f.querySelectorAll('.curwrap').forEach(w => { const k = w.querySelector('select').value, b = w.querySelector('.cbadge'); b.style.setProperty('--cb', CUR[k].col); b.textContent = CUR[k].sym; });
+      f.querySelectorAll('.curwrap').forEach(w => { const k = w.querySelector('select').value; w.querySelector('.cbadge').outerHTML = badge(k); });
       const t = state.tasa, bs = rate();
       const perUnit = { USD: bs, VES: 1, EUR: t.eur || 0, USDT: t.usdt || bs };   // bolívares por unidad
       const symOf = k => k === 'VES' ? 'Bs' : k === 'EUR' ? '€' : k === 'USDT' ? 'USDT' : '$';
