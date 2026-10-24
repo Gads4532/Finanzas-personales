@@ -16,6 +16,10 @@ proyecto que el Habit Tracker). La app muestra su versión y avisa cuando hay un
 nueva; actualizar nunca toca los datos. Abierta como página de Claude, guarda en
 la nube de Claude.
 
+Tiene un plan opcional **Finanzas Plus** (análisis completo, historial, categorías
+propias, más metas y Excel), ligado a la cuenta; `plus.sql` crea su tabla. La política de
+privacidad y los términos están en `privacidad.html`.
+
 Desarrollada con Claude con la misma estructura que
 [Habit-tracker](https://github.com/Gads4532/Habit-tracker); el banco de ideas vive en
 [Gads4532/Skills](https://github.com/Gads4532/Skills/tree/main/apps/finanzas).

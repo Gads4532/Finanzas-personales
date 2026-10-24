@@ -55,6 +55,16 @@ categoría y meta, diálogos que suben con resorte, barra inferior, modo oscuro,
 animaciones con resortes `linear()` que se apagan con «reducir movimiento». El color
 de la app es verde (`--accent: #12a150`) en lugar del naranja del fuego.
 
+## Finanzas Plus (modelo de ingresos, como Rial Plus)
+
+- **Gratis**: cuentas, movimientos, tasas, presupuesto, 1 meta, Análisis del mes, historial de 3 meses.
+- **Plus** ($ 2,99/mes o $ 19,99 de por vida): Análisis de 3 meses y año, historial completo, categorías propias, metas ilimitadas, exportar a Excel. Sin anuncios nunca.
+- Bloqueo suave: la función se ve; al tocarla sale la ficha de Plus con lo que incluye y el precio.
+- Plus vive en la tabla `plus` de Supabase (`plus.sql`), ligada a la cuenta; la app solo la lee. Se activa a mano desde el SQL Editor (hay plantillas en `plus.sql`) o, más adelante, desde el webhook de la pasarela de pago. Sin cuenta no hay Plus: eso empuja al registro.
+- Cobro: pendiente de elegir. Desde Venezuela no hay cuenta de comerciante de Google Play ni Stripe; opciones realistas: Lemon Squeezy/Paddle (pagan a PayPal/Payoneer) para la web, y Binance Pay / Pago Móvil con activación manual para lo local.
+- `privacidad.html`: política de privacidad y términos, enlazada desde Ajustes. Obligatoria para la tienda.
+- Play Store: la PWA se empaqueta como Trusted Web Activity con Bubblewrap (`twa-manifest.json`) y se verifica el dominio con `.well-known/assetlinks.json` (falta la huella SHA-256 del certificado de firma, que sale al generar el paquete). Requiere cuenta de desarrollador (25 USD) y, en cuentas personales nuevas, 14 días de prueba cerrada con 12 testers.
+
 ## Regla para todas las apps
 
 - **La cuenta manda, nunca se pregunta**: jamás un diálogo de «¿qué datos conservar?». Al abrir, si la nube tiene datos, se adoptan en silencio; lo único que sube del teléfono es lo que aún no se había subido (cambios sin red), y la app insiste cada 15 s hasta subirlo. El teléfono recuerda qué versión de la nube ya tiene (`finanzas-seen`) para no volver a compararla. Igual que el Habit Tracker 2.6.x.

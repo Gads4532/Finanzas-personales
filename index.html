@@ -332,7 +332,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.6.0';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -458,6 +458,51 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const TABLE = 'finanzas';
 const AUTH_KEY = 'finanzas-auth';
 let auth = null;
+// ---------- Plus: lo que desbloquea el plan de pago. La fecha vive en la tabla «plus» de Supabase,
+// ligada a la cuenta; la app solo la lee. Sin cuenta no hay Plus.
+const PLUS = { mes: 2.99, vida: 19.99 };
+const PLUS_KEY = 'finanzas-plus';
+let plus = null; try { plus = JSON.parse(localStorage.getItem(PLUS_KEY)); } catch {}
+const isPlus = () => !!(plus?.hasta && new Date(plus.hasta) > new Date());
+async function fetchPlus() {
+  if (!auth) return;
+  try {
+    const rows = await supa(`/rest/v1/plus?select=hasta,plan&user_id=eq.${auth.uid}`);
+    plus = rows?.[0] || { hasta: null };
+    try { localStorage.setItem(PLUS_KEY, JSON.stringify(plus)); } catch {}
+    renderAll();
+  } catch {}
+}
+const PLUS_WHY = {
+  analisis: 'Ver 3 meses o el año completo en Análisis',
+  historial: 'El historial más allá de los últimos 3 meses',
+  categorias: 'Crear tus propias categorías',
+  metas: 'Más de una meta de ahorro',
+  csv: 'Exportar tus movimientos a Excel',
+};
+// Bloqueo suave: la función se ve, y al tocarla sale esto.
+function needPlus(feature) {
+  if (isPlus()) return false;
+  plusDialog(feature);
+  return true;
+}
+const fmtPrice = n => '$ ' + n.toFixed(2).replace('.', ',');
+function plusDialog(feature) {
+  const act = isPlus();
+  showMsg(`<h2>Finanzas Plus</h2>
+    ${feature ? `<p class="meta" style="margin-top:12px"><b>${PLUS_WHY[feature]}</b> es parte de Plus.</p>` : ''}
+    ${act ? `<p class="meta" style="margin-top:12px">Tienes Plus ${plus.plan === 'vida' ? 'de por vida' : 'hasta el ' + longDate(dayKey(new Date(plus.hasta)))}. Gracias por apoyar la app.</p>` : `
+    <ul class="pros" style="margin-top:12px">${Object.values(PLUS_WHY).map(t => `<li>${t}</li>`).join('')}</ul>
+    <div class="summary" style="margin:18px 0 0;border:0;padding:0">
+      <div><b>${fmtPrice(PLUS.mes)}</b><span>al mes</span></div>
+      <div><b>${fmtPrice(PLUS.vida)}</b><span>de por vida</span></div>
+      <div><b>0</b><span>anuncios</span></div>
+    </div>
+    <p class="meta" style="margin-top:16px">${auth ? 'Muy pronto podrás pagar desde aquí. Plus queda ligado a tu cuenta y vale en todos tus teléfonos.' : 'Plus se activa en tu cuenta, así vale en todos tus teléfonos. Crea una cuenta primero.'}</p>`}
+    <div class="dialog-actions">
+      ${!auth && !act ? '<button class="primary" data-plus-acct>Crear cuenta</button>' : '<button class="primary" data-close>Entendido</button>'}
+    </div>`);
+}
 try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch {}
 const saveAuth = a => { auth = a; try { a ? localStorage.setItem(AUTH_KEY, JSON.stringify(a)) : localStorage.removeItem(AUTH_KEY); } catch {} };
 
@@ -536,6 +581,7 @@ function accountForm(mode = 'in') {
 async function signOut() {
   try { await supa('/auth/v1/logout', { method: 'POST' }); } catch {}
   saveAuth(null); cloudRef = null; clearInterval(pollTimer); pollTimer = 0; lastSeen = ''; localStorage.removeItem(SEEN_KEY);
+  plus = null; localStorage.removeItem(PLUS_KEY);
   renderAll(); setSync('local');
 }
 
@@ -547,6 +593,7 @@ async function connectSupabase() {
   setSync('wait');
   if (!(await ensureToken())) { setSync(auth ? 'error' : 'local'); return; }
   const uid = auth.uid;
+  fetchPlus();
   cloudRef = { set: async data => {
     if (!(await ensureToken())) throw new Error('sin sesión');
     const rows = await supa(`/rest/v1/${TABLE}`, { method: 'POST', body: { user_id: uid, data, updated_at: new Date().toISOString() },
@@ -814,6 +861,8 @@ function renderInicio() {
         <span class="title"><div class="name">${esc([state.perfil.nombre, state.perfil.apellido].filter(Boolean).join(' ') || 'Tu nombre')}</div><div class="sub">Nombre y apellido</div></span></button></section>
       <section class="item"><button class="row" style="width:100%" data-act="cats">
         <span class="title"><div class="name">Categorías</div><div class="sub">${state.categorias.filter(c => c.tipo === 'gasto').length} de gastos · ${state.categorias.filter(c => c.tipo === 'ingreso').length} de ingresos · crea o edita las tuyas</div></span></button></section>
+      <section class="item"><button class="row" style="width:100%" data-act="plus">
+        <span class="title"><div class="name">Finanzas Plus</div><div class="sub">${isPlus() ? (plus.plan === 'vida' ? 'Activo de por vida' : 'Activo hasta el ' + shortDate(dayKey(new Date(plus.hasta)))) : `Análisis completo, historial, categorías propias, más metas y Excel · desde ${fmtPrice(PLUS.mes)}`}</div></span></button></section>
       <section class="item"><button class="row" style="width:100%" data-act="tasa">
         <span class="title"><div class="name">Tasas y calculadora</div><div class="sub">${state.tasa.bcv ? `BCV ${fmtNum(state.tasa.bcv)} · USDT ${fmtNum(state.tasa.usdt)} · EUR ${fmtNum(state.tasa.eur)}` : 'Sin tasas aún'}</div></span></button></section>
       ${window.claude?.use ? '' : `<section class="item"><button class="row" style="width:100%" data-act="${auth ? 'acct-out' : 'acct-in'}">
@@ -822,8 +871,11 @@ function renderInicio() {
     <div class="backup" id="backup">
       <button class="link" id="backup-out">Guardar copia</button>
       <button class="link" id="backup-in">Restaurar copia</button>
-      <button class="link" id="csv-out">Exportar a Excel (CSV)</button>
       <input type="file" id="backup-file" accept="application/json,.json" hidden>
+    </div>
+    <div class="backup" style="margin-top:12px">
+      <button class="link" id="csv-out">Exportar a Excel (CSV)</button>
+      <a class="link" href="privacidad.html">Privacidad y términos</a>
     </div>
     <div class="ver"><span>v${APP_VERSION}</span><button class="link" id="check-upd">Buscar actualización</button></div>`;
   setupQuick();
@@ -873,8 +925,8 @@ function renderHist() {
       <div><b class="neg">${view$(allGas)}</b><span>gastos</span></div>
       <div><b>${view$(allIng - allGas)}</b><span>ahorro total</span></div>
     </div>
-    <div class="list">${months.map((mk, i) => `<section class="item"><button class="row" style="width:100%" data-goto="${mk}">
-      <span class="title"><div class="name">${monthName(mk)}</div>
+    <div class="list">${months.map((mk, i) => `<section class="item"><button class="row" style="width:100%" data-goto="${mk}" ${i >= 3 && !isPlus() ? 'data-lock="historial"' : ''}>
+      <span class="title"><div class="name">${monthName(mk)}${i >= 3 && !isPlus() ? ' <span class="sub">· Plus</span>' : ''}</div>
         <div class="sub"><span class="pos">+${view$(tot[i].ing)}</span> · <span class="neg">−${view$(tot[i].gas)}</span></div></span>
       <span class="amt${tot[i].ing - tot[i].gas < 0 ? ' neg' : ''}">${view$(tot[i].ing - tot[i].gas)}</span>
     </button></section>`).join('')}</div>`;
@@ -957,9 +1009,9 @@ function renderMovs() {
 $('#view-movs').addEventListener('click', e => {
   const b = e.target.closest('button');
   if (!b || b.disabled) return;
-  if (b.dataset.month) { movMonth = shiftMonth(movMonth, +b.dataset.month); movDay = ''; }
+  if (b.dataset.month) { const to = shiftMonth(movMonth, +b.dataset.month); if (to < shiftMonth(thisMonth(), -2) && needPlus('historial')) return; movMonth = to; movDay = ''; }
   else if (b.dataset.hist !== undefined) movHist = b.dataset.hist === '1';
-  else if (b.dataset.goto) { movMonth = b.dataset.goto; movHist = false; movDay = ''; }
+  else if (b.dataset.goto) { if (b.dataset.lock && needPlus(b.dataset.lock)) return; movMonth = b.dataset.goto; movHist = false; movDay = ''; }
   else if (b.dataset.day !== undefined) movDay = movDay === b.dataset.day ? '' : b.dataset.day;
   else if (b.dataset.tipo !== undefined) movTipo = b.dataset.tipo;
   else if (b.dataset.acc !== undefined) movAcc = b.dataset.acc;
@@ -1093,7 +1145,7 @@ function renderAna() {
 }
 $('#view-ana').addEventListener('click', e => {
   const b = e.target.closest('button[data-periodo]');
-  if (b) { anaPeriodo = +b.dataset.periodo; renderAna(); }
+  if (b) { if (+b.dataset.periodo > 1 && needPlus('analisis')) return; anaPeriodo = +b.dataset.periodo; renderAna(); }
 });
 
 // ---------- Metas de ahorro
@@ -1175,7 +1227,8 @@ document.querySelector('main').addEventListener('click', e => {
     case 'budget': openForm('budget', categoria(id)); break;
     case 'new-cat': openForm('cat'); break;
     case 'cats': catList(); break;
-    case 'new-meta': openForm('meta'); break;
+    case 'plus': plusDialog(); break;
+    case 'new-meta': if (state.metas.length >= 1 && needPlus('metas')) break; openForm('meta'); break;
     case 'edit-meta': openForm('meta', meta(id)); break;
     case 'aportar': openForm('aporte', meta(id)); break;
     case 'retirar': openForm('aporte', meta(id), { retiro: true }); break;
@@ -1693,6 +1746,7 @@ $('#form').addEventListener('click', e => {
   if (k === 'delete') { const o = editing; $('#form-dialog').close(); FORMS[formKind].remove(o); }
   if (k === 'edit-cat') { const c = editing; $('#form-dialog').close(); openForm('cat', c); }
   if (k === 'new-cat') {
+    if (!isPlus()) { $('#form-dialog').close(); plusDialog('categorias'); return; }
     const f = $('#form'), t = e.target.closest('[data-tipo]').dataset.tipo;
     const back = { kind: formKind, obj: editing, opts: { ...formOpts, tipo: f.elements.tipo?.value, cuenta: f.elements.cuenta?.value, monto: parseAmount(f.elements.monto?.value) || 0, fecha: f.elements.fecha?.value, nota: f.elements.nota?.value } };
     $('#form-dialog').close();
@@ -1727,9 +1781,10 @@ $('#msg-dialog').addEventListener('click', e => {
   const t = e.target;
   if (t === $('#msg-dialog') || t.hasAttribute('data-close')) $('#msg-dialog').close();
   if (t.hasAttribute('data-confirm')) { $('#msg-dialog').close(); confirmFn?.(); confirmFn = null; }
+  if (t.hasAttribute('data-plus-acct')) { $('#msg-dialog').close(); accountForm('up'); }
   const ec = t.closest('[data-edit-cat]'), nc = t.closest('[data-new-cat]');
   if (ec) { $('#msg-dialog').close(); openForm('cat', categoria(ec.dataset.editCat), { list: true }); }
-  if (nc) { $('#msg-dialog').close(); openForm('cat', null, { tipo: nc.dataset.newCat, list: true }); }
+  if (nc) { $('#msg-dialog').close(); if (needPlus('categorias')) return; openForm('cat', null, { tipo: nc.dataset.newCat, list: true }); }
 });
 
 // ---------- Meta cumplida: la pantalla entera lo celebra.
@@ -1805,9 +1860,8 @@ function download(name, text, type) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 function setupBackup() {
-  if (window.claude?.use || auth) { $('#backup').hidden = true; return; }   // con cuenta, la copia local sobra
-  $('#backup-out').onclick = () => download(`finanzas-${today()}.json`, JSON.stringify(state, null, 2), 'application/json');
   $('#csv-out').onclick = () => {
+    if (needPlus('csv')) return;
     const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
     const TIPO = { gasto: 'Gasto', ingreso: 'Ingreso', transfer: 'Transferencia', meta: 'Meta' };
     const rows = [['Fecha', 'Tipo', 'Cuenta', 'Moneda', 'Monto', 'Categoría', 'Nota', 'Equivalente USD', 'Tasa']]
@@ -1819,6 +1873,8 @@ function setupBackup() {
       }));
     download(`movimientos-${today()}.csv`, '﻿' + rows.map(r => r.map(q).join(';')).join('\n'), 'text/csv');
   };
+  if (window.claude?.use || auth) { $('#backup').hidden = true; return; }   // con cuenta, la copia local sobra
+  $('#backup-out').onclick = () => download(`finanzas-${today()}.json`, JSON.stringify(state, null, 2), 'application/json');
   $('#backup-in').onclick = () => $('#backup-file').click();
   $('#backup-file').onchange = async e => {
     const file = e.target.files[0];
