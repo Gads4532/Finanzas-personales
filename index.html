@@ -383,7 +383,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.8.0';
+const APP_VERSION = '1.8.1';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -911,7 +911,7 @@ function renderInicio() {
     <div class="summary">
       <div><b class="pos">${view$(ing)}</b><span>Ingresos</span></div>
       <div><b class="neg">${view$(gas)}</b><span>Gastos</span></div>
-      <div><b>${view$(ing - gas)}</b><span>ahorro del mes</span></div>
+      <div><b>${view$(ing - gas)}</b><span>Ahorro${ing ? " · " + Math.round((ing - gas) / ing * 100) + "%" : ""}</span></div>
     </div>
     <h2 class="sec">Cuentas <button class="link" data-act="new-acc">+ Nueva</button></h2>
     <div class="list">${state.cuentas.length ? state.cuentas.map(accountHTML).join('')
