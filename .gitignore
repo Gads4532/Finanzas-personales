@@ -1,0 +1,11 @@
+# Claves de firma de Android: nunca en el repo (ver ANDROID.md §2)
+*.keystore
+*.jks
+*.p12
+*.pem
+android.keystore
+# Salida de Bubblewrap
+app-release-*.apk
+app-release-*.aab
+build/
+.gradle/

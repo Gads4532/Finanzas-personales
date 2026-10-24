@@ -65,7 +65,7 @@ de la app es verde (`--accent: #12a150`) en lugar del naranja del fuego.
 - Plus vive en la tabla `plus` de Supabase (`plus.sql`), ligada a la cuenta; la app solo la lee. Se activa a mano desde el SQL Editor (hay plantillas en `plus.sql`) o, más adelante, desde el webhook de la pasarela de pago. Sin cuenta no hay Plus: eso empuja al registro.
 - Cobro: pendiente de elegir. Desde Venezuela no hay cuenta de comerciante de Google Play ni Stripe; opciones realistas: Lemon Squeezy/Paddle (pagan a PayPal/Payoneer) para la web, y Binance Pay / Pago Móvil con activación manual para lo local.
 - `privacidad.html`: política de privacidad y términos, enlazada desde Ajustes. Obligatoria para la tienda.
-- Play Store: la PWA se empaqueta como Trusted Web Activity con Bubblewrap (`twa-manifest.json`) y se verifica el dominio con `.well-known/assetlinks.json` (falta la huella SHA-256 del certificado de firma, que sale al generar el paquete). Requiere cuenta de desarrollador (25 USD) y, en cuentas personales nuevas, 14 días de prueba cerrada con 12 testers.
+- Play Store y Android: reglas fijas en `ANDROID.md`. `applicationId` `io.github.gads4532.finanzas` para siempre; Play App Signing desde el primer día; un solo APK para todos los canales (el universal firmado que descarga Play Console), clave de carga con tres copias y nunca en Git; verificación de desarrollador registrando el package name aunque se distribuya fuera de Play (ya vigente en Brasil, Indonesia, Singapur y Tailandia; global en 2027). Cuenta personal, no de organización; mirar la cuenta de distribución limitada. Prueba cerrada: 12 testers reales, 14 días.
 
 ## Regla para todas las apps
 
