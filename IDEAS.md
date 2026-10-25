@@ -59,6 +59,8 @@ categoría y meta, diálogos que suben con resorte, barra inferior, modo oscuro,
 animaciones con resortes `linear()` que se apagan con «reducir movimiento». El color
 de la app es verde (`--accent: #12a150`) en lugar del naranja del fuego.
 
+**Porcentajes (auditoría 1.9.3)**: la variación del saldo en Inicio compara el ahorro del mes con el saldo con que empezó el mes, redondeado a centavos, y solo aparece si ese saldo inicial es de al menos $1; antes, un saldo inicial de $0 dejaba un resto decimal y salía un porcentaje gigantesco. Los demás porcentajes (Ahorro = ahorro/ingresos, gasto vs. mes anterior, metas, barra por categoría, cambio de tasas) ya tienen su divisor protegido y se revisaron.
+
 ## Finanzas Plus (modelo de ingresos, como Rial Plus)
 
 - **Gratis**: cuentas, movimientos, tasas, presupuesto, 1 meta, Análisis del mes, historial de 3 meses.

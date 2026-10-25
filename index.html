@@ -438,7 +438,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.9.2';
+const APP_VERSION = '1.9.3';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -957,7 +957,10 @@ function renderInicio() {
   const pend = pendientes();
   const alt = state.verEn === 'VES' ? money(total, 'USD') : rate() ? money(fromUSD(total, 'VES'), 'VES') : '';
   // Variación del mes: lo ahorrado (o perdido) frente al saldo con que empezó el mes.
-  const before = total - (ing - gas), varPct = before > 0 && (ing || gas) ? (ing - gas) / before * 100 : null;
+  // Se redondea a centavos (los decimales binarios dejan restos como 0,000000000001) y solo se
+  // muestra si el mes empezó con al menos $1: dividir entre casi nada da porcentajes absurdos.
+  const before = Math.round((total - (ing - gas)) * 100) / 100;
+  const varPct = before >= 1 && (ing || gas) ? (ing - gas) / before * 100 : null;
   const prev = $('#view-inicio .hero-total')?.dataset.v;
   const ICO = {
     plus: '<path d="M12 5v14M5 12h14"/>',
