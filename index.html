@@ -438,7 +438,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.9.4';
+const APP_VERSION = '1.9.5';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -807,15 +807,20 @@ function balance(c) {
 }
 const totalUSD = () => state.cuentas.reduce((s, c) => s + toUSD(balance(c), c.moneda), 0);
 const inMonth = mk => state.movs.filter(mv => mv.fecha.startsWith(mk));
-// Porcentaje de «parte» sobre «base» en dólares. Devuelve null (y no se muestra nada) si la base
-// es menor de $1 o el resultado pasa de ±999 %: comparar contra casi nada da cifras sin sentido.
-// Todo se redondea a centavos para que los restos binarios (0,000000000001) no distorsionen.
+// Porcentaje de «parte» sobre «base» en dólares, redondeado a centavos para que los restos
+// binarios (0,000000000001) no distorsionen. Si la base es cero (el mes empezó en $0, no hubo
+// gasto el mes anterior…), se usa la convención financiera: lo que aparece cuenta como ±100 %.
+// Devuelve null solo cuando no hay nada que comparar (parte y base en cero).
 function pctOf(parte, base) {
   parte = Math.round(parte * 100) / 100; base = Math.round(base * 100) / 100;
-  if (!(base >= 1)) return null;
-  const v = parte / base * 100;
-  return Number.isFinite(v) && Math.abs(v) <= 999 ? v : null;
+  if (!parte && !base) return null;
+  if (!base) return parte > 0 ? 100 : -100;
+  const v = parte / Math.abs(base) * 100;
+  return Number.isFinite(v) ? v : null;
 }
+// Texto del porcentaje: un decimal hasta 100 %, entero de ahí en adelante, con puntos de miles.
+const nf0 = new Intl.NumberFormat('es-VE', { maximumFractionDigits: 0 });
+const pctTxt = (v, sign = false, dec = 1) => (sign && v > 0 ? '+' : '') + (Math.abs(v) < 100 ? v.toFixed(dec).replace('.', ',').replace('-', '−') : nf0.format(Math.round(v)).replace('-', '−')) + '%';
 function monthTotals(mk) {
   let ing = 0, gas = 0;
   for (const mv of inMonth(mk)) {
@@ -980,7 +985,7 @@ function renderInicio() {
   $('#view-inicio').innerHTML = `
     <div class="hero">
       <div class="hero-top"><div class="hero-label">Saldo total</div><button class="curpill" data-act="flip">${badge(state.verEn, 'sm')} ${state.verEn === 'VES' ? 'Bs' : 'USD'} ▾</button></div>
-      <div class="hero-total${prev !== undefined && +prev !== Math.round(total * 100) ? ' bump' : ''}" data-v="${Math.round(total * 100)}">${view$(total)}${varPct !== null ? `<span class="pill${varPct < 0 ? ' neg' : ''}">${varPct > 0 ? '+' : ''}${varPct.toFixed(1).replace('.', ',')}%</span>` : ''}</div>
+      <div class="hero-total${prev !== undefined && +prev !== Math.round(total * 100) ? ' bump' : ''}" data-v="${Math.round(total * 100)}">${view$(total)}${varPct !== null ? `<span class="pill${varPct < 0 ? ' neg' : ''}">${pctTxt(varPct, true)}</span>` : ''}</div>
       <div class="hero-alt">${alt ? '≈ ' + alt : ''}</div>
     </div>
     <form class="quick" id="quick">
@@ -997,7 +1002,7 @@ function renderInicio() {
     <div class="cards">
       <div class="card"><div class="lbl"><i style="background:var(--green)"></i>Ingresos</div><b class="pos">${view$(ing)}</b></div>
       <div class="card"><div class="lbl"><i style="background:var(--red)"></i>Gastos</div><b class="neg">${view$(gas)}</b></div>
-      <div class="card"><div class="lbl"><i style="background:var(--text)"></i>Ahorro${pctOf(ing - gas, ing) !== null ? ' ' + Math.round(pctOf(ing - gas, ing)) + '%' : ''}</div><b>${view$(ing - gas)}</b></div>
+      <div class="card"><div class="lbl"><i style="background:var(--text)"></i>Ahorro${pctOf(ing - gas, ing) !== null ? ' ' + pctTxt(pctOf(ing - gas, ing), false, 0) : ''}</div><b>${view$(ing - gas)}</b></div>
     </div>
     <h2 class="sec" style="margin-top:0">Mis cuentas</h2>
     <div class="accs">${state.cuentas.map(c => { const b = balance(c); return `<button class="acc" data-act="acc-detail" data-id="${c.id}" style="${colorVar(c)}">
@@ -1164,7 +1169,7 @@ function renderMovs() {
   };
   const { ing, gas } = monthTotals(mk);
   const prevGas = monthTotals(shiftMonth(mk, -1)).gas;
-  const diff = pctOf(gas - prevGas, prevGas) !== null ? Math.round(pctOf(gas - prevGas, prevGas)) : null;
+  const diff = pctOf(gas - prevGas, prevGas);
 
   $('#view-movs').innerHTML = `
     <div class="month">
@@ -1177,7 +1182,7 @@ function renderMovs() {
       <div><b class="neg">${view$(gas)}</b><span>Gastos</span></div>
       <div><b>${view$(ing - gas)}</b><span>Balance</span></div>
     </div>
-    ${diff !== null && diff !== 0 ? `<p class="compare">Gasto <b>${Math.abs(diff)}% ${diff > 0 ? 'mayor' : 'menor'}</b> que en ${monthName(shiftMonth(mk, -1), { month: 'long' }).toLowerCase()}.</p>` : ''}
+    ${diff !== null && Math.round(diff) !== 0 ? `<p class="compare">Gasto <b>${pctTxt(Math.abs(diff), false, 0)} ${diff > 0 ? 'mayor' : 'menor'}</b> que en ${monthName(shiftMonth(mk, -1), { month: 'long' }).toLowerCase()}.</p>` : ''}
     <div class="filters">
       <div class="seg">${[['', 'Todos'], ['gasto', 'Gastos'], ['ingreso', 'Ingresos']].map(([v, l]) =>
         `<button class="${movTipo === v ? 'on' : ''}" data-tipo="${v}">${l}</button>`).join('')}</div>
@@ -1295,7 +1300,7 @@ function renderAna() {
   const sum = (list, tipo) => list.reduce((s, mv) => s + (mv.tipo === tipo ? movUSD(mv) : 0), 0);
   const cur = inRange(desde, hasta), prev = inRange(prevDesde, prevHasta);
   const ing = sum(cur, 'ingreso'), gas = sum(cur, 'gasto'), gasPrev = sum(prev, 'gasto');
-  const tasa = pctOf(ing - gas, ing) !== null ? Math.round(pctOf(ing - gas, ing)) : null;
+  const tasa = pctOf(ing - gas, ing);
   // Por categoría, con lo del periodo anterior para ver qué subió.
   const byCat = {}, byCatPrev = {};
   for (const mv of cur) if (mv.tipo === 'gasto') byCat[mv.categoria] = (byCat[mv.categoria] || 0) + movUSD(mv);
@@ -1320,14 +1325,14 @@ function renderAna() {
     <div class="hero">
       <div class="hero-label">Ahorro · ${label}</div>
       <div class="hero-total" style="${ing - gas < 0 ? 'color:var(--red)' : ''}">${view$(ing - gas)}</div>
-      <div class="hero-alt">${tasa === null ? 'Sin ingresos en el periodo' : `Tasa de ahorro: ${tasa}% de los ingresos`}</div>
+      <div class="hero-alt">${tasa === null ? 'Sin ingresos en el periodo' : `Tasa de ahorro: ${pctTxt(tasa, false, 0)} de los ingresos`}</div>
     </div>
     <div class="summary">
       <div><b class="pos">${view$(ing)}</b><span>Ingresos</span></div>
       <div><b class="neg">${view$(gas)}</b><span>Gastos</span></div>
       <div><b>${view$(daysElapsed ? gas / daysElapsed : 0)}</b><span>Gasto por día</span></div>
     </div>
-    ${pctOf(gas - gasPrev, gasPrev) !== null && Math.round(pctOf(gas - gasPrev, gasPrev)) !== 0 ? `<p class="insight">Gasto <b>${Math.abs(Math.round(pctOf(gas - gasPrev, gasPrev)))}% ${gas > gasPrev ? 'mayor' : 'menor'}</b> que en el periodo anterior${grew ? `; la categoría con mayor aumento fue <b>${esc(categoria(grew[0]).nombre)}</b> (+${view$(grew[1])})` : ''}.</p>` : ''}
+    ${pctOf(gas - gasPrev, gasPrev) !== null && Math.round(pctOf(gas - gasPrev, gasPrev)) !== 0 ? `<p class="insight">Gasto <b>${pctTxt(Math.abs(pctOf(gas - gasPrev, gasPrev)), false, 0)} ${gas > gasPrev ? 'mayor' : 'menor'}</b> que en el periodo anterior${grew ? `; la categoría con mayor aumento fue <b>${esc(categoria(grew[0]).nombre)}</b> (+${view$(grew[1])})` : ''}.</p>` : ''}
     ${days.length ? `<p class="insight">El día con más gasto fue el <b>${shortDate(days[0][0])}</b>: ${view$(days[0][1])}.</p>` : ''}
     <h2 class="sec">Gastos por categoría</h2>
     <div class="list">${cats.length ? cats.map(([id, v]) => { const c = categoria(id); return `<section class="item" style="${colorVar(c)}">
