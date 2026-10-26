@@ -1,9 +1,13 @@
-# Finanzas Personales — banco de ideas
+# Billuyo — banco de ideas
 
 Referencia: **Rial – Finanzas Personales** (App Store, pensada para Venezuela). Rial
 pide cuenta y tiene suscripción Plus; esta versión es gratis, sin registro, funciona sin
 internet y sin Claude. Mismo sistema que el Habit Tracker: un solo `index.html`,
 `sw.js`, `manifest.webmanifest`, iconos, rama `gh-pages` para publicar.
+
+## Nombre
+
+**Billuyo** (desde 1.10.0). Suena exactamente como el criollo *biyuyo* (dinero), porque en Venezuela «ll» y «y» se pronuncian igual, y se lee *bill* + *yo*: «mis billetes y yo». Se descartaron «BeYouYo» (el «yo» no significaba nada), «Biyú» y «BiYuYo». La URL, el repositorio y el `applicationId` de Android no cambian: el id es fijo para siempre y la dirección ya está instalada en teléfonos. Las claves de almacenamiento (`finanzas-v1`, caché del service worker) tampoco cambian para no perder datos.
 
 ## Requisito base
 
@@ -41,7 +45,7 @@ internet y sin Claude. Mismo sistema que el Habit Tracker: un solo `index.html`,
 
 ## Instalación en el teléfono
 
-**Desde 1.9.6 se ofrece sola**: al abrir el enlace (tras la bienvenida) sale una hoja «Instalar Finanzas Personales» con el icono. En Android y Chrome el botón «Instalar» abre el cuadro del navegador (`beforeinstallprompt`); en iPhone muestra los tres pasos de Safari (Compartir → Añadir a pantalla de inicio → Añadir). «Ahora no» la silencia una semana; no aparece si ya está instalada ni dentro de Claude. También está como fila «Instalar en el teléfono» en Ajustes.
+**Desde 1.9.6 se ofrece sola**: al abrir el enlace (tras la bienvenida) sale una hoja «Instalar Billuyo» con el icono. En Android y Chrome el botón «Instalar» abre el cuadro del navegador (`beforeinstallprompt`); en iPhone muestra los tres pasos de Safari (Compartir → Añadir a pantalla de inicio → Añadir). «Ahora no» la silencia una semana; no aparece si ya está instalada ni dentro de Claude. También está como fila «Instalar en el teléfono» en Ajustes.
 
 - Chrome → ⋮ → «Instalar aplicación». En Samsung Galaxy, borrar el icono de la pantalla de inicio no desinstala la app: queda en Ajustes → Aplicaciones.
 - Si Chrome dice que ya está instalada y no ofrece reinstalar: borrar la página `gads4532.github.io` del **Historial** de Chrome lo arregla (probado). También sirve Configuración → Configuración de sitios → Datos almacenados → borrar.
@@ -63,7 +67,7 @@ de la app es verde (`--accent: #12a150`) en lugar del naranja del fuego.
 
 **Porcentajes (auditoría 1.9.5)**: todos los porcentajes de dinero pasan por `pctOf(parte, base)` y se escriben con `pctTxt`. Se redondea a centavos antes de dividir (los restos binarios como 0,000000000001 eran los que producían cifras gigantes). Si la base es cero (el mes empezó en $0, no hubo gasto el mes anterior) se aplica la convención financiera: lo que aparece cuenta como ±100 %. Siempre se muestra el porcentaje: un decimal por debajo de 100 %, entero con puntos de miles por encima («1.000 %»), signo menos tipográfico. Afecta a la variación del saldo en Inicio, Ahorro %, «Gasto X % mayor/menor» en Movimientos y a la tasa de ahorro y comparación de Análisis.
 
-## Finanzas Plus (modelo de ingresos, como Rial Plus)
+## Billuyo Plus (modelo de ingresos, como Rial Plus)
 
 - **Gratis**: cuentas, movimientos, tasas, presupuesto, 1 meta, Análisis del mes, historial de 3 meses.
 - **Apagado por ahora** (`PLUS_ON = false`): todo abierto para todos y sin rastro en pantalla, hasta que exista el cobro. Encenderlo es cambiar esa constante.

@@ -1,6 +1,6 @@
-# Finanzas Personales
+# Billuyo
 
-Finanzas personales para quien maneja dólares, bolívares y USDT a la vez, inspirada en
+Billuyo («mis billetes y yo», suena como el criollo *biyuyo*): finanzas personales para quien maneja dólares, bolívares y USDT a la vez, inspirada en
 [Rial](https://apps.apple.com/us/app/rial-finanzas-personales/id6755372307): saldo total
 consolidado, tasa BCV del día, cuentas, gastos por categoría, presupuesto, pagos
 programados y metas de ahorro. Un solo archivo, sin dependencias.
@@ -16,7 +16,7 @@ proyecto que el Habit Tracker). La app muestra su versión y avisa cuando hay un
 nueva; actualizar nunca toca los datos. Abierta como página de Claude, guarda en
 la nube de Claude.
 
-Tiene un plan opcional **Finanzas Plus** (análisis completo, historial, categorías
+Tiene un plan opcional **Billuyo Plus** (análisis completo, historial, categorías
 propias, más metas y Excel), ligado a la cuenta; `plus.sql` crea su tabla. La política de
 privacidad y los términos están en `privacidad.html`.
 

@@ -1,7 +1,7 @@
 {
-  "name": "Finanzas Personales",
-  "short_name": "Finanzas",
-  "description": "Finanzas personales en dólares, bolívares y USDT: cuentas, gastos, presupuesto y metas.",
+  "name": "Billuyo",
+  "short_name": "Billuyo",
+  "description": "Billuyo: tus billetes y tú. Finanzas personales en dólares, bolívares y USDT: cuentas, gastos, presupuesto y metas.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

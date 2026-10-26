@@ -1,8 +1,8 @@
 {
   "packageId": "io.github.gads4532.finanzas",
   "host": "gads4532.github.io",
-  "name": "Finanzas Personales",
-  "launcherName": "Finanzas",
+  "name": "Billuyo",
+  "launcherName": "Billuyo",
   "display": "standalone",
   "orientation": "portrait",
   "themeColor": "#0e0e0e",

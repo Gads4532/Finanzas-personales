@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Finanzas Personales</title>
+<title>Billuyo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
@@ -443,7 +443,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.9.6';
+const APP_VERSION = '1.10.0';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -608,7 +608,7 @@ function needPlus(feature) {
 const fmtPrice = n => '$' + n.toFixed(2).replace('.', ',');
 function plusDialog(feature) {
   const act = isPlus();
-  showMsg(`<h2>Finanzas Plus</h2>
+  showMsg(`<h2>Billuyo Plus</h2>
     ${feature ? `<p class="meta" style="margin-top:12px"><b>${PLUS_WHY[feature]}</b> es parte de Plus.</p>` : ''}
     ${act ? `<p class="meta" style="margin-top:12px">Tienes Plus ${plus.plan === 'vida' ? 'de por vida' : 'hasta el ' + longDate(dayKey(new Date(plus.hasta)))}. Gracias por apoyar la app.</p>` : `
     <ul class="pros" style="margin-top:12px">${Object.values(PLUS_WHY).map(t => `<li>${t}</li>`).join('')}</ul>
@@ -1061,7 +1061,7 @@ function openSettings() {
       <section class="item"><button class="row" style="width:100%" data-act="cats">
         <span class="title"><div class="name">Categorías</div><div class="sub">${state.categorias.filter(c => c.tipo === 'gasto').length} de gastos · ${state.categorias.filter(c => c.tipo === 'ingreso').length} de ingresos</div></span></button></section>
       ${PLUS_ON ? `<section class="item"><button class="row" style="width:100%" data-act="plus">
-        <span class="title"><div class="name">Finanzas Plus</div><div class="sub">${isPlus() ? (plus.plan === 'vida' ? 'Activo de por vida' : 'Activo hasta el ' + shortDate(dayKey(new Date(plus.hasta)))) : `Análisis completo, historial, categorías propias, más metas y Excel · desde ${fmtPrice(PLUS.mes)}`}</div></span></button></section>` : ''}
+        <span class="title"><div class="name">Billuyo Plus</div><div class="sub">${isPlus() ? (plus.plan === 'vida' ? 'Activo de por vida' : 'Activo hasta el ' + shortDate(dayKey(new Date(plus.hasta)))) : `Análisis completo, historial, categorías propias, más metas y Excel · desde ${fmtPrice(PLUS.mes)}`}</div></span></button></section>` : ''}
       ${canInstall() ? `<section class="item"><button class="row" style="width:100%" data-act="install">
         <span class="title"><div class="name">Instalar en el teléfono</div><div class="sub">Icono en la pantalla de inicio, abre sin internet</div></span></button></section>` : ''}
       <section class="item"><button class="row" style="width:100%" data-act="tasa">
@@ -2179,7 +2179,7 @@ function offerInstall(force = false) {
   const steps = isIOS && !installPrompt
     ? `<ol class="steps"><li>Toque <b>Compartir</b> (el cuadrado con la flecha) abajo en Safari.</li><li>Elija <b>Añadir a pantalla de inicio</b>.</li><li>Toque <b>Añadir</b>.</li></ol>`
     : `<p class="meta" style="margin-top:12px">Queda en su pantalla de inicio como cualquier aplicación, abre sin internet y ocupa muy poco.</p>`;
-  showMsg(`<div class="install-head"><img src="icon-192.png" alt="" width="56" height="56"><div><h2>Instalar Finanzas Personales</h2><div class="sub">Gratis · sin tienda · 1 segundo</div></div></div>
+  showMsg(`<div class="install-head"><img src="icon-192.png" alt="" width="56" height="56"><div><h2>Instalar Billuyo</h2><div class="sub">Gratis · sin tienda · 1 segundo</div></div></div>
     ${steps}
     <div class="dialog-actions"><button class="link" data-install-later>Ahora no</button>${installPrompt ? '<button class="primary" data-install>Instalar</button>' : '<button class="primary" data-install-later>Entendido</button>'}</div>`);
 }

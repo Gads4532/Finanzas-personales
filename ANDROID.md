@@ -10,7 +10,7 @@ envoltorio (icono, nombre, permisos).
 | Qué | Valor | Regla |
 |---|---|---|
 | `applicationId` (package name) | `io.github.gads4532.finanzas` | **No se cambia nunca.** Cambiarlo = app distinta; nadie podría actualizar. |
-| Nombre visible | Finanzas Personales | Se puede cambiar. |
+| Nombre visible | Billuyo | Se puede cambiar. |
 | `versionCode` | entero que solo sube (1, 2, 3…) | Cada paquete que se publique, dentro o fuera de Play, sube el número. |
 | `versionName` | la versión de la web (`APP_VERSION`) | Informativo. |
 
