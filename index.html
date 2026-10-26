@@ -388,6 +388,11 @@
   .cbadge svg { width: 100%; height: 100%; display: block; font-family: inherit; }
   .cbadge.sm { width: 16px; height: 16px; }
   .cbadge.lg { width: 36px; height: 36px; margin-right: 2px; }
+  .install-head { display: flex; align-items: center; gap: 14px; }
+  .install-head img { border-radius: 14px; }
+  .install-head h2 { margin: 0; font-size: 1.15rem; }
+  .steps { margin: 14px 0 0; padding-left: 20px; color: var(--muted); line-height: 1.7; }
+  .steps b { color: var(--text); }
   .curwrap { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; background: var(--bg); padding: 4px 4px 4px 5px; }
   .curwrap .cur { background-color: transparent; padding-left: 0; }
 </style>
@@ -438,7 +443,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.9.5';
+const APP_VERSION = '1.9.6';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -1057,6 +1062,8 @@ function openSettings() {
         <span class="title"><div class="name">Categorías</div><div class="sub">${state.categorias.filter(c => c.tipo === 'gasto').length} de gastos · ${state.categorias.filter(c => c.tipo === 'ingreso').length} de ingresos</div></span></button></section>
       ${PLUS_ON ? `<section class="item"><button class="row" style="width:100%" data-act="plus">
         <span class="title"><div class="name">Finanzas Plus</div><div class="sub">${isPlus() ? (plus.plan === 'vida' ? 'Activo de por vida' : 'Activo hasta el ' + shortDate(dayKey(new Date(plus.hasta)))) : `Análisis completo, historial, categorías propias, más metas y Excel · desde ${fmtPrice(PLUS.mes)}`}</div></span></button></section>` : ''}
+      ${canInstall() ? `<section class="item"><button class="row" style="width:100%" data-act="install">
+        <span class="title"><div class="name">Instalar en el teléfono</div><div class="sub">Icono en la pantalla de inicio, abre sin internet</div></span></button></section>` : ''}
       <section class="item"><button class="row" style="width:100%" data-act="tasa">
         <span class="title"><div class="name">Tasas y calculadora</div><div class="sub">${state.tasa.bcv ? `${rateTxt('bcv')} · ${rateTxt('usdt')} · ${rateTxt('eur')}` : 'Sin tasas aún'}</div></span></button></section>
       ${window.claude?.use ? '' : `<section class="item"><button class="row" style="width:100%" data-act="${auth ? 'acct-out' : 'acct-in'}">
@@ -1425,6 +1432,7 @@ function doAct(act, id) {
     case 'calc': openForm('tasa'); break;
     case 'pending': pendingDialog(); break;
     case 'settings': openSettings(); break;
+    case 'install': offerInstall(true); break;
     case 'new-mov': openForm('mov'); break;
     case 'toggle': open.has(id) ? open.delete(id) : open.add(id); renderAll(); break;
     case 'flip': state.verEn = state.verEn === 'USD' ? 'VES' : 'USD'; save(); renderAll(); break;
@@ -2154,8 +2162,40 @@ async function checkUpdate() {
   }, 1500);
 }
 
+// ---------- Instalar en el teléfono. Al abrir el enlace se ofrece directamente la instalación:
+// en Android y Chrome con el botón «Instalar» del navegador; en iPhone, con los pasos de Safari.
+// Si la persona dice «Ahora no», se vuelve a ofrecer a la semana. No aparece si ya está instalada.
+const INSTALL_KEY = 'finanzas-install-ask';
+const installed = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; offerInstall(); });
+window.addEventListener('appinstalled', () => { installPrompt = null; localStorage.removeItem(INSTALL_KEY); toast('Instalada. Ábrala desde la pantalla de inicio.'); });
+function canInstall() { return !installed() && !window.claude?.use && (installPrompt || isIOS); }
+function offerInstall(force = false) {
+  if (!canInstall()) return;
+  if (!force && (Date.now() - (+localStorage.getItem(INSTALL_KEY) || 0) < 7 * 864e5)) return;
+  if (!force && document.querySelector('dialog[open]')) return;   // la bienvenida va primero
+  const steps = isIOS && !installPrompt
+    ? `<ol class="steps"><li>Toque <b>Compartir</b> (el cuadrado con la flecha) abajo en Safari.</li><li>Elija <b>Añadir a pantalla de inicio</b>.</li><li>Toque <b>Añadir</b>.</li></ol>`
+    : `<p class="meta" style="margin-top:12px">Queda en su pantalla de inicio como cualquier aplicación, abre sin internet y ocupa muy poco.</p>`;
+  showMsg(`<div class="install-head"><img src="icon-192.png" alt="" width="56" height="56"><div><h2>Instalar Finanzas Personales</h2><div class="sub">Gratis · sin tienda · 1 segundo</div></div></div>
+    ${steps}
+    <div class="dialog-actions"><button class="link" data-install-later>Ahora no</button>${installPrompt ? '<button class="primary" data-install>Instalar</button>' : '<button class="primary" data-install-later>Entendido</button>'}</div>`);
+}
+$('#msg-dialog').addEventListener('click', async e => {
+  if (e.target.closest('[data-install-later]')) { localStorage.setItem(INSTALL_KEY, Date.now()); $('#msg-dialog').close(); }
+  if (e.target.closest('[data-install]') && installPrompt) {
+    const p = installPrompt; installPrompt = null; $('#msg-dialog').close();
+    p.prompt(); const { outcome } = await p.userChoice;
+    if (outcome !== 'accepted') { installPrompt = p; localStorage.setItem(INSTALL_KEY, Date.now()); }
+  }
+});
+$('#form-dialog').addEventListener('close', () => setTimeout(() => offerInstall(), 400));
+
 renderAll();
 if (!state.perfil.nombre) openForm('perfil', null, { bienvenida: true });
+else setTimeout(() => offerInstall(), 1200);
 setSync('local');
 connectCloud();
 if (navigator.onLine) fetchRate();

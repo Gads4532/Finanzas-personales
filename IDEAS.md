@@ -41,6 +41,8 @@ internet y sin Claude. Mismo sistema que el Habit Tracker: un solo `index.html`,
 
 ## Instalación en el teléfono
 
+**Desde 1.9.6 se ofrece sola**: al abrir el enlace (tras la bienvenida) sale una hoja «Instalar Finanzas Personales» con el icono. En Android y Chrome el botón «Instalar» abre el cuadro del navegador (`beforeinstallprompt`); en iPhone muestra los tres pasos de Safari (Compartir → Añadir a pantalla de inicio → Añadir). «Ahora no» la silencia una semana; no aparece si ya está instalada ni dentro de Claude. También está como fila «Instalar en el teléfono» en Ajustes.
+
 - Chrome → ⋮ → «Instalar aplicación». En Samsung Galaxy, borrar el icono de la pantalla de inicio no desinstala la app: queda en Ajustes → Aplicaciones.
 - Si Chrome dice que ya está instalada y no ofrece reinstalar: borrar la página `gads4532.github.io` del **Historial** de Chrome lo arregla (probado). También sirve Configuración → Configuración de sitios → Datos almacenados → borrar.
 
