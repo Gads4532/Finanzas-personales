@@ -438,7 +438,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.9.3';
+const APP_VERSION = '1.9.4';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -807,6 +807,15 @@ function balance(c) {
 }
 const totalUSD = () => state.cuentas.reduce((s, c) => s + toUSD(balance(c), c.moneda), 0);
 const inMonth = mk => state.movs.filter(mv => mv.fecha.startsWith(mk));
+// Porcentaje de «parte» sobre «base» en dólares. Devuelve null (y no se muestra nada) si la base
+// es menor de $1 o el resultado pasa de ±999 %: comparar contra casi nada da cifras sin sentido.
+// Todo se redondea a centavos para que los restos binarios (0,000000000001) no distorsionen.
+function pctOf(parte, base) {
+  parte = Math.round(parte * 100) / 100; base = Math.round(base * 100) / 100;
+  if (!(base >= 1)) return null;
+  const v = parte / base * 100;
+  return Number.isFinite(v) && Math.abs(v) <= 999 ? v : null;
+}
 function monthTotals(mk) {
   let ing = 0, gas = 0;
   for (const mv of inMonth(mk)) {
@@ -959,8 +968,7 @@ function renderInicio() {
   // Variación del mes: lo ahorrado (o perdido) frente al saldo con que empezó el mes.
   // Se redondea a centavos (los decimales binarios dejan restos como 0,000000000001) y solo se
   // muestra si el mes empezó con al menos $1: dividir entre casi nada da porcentajes absurdos.
-  const before = Math.round((total - (ing - gas)) * 100) / 100;
-  const varPct = before >= 1 && (ing || gas) ? (ing - gas) / before * 100 : null;
+  const varPct = (ing || gas) ? pctOf(ing - gas, total - (ing - gas)) : null;
   const prev = $('#view-inicio .hero-total')?.dataset.v;
   const ICO = {
     plus: '<path d="M12 5v14M5 12h14"/>',
@@ -989,7 +997,7 @@ function renderInicio() {
     <div class="cards">
       <div class="card"><div class="lbl"><i style="background:var(--green)"></i>Ingresos</div><b class="pos">${view$(ing)}</b></div>
       <div class="card"><div class="lbl"><i style="background:var(--red)"></i>Gastos</div><b class="neg">${view$(gas)}</b></div>
-      <div class="card"><div class="lbl"><i style="background:var(--text)"></i>Ahorro${ing ? ' ' + Math.round((ing - gas) / ing * 100) + '%' : ''}</div><b>${view$(ing - gas)}</b></div>
+      <div class="card"><div class="lbl"><i style="background:var(--text)"></i>Ahorro${pctOf(ing - gas, ing) !== null ? ' ' + Math.round(pctOf(ing - gas, ing)) + '%' : ''}</div><b>${view$(ing - gas)}</b></div>
     </div>
     <h2 class="sec" style="margin-top:0">Mis cuentas</h2>
     <div class="accs">${state.cuentas.map(c => { const b = balance(c); return `<button class="acc" data-act="acc-detail" data-id="${c.id}" style="${colorVar(c)}">
@@ -1156,7 +1164,7 @@ function renderMovs() {
   };
   const { ing, gas } = monthTotals(mk);
   const prevGas = monthTotals(shiftMonth(mk, -1)).gas;
-  const diff = prevGas ? Math.round((gas - prevGas) / prevGas * 100) : null;
+  const diff = pctOf(gas - prevGas, prevGas) !== null ? Math.round(pctOf(gas - prevGas, prevGas)) : null;
 
   $('#view-movs').innerHTML = `
     <div class="month">
@@ -1169,7 +1177,7 @@ function renderMovs() {
       <div><b class="neg">${view$(gas)}</b><span>Gastos</span></div>
       <div><b>${view$(ing - gas)}</b><span>Balance</span></div>
     </div>
-    ${diff !== null ? `<p class="compare">Gasto <b>${Math.abs(diff)}% ${diff > 0 ? 'mayor' : 'menor'}</b> que en ${monthName(shiftMonth(mk, -1), { month: 'long' }).toLowerCase()}.</p>` : ''}
+    ${diff !== null && diff !== 0 ? `<p class="compare">Gasto <b>${Math.abs(diff)}% ${diff > 0 ? 'mayor' : 'menor'}</b> que en ${monthName(shiftMonth(mk, -1), { month: 'long' }).toLowerCase()}.</p>` : ''}
     <div class="filters">
       <div class="seg">${[['', 'Todos'], ['gasto', 'Gastos'], ['ingreso', 'Ingresos']].map(([v, l]) =>
         `<button class="${movTipo === v ? 'on' : ''}" data-tipo="${v}">${l}</button>`).join('')}</div>
@@ -1287,7 +1295,7 @@ function renderAna() {
   const sum = (list, tipo) => list.reduce((s, mv) => s + (mv.tipo === tipo ? movUSD(mv) : 0), 0);
   const cur = inRange(desde, hasta), prev = inRange(prevDesde, prevHasta);
   const ing = sum(cur, 'ingreso'), gas = sum(cur, 'gasto'), gasPrev = sum(prev, 'gasto');
-  const tasa = ing ? Math.round((ing - gas) / ing * 100) : null;
+  const tasa = pctOf(ing - gas, ing) !== null ? Math.round(pctOf(ing - gas, ing)) : null;
   // Por categoría, con lo del periodo anterior para ver qué subió.
   const byCat = {}, byCatPrev = {};
   for (const mv of cur) if (mv.tipo === 'gasto') byCat[mv.categoria] = (byCat[mv.categoria] || 0) + movUSD(mv);
@@ -1319,7 +1327,7 @@ function renderAna() {
       <div><b class="neg">${view$(gas)}</b><span>Gastos</span></div>
       <div><b>${view$(daysElapsed ? gas / daysElapsed : 0)}</b><span>Gasto por día</span></div>
     </div>
-    ${gasPrev ? `<p class="insight">Gasto <b>${Math.abs(Math.round((gas - gasPrev) / gasPrev * 100))}% ${gas > gasPrev ? 'mayor' : 'menor'}</b> que en el periodo anterior${grew ? `; la categoría con mayor aumento fue <b>${esc(categoria(grew[0]).nombre)}</b> (+${view$(grew[1])})` : ''}.</p>` : ''}
+    ${pctOf(gas - gasPrev, gasPrev) !== null && Math.round(pctOf(gas - gasPrev, gasPrev)) !== 0 ? `<p class="insight">Gasto <b>${Math.abs(Math.round(pctOf(gas - gasPrev, gasPrev)))}% ${gas > gasPrev ? 'mayor' : 'menor'}</b> que en el periodo anterior${grew ? `; la categoría con mayor aumento fue <b>${esc(categoria(grew[0]).nombre)}</b> (+${view$(grew[1])})` : ''}.</p>` : ''}
     ${days.length ? `<p class="insight">El día con más gasto fue el <b>${shortDate(days[0][0])}</b>: ${view$(days[0][1])}.</p>` : ''}
     <h2 class="sec">Gastos por categoría</h2>
     <div class="list">${cats.length ? cats.map(([id, v]) => { const c = categoria(id); return `<section class="item" style="${colorVar(c)}">
@@ -1896,7 +1904,7 @@ const FORMS = {
       const rows = [['bcv', 'USD', 'Dólar BCV', 'Oficial'], ['usdt', 'USDT', 'USDT', 'Binance P2P'], ['eur', 'EUR', 'Euro BCV', 'Oficial']];
       $('#rates').innerHTML = rows.map(([k, cur, n, src]) => {
         const v = state.tasa[k], p = state.tasa.prev[k];
-        const d = v && p ? (v - p) / p * 100 : 0;
+        const d = v && p > 0 ? Math.max(-999, Math.min(999, (v - p) / p * 100)) : 0;
         const when = fmtCuando(state.tasa.at[k]);
         return `<section class="item"><div class="row">${badge(cur, 'lg')}<span class="title"><div class="name">${n}</div><div class="sub">${src}${when ? ' · ' + when : ''}${d ? ` · <span class="${d > 0 ? 'neg' : 'pos'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d).toFixed(2)}%</span>` : ''}</div></span>
           <span class="amt">${rateTxt(k, v)}</span></div></section>`; }).join('');
