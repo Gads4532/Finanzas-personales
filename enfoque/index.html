@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0e0e0e">
+<meta name="description" content="Enfoque: menos teléfono y más de lo que importa.">
+<title>Enfoque</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root {
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --bg: #ffffff; --text: #111111; --muted: #8a8a8a; --line: #ededed; --soft: #f3f3f5; --empty: #e6e6e6;
+    --accent: #3b5bdb; --on-accent: #ffffff; --red: #e03131; --amber: #e8590c; --green: #2f9e44;
+    --spring: linear(0, 0.009, 0.035 2.1%, 0.141 4.4%, 0.723 12.9%, 0.938 16.7%, 1.017 19.4%, 1.067, 1.099 24.3%, 1.108 26%, 1.103, 1.085 30.4%, 1.006 39%, 0.993 42.4%, 0.99 46.3%, 1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e0e0e; --text: #f2f2f2; --muted: #7a7a7a; --line: #1f1f1f; --soft: #1a1a1c; --empty: #2a2a2a;
+      --accent: #748ffc; --on-accent: #0e0e0e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e0e0e; --text: #f2f2f2; --muted: #7a7a7a; --line: #1f1f1f; --soft: #1a1a1c; --empty: #2a2a2a;
+    --accent: #748ffc; --on-accent: #0e0e0e;
+  }
+  /* Fondo del propio sistema en todo el alto, sin franja blanca arriba ni abajo (igual que el Habit Tracker). */
+  html { background: var(--bg); color-scheme: light dark; min-height: 100%; overscroll-behavior-y: none; }
+  body { margin: 0; min-height: 100dvh; background: var(--bg); color: var(--text); font: 16px/1.5 var(--font);
+    -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+  main { max-width: 520px; margin: 0 auto; padding-block: 48px calc(48px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  a { color: inherit; }
+  h1 { font-size: 2rem; font-weight: 600; letter-spacing: -.02em; margin: 0; line-height: 1.15; }
+  h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; margin: 0 0 6px; }
+  h3 { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 36px 0 8px; }
+  .hello { color: var(--muted); font-size: 1rem; margin: 0; }
+  .date { color: var(--muted); margin: 2px 0 28px; }
+  .note, .meta { color: var(--muted); font-size: .9rem; margin: 0 0 16px; }
+  .link { color: var(--muted); font-size: .9rem; }
+  .link:hover { color: var(--text); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .global { text-align: right; flex: none; }
+  .g-num { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .g-sub { color: var(--muted); font-size: .8rem; }
+
+  /* La pregunta de cada vez que tomas el teléfono */
+  .q { font-size: 1.15rem; font-weight: 500; margin: 0 0 14px; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .choice { text-align: left; background: var(--soft); border-radius: 16px; padding: 14px 14px 16px; min-height: 92px;
+    display: flex; flex-direction: column; gap: 6px; transition: transform .35s var(--spring); }
+  .choice:active { transform: scale(.96); }
+  .choice b { font-weight: 600; }
+  .choice span { color: var(--muted); font-size: .85rem; line-height: 1.3; }
+  .choice svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .choice.main { background: var(--accent); color: var(--on-accent); }
+  .choice.main span { color: inherit; opacity: .8; }
+
+  /* Estadísticas del día */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 28px; }
+  .stat { padding: 14px 0; }
+  .stat + .stat { padding-left: 12px; border-left: 1px solid var(--line); }
+  .stat b { display: block; font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .stat span { color: var(--muted); font-size: .8rem; }
+  .stat .over { color: var(--red); }
+
+  /* Filas: misma pieza que los hábitos del Habit Tracker */
+  .row { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border-top: 1px solid var(--line); padding: 13px 0; }
+  .rows > .row:last-child { border-bottom: 1px solid var(--line); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--text)); flex: none; margin: 0 4px; }
+  .box { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--muted); flex: none; margin: 0 1px; }
+  .row .t { flex: 1; min-width: 0; }
+  .row .t div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .t small { display: block; color: var(--muted); font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .tag { color: var(--muted); font-size: .8rem; flex: none; }
+  .row .tag.late { color: var(--red); }
+  .more { color: var(--muted); font-size: .85rem; padding: 10px 0 0; }
+  .empty { color: var(--muted); font-size: .9rem; padding: 4px 0; }
+
+  /* Semana */
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 120px; margin-top: 8px; }
+  .bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; }
+  .bar i { display: block; width: 100%; max-width: 28px; border-radius: 6px 6px 3px 3px; background: var(--empty); min-height: 3px;
+    transform-origin: bottom; animation: grow .7s var(--spring) both; }
+  .bar.on i { background: var(--accent); }
+  .bar span { font-size: .75rem; color: var(--muted); }
+  .bar.today span { color: var(--text); font-weight: 600; }
+  @keyframes grow { from { transform: scaleY(0); } }
+  .week-sum { color: var(--muted); font-size: .88rem; margin: 12px 0 0; }
+  .week-sum b { color: var(--text); font-weight: 600; }
+
+  footer { margin-top: 44px; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: .85rem; }
+
+  /* Botones */
+  .primary { background: var(--accent); color: var(--on-accent); border-radius: 999px; padding: 12px 22px; font-weight: 600; }
+  .primary:disabled { opacity: .4; }
+  .outline { border: 1.5px solid var(--line); border-radius: 999px; padding: 10px 18px; }
+  .wide { width: 100%; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--soft); border-radius: 999px; padding: 7px 14px; font-size: .9rem; font-variant-numeric: tabular-nums; }
+  .chip.on { background: var(--text); color: var(--bg); }
+
+  /* Formularios */
+  .field { margin: 0 0 18px; }
+  .field > label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+  input, textarea, select { width: 100%; box-sizing: border-box; font: inherit; color: inherit; background: transparent; padding: 6px 0;
+    border: 0; border-bottom: 1px solid var(--line); border-radius: 0; outline: none; }
+  input:focus, textarea:focus, select:focus { border-color: var(--text); }
+  textarea { resize: vertical; min-height: 120px; line-height: 1.5; }
+  select option { background: var(--bg); color: var(--text); }
+
+  /* Hoja que sube desde abajo */
+  dialog { border: 0; padding: 0; background: var(--bg); color: var(--text); width: min(520px, 100vw); max-width: 100vw; max-height: 88dvh;
+    margin: auto auto 0; border-radius: 22px 22px 0 0; box-sizing: border-box; }
+  dialog[open] { animation: up .5s var(--spring); }
+  dialog::backdrop { background: rgb(0 0 0 / .45); animation: fade .25s; }
+  @media (min-width: 600px) { dialog { margin: auto; border-radius: 22px; } }
+  .sheet { padding: 22px max(20px, env(safe-area-inset-left, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; max-height: 88dvh; box-sizing: border-box; }
+  .sheet .grab { width: 36px; height: 4px; border-radius: 2px; background: var(--empty); margin: -8px auto 16px; }
+  .actions { display: flex; justify-content: flex-end; align-items: center; gap: 18px; margin-top: 22px; flex-wrap: wrap; }
+  .actions.stack { flex-direction: column; align-items: stretch; gap: 12px; }
+  .actions.stack .link { text-align: center; padding: 6px 0; }
+  .green { color: var(--green); } .red { color: var(--red); }
+  .pros { margin: 6px 0 14px; padding-left: 18px; }
+  .pros li { margin: 2px 0; }
+  .set-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .set-row span small { display: block; color: var(--muted); font-size: .8rem; }
+  .set-row select { width: auto; border: 0; text-align: right; }
+  .app-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+  .app-row .t { flex: 1; min-width: 0; }
+  .app-row small { display: block; color: var(--muted); font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .x { color: var(--muted); font-size: 1.3rem; line-height: 1; padding: 4px 8px; }
+  .add-app { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 10px; align-items: end; margin-top: 10px; }
+
+  /* Pantallas completas: espera y enfoque */
+  .full { position: fixed; inset: 0; z-index: 10; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; animation: fade .3s; overflow-y: auto; }
+  .full[hidden] { display: none; }
+  .full .inner { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .full .lead { color: var(--muted); margin: 0; }
+  .full .lead b { color: var(--text); }
+  .full .lead.red, .full .lead .red { color: var(--red); }
+  .breath { width: 180px; height: 180px; border-radius: 50%; display: grid; place-items: center; margin: 18px 0;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent) 8%, transparent) 70%);
+    animation: breath 8s ease-in-out infinite; }
+  .breath span { font-size: 1rem; color: var(--text); }
+  @keyframes breath { 0%, 100% { transform: scale(.72); } 50% { transform: scale(1); } }
+  .count { font-size: 3rem; font-weight: 600; letter-spacing: -.03em; font-variant-numeric: tabular-nums; margin: 0; line-height: 1; }
+  .why { background: var(--soft); border-radius: 16px; padding: 14px 16px; text-align: left; width: 100%; box-sizing: border-box; font-size: .92rem; }
+  .why b { font-weight: 600; }
+  .why .red { display: block; margin-top: 4px; }
+  .ring { --p: 0%; width: 240px; height: 240px; border-radius: 50%; display: grid; place-items: center; position: relative; margin: 10px 0; }
+  .ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background: conic-gradient(var(--accent) var(--p), var(--empty) 0);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5.5px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5.5px)); }
+  .ring .count { font-size: 3.4rem; }
+  .focus-what { font-size: 1.15rem; font-weight: 500; margin: 0; }
+
+  #toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); opacity: 0; z-index: 20;
+    background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: .9rem; pointer-events: none;
+    transition: opacity .25s, transform .45s var(--spring); max-width: calc(100vw - 48px); text-align: center; }
+  #toast.on { opacity: 1; transform: translate(-50%, 0); }
+  #update { position: fixed; left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 15; max-width: 488px; margin: 0 auto;
+    background: var(--text); color: var(--bg); border-radius: 16px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: .9rem; }
+  #update[hidden] { display: none; }
+  #update button { font-weight: 600; }
+
+  @keyframes up { from { transform: translateY(40%); opacity: 0; } }
+  @keyframes fade { from { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <p class="hello" id="hello"></p>
+      <h1 id="title">Enfoque</h1>
+      <p class="date" id="today"></p>
+    </div>
+    <div class="global">
+      <div class="g-num" id="g-focus">0 min</div>
+      <div class="g-sub">enfoque hoy</div>
+    </div>
+  </header>
+
+  <section>
+    <p class="q">¿Para qué tomaste el teléfono?</p>
+    <div class="choices">
+      <button class="choice" data-go="concreto">
+        <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+        <b>Algo concreto</b><span>Lo haces y lo sueltas</span>
+      </button>
+      <button class="choice main" data-go="enfoque">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
+        <b>Enfocarme</b><span>Una sesión sin teléfono</span>
+      </button>
+      <button class="choice" data-go="costumbre">
+        <svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M4.2 7.5l2.6 1.5M17.2 15l2.6 1.5M4.2 16.5l2.6-1.5M17.2 9l2.6-1.5"/></svg>
+        <b>Por costumbre</b><span>Una alternativa que sume</span>
+      </button>
+      <button class="choice" data-go="distraer">
+        <svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M11 18h2"/></svg>
+        <b>Distraerme</b><span>Con espera y límite diario</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="stats" id="stats"></div>
+
+  <section>
+    <h3>Pendiente hoy</h3>
+    <div id="pend"></div>
+  </section>
+
+  <section>
+    <h3>Últimos 7 días</h3>
+    <div class="week" id="week"></div>
+    <p class="week-sum" id="week-sum"></p>
+  </section>
+
+  <footer>
+    <button class="link" id="open-settings">Ajustes</button>
+    <span id="ver"></span>
+  </footer>
+</main>
+
+<dialog id="sheet"><div class="sheet" id="sheet-body"></div></dialog>
+<div class="full" id="gate" hidden><div class="inner" id="gate-body"></div></div>
+<div class="full" id="focus" hidden><div class="inner" id="focus-body"></div></div>
+<div id="toast"></div>
+<div id="update" hidden><span>Hay una versión nueva lista.</span><button id="update-go">Actualizar</button></div>
+
+<script>
+const APP_VERSION = '1.0.0';
+const KEY = 'enfoque-v1';
+// El Habit Tracker vive en el mismo dominio (gads4532.github.io), así que sus datos están en este mismo teléfono.
+const HT_KEY = 'habit-tracker-v1', HT_AUTH = 'habit-auth';
+const HT_URL = 'https://gads4532.github.io/Habit-tracker/';
+// Misma base de datos del Habit Tracker. La clave es la pública («anon»): solo permite lo que las reglas dejan.
+const SUPA_URL = 'https://vqxtxzmtrgsitgsxtvif.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxeHR4em10cmdzaXRnc3h0dmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2MjQzNTksImV4cCI6MjEwODIwMDM1OX0.9CrCH7vkgr_4-25m22ttDxI1WyTPKVxK-2uEUi801dQ';
+
+const DEFAULT_APPS = [
+  { id: 'ig', nombre: 'Instagram', url: 'https://www.instagram.com/' },
+  { id: 'tt', nombre: 'TikTok', url: 'https://www.tiktok.com/' },
+  { id: 'yt', nombre: 'YouTube', url: 'https://m.youtube.com/' },
+  { id: 'x', nombre: 'X', url: 'https://x.com/' },
+  { id: 'fb', nombre: 'Facebook', url: 'https://www.facebook.com/' },
+];
+const DEFAULT_ALTS = [
+  'Leer 10 páginas de un libro',
+  'Caminar 10 minutos sin el teléfono',
+  'Tomar agua y estirarte 2 minutos',
+  'Ordenar tu espacio durante 5 minutos',
+  'Escribir tres cosas que agradeces hoy',
+  'Llamar a alguien que aprecias',
+  'Respirar un minuto con los ojos cerrados',
+  'Avanzar 5 minutos en la tarea más importante',
+];
+const MINUTOS_ENFOQUE = [15, 25, 50, 90];
+const MINUTOS_SALIDA = [5, 10, 15, 30];
+const FRASE = 'Elijo distraerme';
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// Fechas en hora local, como 'YYYY-MM-DD' (igual que el Habit Tracker).
+const dayKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+const today = () => dayKey(new Date());
+// Días de la semana: 0 = lunes … 6 = domingo.
+const wd = day => (new Date(day + 'T12:00').getDay() + 6) % 7;
+const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6], DAY_L = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+const fmtMin = m => { m = Math.round(m); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${r} min` : `${h} h`; };
+const fmtClock = s => { s = Math.max(0, Math.ceil(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+const fmtSec = s => s >= 60 ? `${Math.floor(s / 60)} min ${s % 60 ? `${s % 60} s` : ''}`.trim() : `${s} s`;
+
+// ---------- Estado
+let state = load();
+function load() {
+  let s;
+  try { s = JSON.parse(localStorage.getItem(KEY)); } catch {}
+  return normalize(s);
+}
+function normalize(s) {
+  s ||= {};
+  s.nombre = String(s.nombre || '').trim();
+  if (!Array.isArray(s.apps)) s.apps = DEFAULT_APPS.map(a => ({ ...a }));
+  if (!Array.isArray(s.alternativas) || !s.alternativas.length) s.alternativas = [...DEFAULT_ALTS];
+  s.limite = Math.max(1, Math.min(20, +s.limite || 3));
+  s.espera = [5, 10, 20, 30].includes(+s.espera) ? +s.espera : 10;
+  s.dias ||= {};
+  s.sesion ||= null; s.salida ||= null;
+  s.bienvenida = !!s.bienvenida;
+  return s;
+}
+function save() {
+  // Solo se guardan los últimos 180 días.
+  const cut = dayKey(addDays(new Date(), -180));
+  for (const k of Object.keys(state.dias)) if (k < cut) delete state.dias[k];
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+}
+const EMPTY_DAY = { enfoque: 0, sesiones: 0, interrupciones: 0, resistidas: 0, aperturas: 0, distraccion: 0, alternativas: 0, concretos: 0 };
+const dayOf = (k = today()) => ({ ...EMPTY_DAY, ...state.dias[k] });
+function bump(field, n = 1, k = today()) { state.dias[k] = { ...dayOf(k), [field]: dayOf(k)[field] + n }; }
+
+// ---------- Datos del Habit Tracker (solo lectura)
+let htRemote = null, htEmail = '';
+function htLocal() { try { return JSON.parse(localStorage.getItem(HT_KEY)); } catch { return null; } }
+// Se usa la versión más reciente entre la del teléfono y la de la cuenta.
+function htData() {
+  const l = htLocal(), r = htRemote;
+  if (l && r) return (+r.cambiado || 0) > (+l.cambiado || 0) ? r : l;
+  return r || l;
+}
+async function supa(path, { method = 'GET', body, token } = {}) {
+  const res = await fetch(SUPA_URL + path, {
+    method, headers: { apikey: SUPA_KEY, Authorization: `Bearer ${token || SUPA_KEY}`, 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!res.ok) { const e = new Error(res.statusText); e.status = res.status; throw e; }
+  return res.json();
+}
+// Con la sesión del Habit Tracker se lee su fila de «estados». Si el token caducó se renueva y se devuelve
+// al Habit Tracker para que su sesión siga viva.
+async function htRefresh() {
+  let a = null; try { a = JSON.parse(localStorage.getItem(HT_AUTH)); } catch {}
+  if (!a?.access_token || !a.uid || !navigator.onLine) return;
+  try {
+    if ((a.expires_at || 0) - Date.now() < 60000) {
+      const d = await supa('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: a.refresh_token } });
+      a = { ...a, access_token: d.access_token, refresh_token: d.refresh_token, expires_at: Date.now() + (d.expires_in || 3600) * 1000 };
+      try { localStorage.setItem(HT_AUTH, JSON.stringify(a)); } catch {}
+    }
+    const rows = await supa(`/rest/v1/estados?select=data&user_id=eq.${encodeURIComponent(a.uid)}`, { token: a.access_token });
+    htRemote = rows?.[0]?.data || null; htEmail = a.email || '';
+    renderAll();
+  } catch {}
+}
+function pendientes() {
+  const s = htData(); if (!s) return null;
+  const t = today(), w = wd(t);
+  const firstHour = h => (h.horas || [])[0] || '99';
+  const habits = (s.habits || [])
+    .filter(h => !h.rutina && (!h.creado || h.creado <= t) && (h.dias?.length ? h.dias : ALL_DAYS).includes(w) && !s.log?.[h.id]?.[t])
+    .sort((a, b) => firstHour(a) < firstHour(b) ? -1 : firstHour(a) > firstHour(b) ? 1 : 0);
+  const items = (s.tareas?.items || []).filter(x => !x.hecha);
+  const due = items.filter(x => x.fecha && x.fecha <= t).sort((a, b) => a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0);
+  const sinFecha = items.filter(x => !x.fecha).sort((a, b) => (b.creado || 0) - (a.creado || 0));
+  return { habits, due, sinFecha, nombre: s.nombre || '' };
+}
+const nombre = () => state.nombre || htData()?.nombre || '';
+const fmtHora = hhmm => { if (!/^\d\d:\d\d$/.test(hhmm || '')) return ''; let [h, m] = hhmm.split(':').map(Number); const ap = h < 12 ? 'AM' : 'PM'; h = h % 12 || 12; return `${h}:${String(m).padStart(2, '0')} ${ap}`; };
+const fmtFecha = f => { const t = today(); if (f === t) return 'Hoy'; if (f === dayKey(addDays(new Date(), -1))) return 'Ayer'; return new Date(f + 'T12:00').toLocaleDateString('es', { day: 'numeric', month: 'short' }); };
+// Un recordatorio concreto para la pantalla de espera: lo que pierdes si sigues de largo.
+function recordatorio() {
+  const p = pendientes(); if (!p) return '';
+  const h = p.habits.find(h => h.contras?.length) || p.habits[0];
+  if (h) return `<b>${esc(h.nombre)}</b> sigue pendiente hoy.${h.contras?.length ? `<span class="red">Si no lo haces: ${esc(h.contras[0])}</span>` : h.minima ? `<span>Versión de 2 minutos: ${esc(h.minima)}</span>` : ''}`;
+  const x = p.due[0] || p.sinFecha[0];
+  if (x) return `<b>${esc(x.titulo)}</b> sigue en tu lista${x.fecha ? ` (${x.fecha < today() ? 'vencida' : 'vence hoy'})` : ''}.`;
+  return '';
+}
+
+// ---------- Pantalla principal
+function renderAll() { renderHead(); renderStats(); renderPend(); renderWeek(); }
+function renderHead() {
+  const h = new Date().getHours();
+  const n = nombre();
+  $('#hello').textContent = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  $('#title').textContent = n || 'Enfoque';
+  const f = new Date().toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+  $('#today').textContent = f[0].toUpperCase() + f.slice(1);
+  $('#g-focus').textContent = fmtMin(dayOf().enfoque);
+}
+function renderStats() {
+  const d = dayOf(), over = d.aperturas > state.limite;
+  $('#stats').innerHTML = `
+    <div class="stat"><b>${d.resistidas + d.alternativas}</b><span>Resististe</span></div>
+    <div class="stat"><b class="${over ? 'over' : ''}">${d.aperturas}<span class="num" style="font-size:.8rem;color:var(--muted);font-weight:400"> / ${state.limite}</span></b><span>Aperturas</span></div>
+    <div class="stat"><b>${d.distraccion ? '~' + fmtMin(d.distraccion) : '0 min'}</b><span>En distracciones</span></div>`;
+}
+function renderPend() {
+  const p = pendientes(), el = $('#pend');
+  if (!p) {
+    el.innerHTML = `<p class="empty">Aquí aparecen tus hábitos y tareas del Habit Tracker. Ábrelo una vez en este teléfono (en Chrome) y vuelve.</p>
+      <p style="margin-top:12px"><a class="link" href="${HT_URL}" target="_blank" rel="noopener">Abrir Habit Tracker</a></p>`;
+    return;
+  }
+  const H = p.habits.slice(0, 5), tasks = [...p.due, ...p.sinFecha], T = tasks.slice(0, Math.max(3, 6 - H.length));
+  const rest = p.habits.length - H.length + tasks.length - T.length;
+  if (!H.length && !T.length) { el.innerHTML = `<p class="empty">Todo hecho por hoy. Buen momento para soltar el teléfono.</p>`; return; }
+  el.innerHTML = `<div class="rows">
+    ${H.map(h => `<button class="row" data-h="${esc(h.id)}" style="${h.color ? `--c:${esc(h.color)}` : ''}">
+      <span class="dot"></span><span class="t"><div>${esc(h.nombre)}</div>${h.minima ? `<small>2 min: ${esc(h.minima)}</small>` : ''}</span>
+      <span class="tag">${fmtHora((h.horas || [])[0]) || 'Hábito'}</span></button>`).join('')}
+    ${T.map(x => `<button class="row" data-x="${esc(x.id)}">
+      <span class="box"></span><span class="t"><div>${esc(x.titulo)}</div>${x.detalle ? `<small>${esc(x.detalle)}</small>` : ''}</span>
+      <span class="tag${x.fecha && x.fecha < today() ? ' late' : ''}">${x.fecha ? fmtFecha(x.fecha) : 'Tarea'}</span></button>`).join('')}
+  </div>
+  <p class="more">${rest > 0 ? `y ${rest} más · ` : ''}<a class="link" href="${HT_URL}" target="_blank" rel="noopener">Abrir Habit Tracker</a></p>`;
+}
+function renderWeek() {
+  const days = Array.from({ length: 7 }, (_, i) => dayKey(addDays(new Date(), i - 6)));
+  const vals = days.map(k => dayOf(k));
+  const max = Math.max(30, ...vals.map(v => v.enfoque));
+  $('#week').innerHTML = days.map((k, i) => `<div class="bar${vals[i].enfoque ? ' on' : ''}${k === today() ? ' today' : ''}" title="${fmtMin(vals[i].enfoque)}">
+    <i style="height:${Math.max(3, vals[i].enfoque / max * 92)}px;animation-delay:${i * 40}ms"></i><span>${DAY_L[wd(k)]}</span></div>`).join('');
+  const sum = f => vals.reduce((a, v) => a + v[f], 0);
+  $('#week-sum').innerHTML = `Enfoque <b>${fmtMin(sum('enfoque'))}</b> · Resististe <b>${sum('resistidas') + sum('alternativas')}</b> · Aperturas <b>${sum('aperturas')}</b> · Distracciones <b>~${fmtMin(sum('distraccion'))}</b>`;
+}
+
+// ---------- Hojas, avisos
+const sheet = $('#sheet');
+function showSheet(html) {
+  $('#sheet-body').innerHTML = `<div class="grab"></div>${html}`;
+  if (!sheet.open) sheet.showModal();
+}
+const closeSheet = () => sheet.open && sheet.close();
+sheet.addEventListener('click', e => { if (e.target === sheet) closeSheet(); });
+let toastT = 0;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2800); }
+const buzz = p => { try { navigator.vibrate?.(p); } catch {} };
+
+// ---------- Las cuatro respuestas
+document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => ({
+  concreto: concretoForm, enfoque: () => focusForm(), costumbre: () => alternativas('La costumbre pide entretenimiento', 'Cámbialo por algo que sume. Elige una:'), distraer: appPicker,
+})[b.dataset.go]()));
+
+function concretoForm() {
+  showSheet(`<h2>¿Qué vas a hacer?</h2>
+    <p class="note">Nombrarlo evita que una consulta de un minuto se convierta en media hora.</p>
+    <div class="field"><input id="c-que" maxlength="80" placeholder="Responder a Ana, pagar la luz…" enterkeyhint="done"></div>
+    <div class="actions"><button class="link" id="c-cancel">Cancelar</button><button class="primary" id="c-go">Listo</button></div>`);
+  $('#c-que').focus();
+  $('#c-cancel').onclick = closeSheet;
+  const go = () => { bump('concretos'); save(); closeSheet(); renderAll(); const q = $('#c-que').value.trim(); toast(q ? `${q}. Luego, teléfono abajo.` : 'Hazlo y deja el teléfono.'); };
+  $('#c-go').onclick = go;
+  $('#c-que').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+}
+
+function alternativas(titulo, sub) {
+  const p = pendientes();
+  const hs = (p?.habits || []).slice(0, 2);
+  const alts = [...state.alternativas].sort(() => Math.random() - .5).slice(0, 3);
+  showSheet(`<h2>${esc(titulo)}</h2><p class="note">${esc(sub)}</p>
+    <div class="rows">
+      ${hs.map(h => `<button class="row" data-alt-h="${esc(h.id)}" style="${h.color ? `--c:${esc(h.color)}` : ''}"><span class="dot"></span>
+        <span class="t"><div>${esc(h.minima || h.nombre)}</div><small>${h.minima ? `Versión de 2 min de «${esc(h.nombre)}»` : 'Hábito pendiente de hoy'}</small></span></button>`).join('')}
+      ${alts.map(a => `<button class="row" data-alt="${esc(a)}"><span class="box" style="border-radius:4px"></span><span class="t"><div>${esc(a)}</div></span></button>`).join('')}
+      <button class="row" data-alt-focus><span class="dot" style="--c:var(--accent)"></span><span class="t"><div>Una sesión de enfoque</div><small>25 minutos en una sola cosa</small></span></button>
+    </div>
+    <div class="actions"><button class="link" id="alt-close">Cerrar</button></div>`);
+  $('#alt-close').onclick = closeSheet;
+  $('#sheet-body').querySelectorAll('[data-alt]').forEach(b => b.onclick = () => { bump('alternativas'); save(); closeSheet(); renderAll(); buzz(20); toast('Bien elegido. Teléfono abajo y a ello.'); });
+  $('#sheet-body').querySelectorAll('[data-alt-h]').forEach(b => b.onclick = () => {
+    bump('alternativas'); save(); renderAll();
+    const h = p.habits.find(h => h.id === b.dataset.altH);
+    habitSheet(h, true);
+  });
+  $('#sheet-body').querySelector('[data-alt-focus]').onclick = () => focusForm();
+}
+
+// ---------- Ficha de un hábito o tarea del Habit Tracker
+function habitSheet(h, elegido = false) {
+  if (!h) return;
+  showSheet(`<h2>${esc(h.nombre)}</h2>
+    ${elegido ? `<p class="note">Hazlo ahora y márcalo en el Habit Tracker.</p>` : h.identidad ? `<p class="note">Soy una persona que ${esc(h.identidad)}</p>` : ''}
+    ${h.minima ? `<p class="meta">Versión de 2 minutos: <b style="color:var(--text);font-weight:500">${esc(h.minima)}</b></p>` : ''}
+    ${h.beneficios?.length ? `<p class="meta green" style="margin:14px 0 0;font-weight:600">Beneficios</p><ul class="pros">${h.beneficios.map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}
+    ${h.contras?.length ? `<p class="meta red" style="margin:0;font-weight:600">Contras de no hacerlo</p><ul class="pros">${h.contras.map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}
+    <div class="actions stack">
+      <button class="primary" id="hs-focus">Enfocarme en esto</button>
+      <a class="link" href="${HT_URL}" target="_blank" rel="noopener">Marcarlo en el Habit Tracker</a>
+    </div>`);
+  $('#hs-focus').onclick = () => focusForm(h.nombre, h.modo === 'tiempo' ? h.meta : 25);
+}
+function taskSheet(x) {
+  if (!x) return;
+  showSheet(`<h2>${esc(x.titulo)}</h2>
+    ${x.detalle ? `<p class="note" style="white-space:pre-wrap">${esc(x.detalle)}</p>` : ''}
+    ${x.fecha ? `<p class="meta${x.fecha < today() ? ' red' : ''}">${x.fecha < today() ? 'Vencida' : 'Fecha'}: ${fmtFecha(x.fecha)}</p>` : ''}
+    <div class="actions stack">
+      <button class="primary" id="ts-focus">Enfocarme en esto</button>
+      <a class="link" href="${HT_URL}" target="_blank" rel="noopener">Completarla en el Habit Tracker</a>
+    </div>`);
+  $('#ts-focus').onclick = () => focusForm(x.titulo);
+}
+$('#pend').addEventListener('click', e => {
+  const b = e.target.closest('.row'); if (!b) return;
+  const p = pendientes(); if (!p) return;
+  if (b.dataset.h) habitSheet(p.habits.find(h => h.id === b.dataset.h));
+  if (b.dataset.x) taskSheet([...p.due, ...p.sinFecha].find(x => x.id === b.dataset.x));
+});
+
+// ---------- Sesión de enfoque
+function focusForm(que = '', min = 25) {
+  const p = pendientes();
+  const sug = p ? [...p.habits.map(h => h.nombre), ...p.due.map(x => x.titulo), ...p.sinFecha.slice(0, 8).map(x => x.titulo)] : [];
+  if (!MINUTOS_ENFOQUE.includes(min)) min = Math.max(5, Math.min(180, Math.round(+min || 25)));
+  const opts = [...new Set([...MINUTOS_ENFOQUE, min])].sort((a, b) => a - b);
+  showSheet(`<h2>Sesión de enfoque</h2>
+    <div class="field"><label>¿En qué?</label><input id="f-que" maxlength="80" value="${esc(que)}" placeholder="Una sola cosa" list="f-sug">
+      <datalist id="f-sug">${[...new Set(sug)].map(s => `<option value="${esc(s)}">`).join('')}</datalist></div>
+    <div class="field"><label>Duración</label><div class="chips" id="f-min">${opts.map(m => `<button class="chip${m === min ? ' on' : ''}" data-m="${m}">${m} min</button>`).join('')}</div></div>
+    <p class="note">Al empezar, bloquea el teléfono y déjalo boca abajo. Si lo vuelves a abrir antes de tiempo, cuenta como interrupción.</p>
+    <div class="actions"><button class="link" id="f-cancel">Cancelar</button><button class="primary" id="f-go">Empezar</button></div>`);
+  let chosen = min;
+  $('#f-min').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; chosen = +c.dataset.m; $('#f-min').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c)); });
+  $('#f-cancel').onclick = closeSheet;
+  $('#f-go').onclick = () => { closeSheet(); startFocus($('#f-que').value.trim(), chosen); };
+}
+let focusTick = 0;
+function startFocus(que, min) {
+  state.sesion = { inicio: Date.now(), min, que, ints: 0, fuera: 0 };
+  save(); showFocus(); buzz(15);
+}
+function focusLeft() { const s = state.sesion; return s ? s.min * 60 - (Date.now() - s.inicio) / 1000 : 0; }
+function showFocus() {
+  const s = state.sesion; if (!s) return;
+  $('#focus-body').innerHTML = `
+    <p class="lead">${s.que ? 'Enfocado en' : 'Sesión de enfoque'}</p>
+    ${s.que ? `<p class="focus-what">${esc(s.que)}</p>` : ''}
+    <div class="ring" id="ring"><p class="count" id="f-left"></p></div>
+    <p class="lead" id="f-ints"></p>
+    <p class="note">Bloquea el teléfono y déjalo boca abajo.</p>
+    <button class="link" id="f-stop">Terminar antes</button>`;
+  $('#focus').hidden = false;
+  $('#f-stop').onclick = () => {
+    const done = Math.floor((Date.now() - s.inicio) / 60000);
+    showSheet(`<h2>¿Terminar ahora?</h2><p class="note">Llevas ${fmtMin(done)} de ${fmtMin(s.min)}. Se cuentan los minutos hechos.</p>
+      <div class="actions"><button class="link" id="fs-no">Seguir</button><button class="primary" id="fs-yes">Terminar</button></div>`);
+    $('#fs-no').onclick = closeSheet;
+    $('#fs-yes').onclick = () => { closeSheet(); finishFocus(false); };
+  };
+  clearInterval(focusTick); focusTick = setInterval(paintFocus, 500); paintFocus();
+}
+function paintFocus() {
+  const s = state.sesion; if (!s) return;
+  const left = focusLeft();
+  if (left <= 0) { finishFocus(true); return; }
+  $('#f-left').textContent = fmtClock(left);
+  $('#ring').style.setProperty('--p', `${(1 - left / (s.min * 60)) * 100}%`);
+  $('#f-ints').textContent = s.ints ? `${s.ints} ${s.ints === 1 ? 'interrupción' : 'interrupciones'}` : 'Sin interrupciones';
+}
+function finishFocus(completa) {
+  const s = state.sesion; if (!s) return;
+  clearInterval(focusTick);
+  const mins = completa ? s.min : Math.floor((Date.now() - s.inicio) / 60000);
+  const k = dayKey(new Date(s.inicio));
+  bump('enfoque', mins, k); bump('interrupciones', s.ints, k); if (completa) bump('sesiones', 1, k);
+  state.sesion = null; save();
+  $('#focus').hidden = true; renderAll();
+  if (completa) buzz([60, 80, 60, 80, 120]);
+  showSheet(`<h2>${completa ? 'Sesión completa' : 'Sesión terminada'}</h2>
+    <p class="note">${fmtMin(mins)} de enfoque${s.que ? ` en «${esc(s.que)}»` : ''} · ${s.ints ? `${s.ints} ${s.ints === 1 ? 'interrupción' : 'interrupciones'}` : 'sin interrupciones'}. Hoy llevas ${fmtMin(dayOf(k).enfoque)}.</p>
+    ${s.ints === 0 && completa ? `<p class="meta green">Ni una mirada al teléfono. Así se entrena la atención.</p>` : ''}
+    <div class="actions stack">
+      ${s.que ? `<a class="primary" style="text-align:center;text-decoration:none" href="${HT_URL}" target="_blank" rel="noopener">Marcarlo en el Habit Tracker</a>` : ''}
+      <button class="${s.que ? 'link' : 'primary'}" id="fr-again">Otra sesión</button>
+      <button class="link" id="fr-close">Cerrar</button>
+    </div>`);
+  $('#fr-again').onclick = () => focusForm(s.que, s.min);
+  $('#fr-close').onclick = closeSheet;
+}
+
+// ---------- La puerta: espera, recordatorio y límite antes de abrir una distracción
+function appPicker() {
+  const d = dayOf(), wait = gateWait();
+  showSheet(`<h2>¿Qué quieres abrir?</h2>
+    <p class="note">Aperturas hoy: ${d.aperturas} de ${state.limite}. La próxima espera es de ${fmtSec(wait)}${d.aperturas >= state.limite ? ' y tendrás que escribir una frase' : ''}.</p>
+    <div class="rows">${state.apps.map(a => `<button class="row" data-app="${esc(a.id)}"><span class="dot"></span><span class="t"><div>${esc(a.nombre)}</div></span><span class="tag">›</span></button>`).join('')}</div>
+    ${state.apps.length ? '' : `<p class="empty">Añade tus apps en Ajustes.</p>`}
+    <div class="actions"><button class="link" id="ap-close">Mejor no</button></div>`);
+  $('#ap-close').onclick = () => { bump('resistidas'); save(); closeSheet(); renderAll(); toast('Bien. Ese tiempo es tuyo.'); };
+  $('#sheet-body').querySelectorAll('[data-app]').forEach(b => b.onclick = () => { closeSheet(); openGate(state.apps.find(a => a.id === b.dataset.app)); });
+}
+// Cada apertura del día duplica la espera: 10 s, 20 s, 40 s… hasta 3 minutos.
+const gateWait = () => Math.min(180, state.espera * 2 ** dayOf().aperturas);
+let gate = null;
+function openGate(app) {
+  if (!app) return;
+  gate = { app, total: gateWait(), fin: 0 };
+  gate.fin = Date.now() + gate.total * 1000;
+  const why = recordatorio();
+  $('#gate-body').innerHTML = `
+    <p class="lead">Ibas a abrir <b>${esc(app.nombre)}</b></p>
+    <div class="breath"><span id="g-br">Inhala</span></div>
+    <p class="count" id="g-count"></p>
+    ${why ? `<div class="why">${why}</div>` : ''}
+    <p class="note" style="margin:0">Si sales de esta pantalla, la espera vuelve a empezar.</p>
+    <button class="primary wide" id="g-no">Mejor no</button>`;
+  $('#gate').hidden = false;
+  $('#g-no').onclick = () => gateNo();
+  clearInterval(gate.tick);
+  let phase = 0;
+  gate.breath = setInterval(() => { const el = $('#g-br'); if (el) el.textContent = (phase = 1 - phase) ? 'Exhala' : 'Inhala'; }, 4000);
+  gate.tick = setInterval(paintGate, 250); paintGate();
+}
+function paintGate() {
+  if (!gate || gate.listo) return;
+  const left = (gate.fin - Date.now()) / 1000;
+  if (left > 0) { $('#g-count').textContent = Math.ceil(left); return; }
+  gate.listo = true; clearInterval(gate.tick); gateChoice();
+}
+function gateChoice() {
+  const d = dayOf(), over = d.aperturas >= state.limite, app = gate.app;
+  let min = 10;
+  $('#gate-body').innerHTML = `
+    <h2>¿Todavía quieres abrir ${esc(app.nombre)}?</h2>
+    <p class="lead">Aperturas hoy: ${d.aperturas} de ${state.limite}</p>
+    ${over ? `<p class="lead red">Superaste tu límite de hoy. Para seguir, escribe: <b class="red">${FRASE}</b></p>
+      <div class="field" style="width:100%"><input id="g-phrase" autocomplete="off" autocapitalize="sentences" placeholder="${FRASE}"></div>` : ''}
+    <div class="field" style="width:100%"><label style="text-align:left">¿Por cuánto tiempo?</label>
+      <div class="chips" id="g-min">${MINUTOS_SALIDA.map(m => `<button class="chip${m === min ? ' on' : ''}" data-m="${m}">${m} min</button>`).join('')}</div></div>
+    <button class="primary wide" id="g-no">Mejor no</button>
+    <button class="link" id="g-yes" ${over ? 'disabled style="opacity:.4"' : ''}>Abrir ${esc(app.nombre)} ${min} min</button>`;
+  $('#g-min').addEventListener('click', e => {
+    const c = e.target.closest('.chip'); if (!c) return; min = +c.dataset.m;
+    $('#g-min').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c));
+    $('#g-yes').textContent = `Abrir ${app.nombre} ${min} min`;
+  });
+  $('#g-phrase')?.addEventListener('input', e => {
+    const ok = e.target.value.trim().toLowerCase() === FRASE.toLowerCase();
+    $('#g-yes').disabled = !ok; $('#g-yes').style.opacity = ok ? '' : '.4';
+  });
+  $('#g-no').onclick = () => gateNo();
+  $('#g-yes').onclick = () => {
+    bump('aperturas'); state.salida = { app: app.nombre, en: Date.now(), min }; save();
+    closeGate(); renderAll();
+    salidaOculta = false;
+    // Con «noopener» window.open siempre devuelve null, así que se corta el vínculo a mano.
+    const w = window.open(app.url, '_blank');
+    if (w) w.opener = null; else location.href = app.url;
+  };
+}
+function gateNo() {
+  bump('resistidas'); save(); closeGate(); renderAll(); buzz(20);
+  alternativas('Bien. Ese tiempo es tuyo', 'Úsalo en algo que sume:');
+}
+function closeGate() { if (gate) { clearInterval(gate.tick); clearInterval(gate.breath); } gate = null; $('#gate').hidden = true; }
+
+// Al volver de la distracción se cuenta cuánto duró de verdad.
+let salidaOculta = false;
+function checkSalida(force = false) {
+  const s = state.salida; if (!s || (!salidaOculta && !force)) return;
+  const mins = (Date.now() - s.en) / 60000;
+  if (mins < .5 && !force) return;
+  state.salida = null;
+  const k = dayKey(new Date(s.en));
+  const medido = mins <= 240;
+  const real = medido ? Math.max(1, Math.round(mins)) : s.min;
+  bump('distraccion', real, k); save(); renderAll();
+  const extra = real - s.min;
+  showSheet(`<h2>Volviste de ${esc(s.app)}</h2>
+    <p class="note">${medido ? `Estuviste fuera unos ${fmtMin(real)}; planeaste ${fmtMin(s.min)}.` : 'No se pudo medir: pasaron más de 4 horas. Se cuentan los minutos que planeaste.'}</p>
+    ${medido && extra > 1 ? `<p class="meta red">Te pasaste ${fmtMin(extra)}. La próxima espera será de ${fmtSec(gateWait())}.</p>` : medido ? `<p class="meta green">Cumpliste lo que planeaste.</p>` : ''}
+    <div class="actions stack">
+      <button class="primary" id="sv-focus">Ahora, una sesión de enfoque</button>
+      <button class="link" id="sv-close">Cerrar</button>
+    </div>`);
+  $('#sv-focus').onclick = () => focusForm();
+  $('#sv-close').onclick = closeSheet;
+}
+
+// ---------- Lo que pasa al salir y volver a la app
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    if (state.sesion && !state.sesion.fuera) { state.sesion.fuera = Date.now(); save(); }
+    if (state.salida) salidaOculta = true;
+    return;
+  }
+  // De vuelta.
+  renderAll(); htRefresh();
+  if (gate && !gate.listo) { gate.fin = Date.now() + gate.total * 1000; paintGate(); toast('La espera vuelve a empezar.'); }
+  const s = state.sesion;
+  if (s) {
+    if (focusLeft() <= 0) finishFocus(true);
+    else if (s.fuera) {
+      s.ints++; s.fuera = 0; save(); paintFocus(); buzz(40);
+      toast(`Tomaste el teléfono a los ${fmtMin((Date.now() - s.inicio) / 60000)}. Bloquéalo y sigue.`);
+    }
+  }
+  checkSalida();
+});
+
+// ---------- Ajustes
+function settings() {
+  const ht = htData();
+  const htLine = htRemote ? `Conectado a la cuenta ${esc(htEmail)}` : ht ? 'Leyendo los datos de este teléfono' : 'No encontrado en este teléfono';
+  showSheet(`<h2>Ajustes</h2>
+    <div class="field" style="margin-top:14px"><label>Nombre</label><input id="s-name" maxlength="30" value="${esc(state.nombre)}" placeholder="${esc(htData()?.nombre || '¿Cómo te llamas?')}"></div>
+    <div class="set-row"><span>Aperturas al día<small>Después, hay que escribir una frase</small></span>
+      <select id="s-lim">${Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<option ${n === state.limite ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+    <div class="set-row"><span>Espera inicial<small>Se duplica con cada apertura del día</small></span>
+      <select id="s-wait">${[5, 10, 20, 30].map(n => `<option value="${n}" ${n === state.espera ? 'selected' : ''}>${n} s</option>`).join('')}</select></div>
+    <h3>Apps que te distraen</h3>
+    <div id="s-apps">${state.apps.map(a => `<div class="app-row"><span class="t">${esc(a.nombre)}<small>${esc(a.url)}</small></span><button class="x" data-del="${esc(a.id)}" aria-label="Quitar">×</button></div>`).join('')}</div>
+    <div class="add-app"><input id="s-an" placeholder="Nombre"><input id="s-au" placeholder="https://…" inputmode="url"><button class="link" id="s-add">Añadir</button></div>
+    <p class="meta" style="margin-top:10px">En Android, la dirección web abre la app si la tienes instalada.</p>
+    <h3>Alternativas</h3>
+    <div class="field"><textarea id="s-alts">${esc(state.alternativas.join('\n'))}</textarea><p class="meta" style="margin-top:6px">Una por línea.</p></div>
+    <h3>Habit Tracker</h3>
+    <div class="set-row"><span>${htLine}<small>Tus hábitos y tareas se leen, nunca se cambian desde aquí</small></span><a class="link" href="${HT_URL}" target="_blank" rel="noopener">Abrir</a></div>
+    <h3>Datos</h3>
+    <div class="set-row"><span>Guardar copia<small>Archivo .json con tu historial y ajustes</small></span><button class="link" id="s-exp">Guardar</button></div>
+    <div class="set-row"><span>Restaurar copia</span><button class="link" id="s-imp">Elegir archivo</button></div>
+    ${installEvt ? `<div class="set-row"><span>Instalar en el teléfono</span><button class="link" id="s-inst">Instalar</button></div>` : ''}
+    <div class="set-row"><span>Cómo usar Enfoque</span><button class="link" id="s-help">Ver</button></div>
+    <div class="set-row"><span>Versión ${APP_VERSION}</span><button class="link" id="s-upd">Buscar actualización</button></div>
+    <div class="actions"><button class="primary" id="s-ok">Listo</button></div>`);
+  const body = $('#sheet-body');
+  body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { state.apps = state.apps.filter(a => a.id !== b.dataset.del); save(); b.closest('.app-row').remove(); });
+  $('#s-add').onclick = () => {
+    const n = $('#s-an').value.trim(); let u = $('#s-au').value.trim();
+    if (!n || !u) { (n ? $('#s-au') : $('#s-an')).focus(); return; }
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https://' + u;
+    state.apps.push({ id: crypto.randomUUID(), nombre: n, url: u }); save(); settings();
+  };
+  $('#s-exp').onclick = () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `enfoque-${today()}.json`; a.click(); URL.revokeObjectURL(a.href);
+  };
+  $('#s-imp').onclick = () => {
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'application/json,.json';
+    inp.onchange = async () => {
+      try { const s = JSON.parse(await inp.files[0].text()); if (!s || typeof s !== 'object' || !s.dias) throw 0; state = normalize(s); save(); renderAll(); closeSheet(); toast('Copia restaurada.'); }
+      catch { toast('Ese archivo no es una copia de Enfoque.'); }
+    };
+    inp.click();
+  };
+  $('#s-inst')?.addEventListener('click', async () => { installEvt.prompt(); await installEvt.userChoice; installEvt = null; closeSheet(); });
+  $('#s-help').onclick = welcome;
+  $('#s-upd').onclick = async () => {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if (!reg) { toast('Sin conexión con el servidor.'); return; }
+    await reg.update().catch(() => {});
+    if (!reg.installing && !reg.waiting) toast(`Tienes la última versión (${APP_VERSION}).`);
+  };
+  $('#s-ok').onclick = () => {
+    state.nombre = $('#s-name').value.trim().split(/\s+/)[0] || '';
+    state.limite = +$('#s-lim').value; state.espera = +$('#s-wait').value;
+    const alts = $('#s-alts').value.split('\n').map(s => s.trim()).filter(Boolean);
+    if (alts.length) state.alternativas = alts;
+    save(); closeSheet(); renderAll();
+  };
+}
+$('#open-settings').onclick = settings;
+
+// ---------- Bienvenida: el desincentivo de verdad es que las apps ya no estén a un toque.
+function welcome() {
+  showSheet(`<h2>Menos teléfono, más de lo que importa</h2>
+    <p class="note">Enfoque se pone entre tú y las apps que te roban tiempo. Tres pasos, una sola vez:</p>
+    <ol class="pros" style="padding-left:20px">
+      <li style="margin-bottom:8px"><b>Instala Enfoque</b> en la pantalla de inicio (Chrome → ⋮ → «Instalar aplicación»).</li>
+      <li style="margin-bottom:8px"><b>Quita Instagram, TikTok y demás de la pantalla de inicio</b>: mantén pulsado el icono → «Quitar» (no desinstalar). Siguen en el cajón de apps, pero ya no a un toque.</li>
+      <li><b>Pon Enfoque en su lugar.</b> Cuando el pulgar vaya solo a ese rincón, abrirás esta pregunta en vez del feed.</li>
+    </ol>
+    <p class="note">Para un tope estricto, combínalo con Bienestar digital de Android: Ajustes → Bienestar digital → Temporizadores de apps.</p>
+    ${state.bienvenida ? '' : `<div class="field"><label>¿Cómo te llamas?</label><input id="w-name" maxlength="30" value="${esc(nombre())}" placeholder="Nombre"></div>`}
+    <div class="actions"><button class="primary" id="w-go">Empezar</button></div>`);
+  $('#w-go').onclick = () => {
+    const n = $('#w-name')?.value.trim().split(/\s+/)[0];
+    if (n !== undefined) state.nombre = n || state.nombre;
+    state.bienvenida = true; save(); closeSheet(); renderAll();
+  };
+}
+
+// ---------- Instalación y versiones
+let installEvt = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; });
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    const offer = w => { $('#update').hidden = false; $('#update-go').onclick = () => w.postMessage('SKIP_WAITING'); };
+    if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
+    reg.addEventListener('updatefound', () => {
+      const w = reg.installing;
+      w?.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) offer(w); });
+    });
+  }).catch(() => {});
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloading) { reloading = true; location.reload(); } });
+}
+
+// ---------- Arranque
+$('#ver').textContent = 'v' + APP_VERSION;
+renderAll();
+if (state.sesion) { if (focusLeft() <= 0) finishFocus(true); else { if (state.sesion.fuera) { state.sesion.ints++; state.sesion.fuera = 0; save(); } showFocus(); } }
+else if (state.salida) checkSalida(true);
+else if (!state.bienvenida) welcome();
+htRefresh();
+// Si el Habit Tracker cambia en otra pestaña de este teléfono, se ve al momento.
+addEventListener('storage', e => { if (e.key === HT_KEY) renderPend(); });
+// Al cambiar de día, todo vuelve a cero.
+let lastDay = today();
+setInterval(() => { if (today() !== lastDay) { lastDay = today(); renderAll(); } }, 60000);
+</script>
+</body>
+</html>
