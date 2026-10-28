@@ -163,6 +163,20 @@
   .ring .count { font-size: 3.4rem; }
   .focus-what { font-size: 1.15rem; font-weight: 500; margin: 0; }
 
+  /* Iniciativa y ciencia */
+  .amber { color: var(--amber); }
+  .meter { display: flex; justify-content: space-between; align-items: baseline; font-size: .9rem; color: var(--muted); }
+  .meter b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .meter-bar { height: 6px; border-radius: 3px; background: var(--empty); margin: 6px 0 12px; overflow: hidden; }
+  .meter-bar i { display: block; height: 100%; background: var(--green); border-radius: 3px; transition: width .6s var(--spring); }
+  .sci { font-size: .82rem; color: var(--muted); border-left: 2px solid var(--accent); padding: 2px 0 2px 10px; margin: 0 0 16px; }
+  .btn { display: block; text-align: center; text-decoration: none; }
+  .woop { margin: 4px 0 14px; font-size: .9rem; }
+  .woop dt { color: var(--muted); font-size: .78rem; margin-top: 8px; }
+  .woop dd { margin: 0; }
+  .refs li { margin: 0 0 12px; font-size: .9rem; }
+  .refs small { display: block; color: var(--muted); font-size: .78rem; }
+  .times { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   #toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); opacity: 0; z-index: 20;
     background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: .9rem; pointer-events: none;
     transition: opacity .25s, transform .45s var(--spring); max-width: calc(100vw - 48px); text-align: center; }
@@ -216,6 +230,11 @@
   <div class="stats" id="stats"></div>
 
   <section>
+    <h3>Tomar la iniciativa</h3>
+    <div id="ini"></div>
+  </section>
+
+  <section>
     <h3>Pendiente hoy</h3>
     <div id="pend"></div>
   </section>
@@ -227,7 +246,7 @@
   </section>
 
   <footer>
-    <button class="link" id="open-settings">Ajustes</button>
+    <span><button class="link" id="open-settings">Ajustes</button> · <button class="link" id="open-sci">Por qué funciona</button></span>
     <span id="ver"></span>
   </footer>
 </main>
@@ -239,7 +258,7 @@
 <div id="update" hidden><span>Hay una versión nueva lista.</span><button id="update-go">Actualizar</button></div>
 
 <script>
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 const KEY = 'enfoque-v1';
 // El Habit Tracker vive en el mismo dominio (gads4532.github.io), así que sus datos están en este mismo teléfono.
 const HT_KEY = 'habit-tracker-v1', HT_AUTH = 'habit-auth';
@@ -268,6 +287,29 @@ const DEFAULT_ALTS = [
 const MINUTOS_ENFOQUE = [15, 25, 50, 90];
 const MINUTOS_SALIDA = [5, 10, 15, 30];
 const FRASE = 'Elijo distraerme';
+// Capas de Dunbar: cuanto más cercana la relación, más frecuente el contacto.
+const CADA = { 7: 'Íntimo · cada semana', 14: 'Muy cercano · cada 2 semanas', 30: 'Cercano · cada mes', 90: 'Amigo · cada 3 meses', 365: 'Conocido · cada año' };
+const SALUDOS = ['Hola, {n}. Me acordé de ti, ¿cómo has estado?', 'Hola, {n}. Hace tiempo que no hablamos y quería saber cómo vas.', 'Hola, {n}. Vi algo que me recordó a ti. ¿Qué tal todo?'];
+const PLANTILLAS = {
+  Saludo: n => SALUDOS[Math.floor(Math.random() * SALUDOS.length)].replace('{n}', n),
+  Gracias: n => `Hola, ${n}. Quería darte las gracias por [lo que hiciste]. Me ayudó a [cómo te afectó]. De verdad significa mucho para mí.`,
+  Plan: n => `Hola, ${n}. ¿Te animas a tomar un café esta semana? Yo puedo el [día] a las [hora].`,
+};
+// Preguntas con sustancia: las conversaciones profundas resultan menos incómodas y más cercanas de lo que se espera.
+const PREGUNTAS = ['¿Qué es lo que más te ilusiona ahora mismo?', '¿Qué aprendiste este año que te cambió algo?', '¿Por qué estás más agradecido últimamente?', '¿Qué harías si supieras que no puedes fallar?', '¿Cuál fue el mejor momento de tu semana?', '¿Qué te gustaría que la gente supiera de ti?', '¿Qué te está costando más en este momento?', '¿Qué decisión reciente te enorgullece?', '¿Con qué sueñas para dentro de cinco años?'];
+// Configuración del teléfono (Olson et al., 2022): pequeños cambios que bajan el uso problemático.
+const CONFIG = [
+  ['inicio', 'Quitar las redes de la pantalla de inicio', 'Mantén pulsado el icono → Quitar (no desinstalar).'],
+  ['enfoque', 'Poner Enfoque donde estaban', 'Que el pulgar encuentre la pregunta en vez del feed.'],
+  ['notif', 'Silenciar las notificaciones de redes', 'Ajustes → Notificaciones. Deja solo llamadas y mensajes de personas. No apagues todo: eso aumenta el FOMO.'],
+  ['grises', 'Pantalla en escala de grises', 'Ajustes → Bienestar digital → Modo descanso, o Accesibilidad → Corrección de color.'],
+  ['dormir', 'Cargar el teléfono fuera del dormitorio', 'Un despertador barato evita la primera y la última revisión del día.'],
+  ['vista', 'Ocultar el contenido en la pantalla bloqueada', 'Ajustes → Notificaciones → Pantalla de bloqueo → Ocultar contenido.'],
+  ['timer', 'Temporizadores de apps', 'Ajustes → Bienestar digital → Temporizadores. El tope estricto que Enfoque no puede poner.'],
+];
+const TIPOS = ['Mensaje', 'Llamada', 'Plan', 'Reunión', 'Gracias'];
+// Planes como verbos, para que la invitación se lea natural: «¿Te animas a tomar un café…?».
+const PLAN_IDEAS = ['tomar un café', 'almorzar', 'caminar', 'hacer deporte', 'una reunión de trabajo', 'cenar'];
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -299,6 +341,19 @@ function normalize(s) {
   s.espera = [5, 10, 20, 30].includes(+s.espera) ? +s.espera : 10;
   s.dias ||= {};
   s.sesion ||= null; s.salida ||= null;
+  // Iniciativa
+  if (!Array.isArray(s.personas)) s.personas = [];
+  for (const p of s.personas) { p.cada = +p.cada || 14; p.ultimo ||= ''; p.tel ||= ''; if (!Array.isArray(p.historial)) p.historial = []; }
+  if (!Array.isArray(s.proyectos)) s.proyectos = [];
+  for (const p of s.proyectos) { if (!Array.isArray(p.pasos)) p.pasos = []; p.creado ||= today(); for (const k of ['deseo', 'resultado', 'obstaculo', 'plan', 'paso', 'minima', 'cuando', 'hora', 'donde', 'nota', 'recompensa']) p[k] ||= ''; }
+  if (!Array.isArray(s.planes)) s.planes = [];
+  if (!Array.isArray(s.predicciones)) s.predicciones = [];
+  s.config ||= {}; s.revision ||= '';
+  s.metaSemanal = Math.max(1, Math.min(14, +s.metaSemanal || 3));
+  // FOMO: ventanas de revisión y presupuesto diario
+  if (!Array.isArray(s.ventanas) || !s.ventanas.length) s.ventanas = ['12:30', '18:00', '21:00'];
+  s.ventanaMin = [10, 15, 20, 30].includes(+s.ventanaMin) ? +s.ventanaMin : 20;
+  s.presupuesto = [15, 30, 45, 60].includes(+s.presupuesto) ? +s.presupuesto : 30;
   s.bienvenida = !!s.bienvenida;
   return s;
 }
@@ -308,7 +363,7 @@ function save() {
   for (const k of Object.keys(state.dias)) if (k < cut) delete state.dias[k];
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
 }
-const EMPTY_DAY = { enfoque: 0, sesiones: 0, interrupciones: 0, resistidas: 0, aperturas: 0, distraccion: 0, alternativas: 0, concretos: 0 };
+const EMPTY_DAY = { enfoque: 0, sesiones: 0, interrupciones: 0, resistidas: 0, aperturas: 0, distraccion: 0, alternativas: 0, concretos: 0, iniciativas: 0, pasos: 0, fomoSi: 0, fomoNo: 0 };
 const dayOf = (k = today()) => ({ ...EMPTY_DAY, ...state.dias[k] });
 function bump(field, n = 1, k = today()) { state.dias[k] = { ...dayOf(k), [field]: dayOf(k)[field] + n }; }
 
@@ -362,6 +417,13 @@ const fmtHora = hhmm => { if (!/^\d\d:\d\d$/.test(hhmm || '')) return ''; let [h
 const fmtFecha = f => { const t = today(); if (f === t) return 'Hoy'; if (f === dayKey(addDays(new Date(), -1))) return 'Ayer'; return new Date(f + 'T12:00').toLocaleDateString('es', { day: 'numeric', month: 'short' }); };
 // Un recordatorio concreto para la pantalla de espera: lo que pierdes si sigues de largo.
 function recordatorio() {
+  const per = personasDue()[0];
+  const ini = per ? `<b>En vez de mirar lo que hacen otros, toma la iniciativa:</b> escríbele a ${esc(per.nombre)} (último contacto ${fmtDias(daysSince(per.ultimo))}).
+    <button class="link" style="display:block;margin-top:6px;color:var(--accent)" data-gate-per="${esc(per.id)}">Escribirle ahora</button>` : '';
+  const hab = recordatorioHabito();
+  return [ini, hab].filter(Boolean).join('<hr style="border:0;border-top:1px solid var(--line);margin:12px 0">');
+}
+function recordatorioHabito() {
   const p = pendientes(); if (!p) return '';
   const h = p.habits.find(h => h.contras?.length) || p.habits[0];
   if (h) return `<b>${esc(h.nombre)}</b> sigue pendiente hoy.${h.contras?.length ? `<span class="red">Si no lo haces: ${esc(h.contras[0])}</span>` : h.minima ? `<span>Versión de 2 minutos: ${esc(h.minima)}</span>` : ''}`;
@@ -371,7 +433,7 @@ function recordatorio() {
 }
 
 // ---------- Pantalla principal
-function renderAll() { renderHead(); renderStats(); renderPend(); renderWeek(); }
+function renderAll() { renderHead(); renderStats(); renderIni(); renderPend(); renderWeek(); }
 function renderHead() {
   const h = new Date().getHours();
   const n = nombre();
@@ -386,7 +448,7 @@ function renderStats() {
   $('#stats').innerHTML = `
     <div class="stat"><b>${d.resistidas + d.alternativas}</b><span>Resististe</span></div>
     <div class="stat"><b class="${over ? 'over' : ''}">${d.aperturas}<span class="num" style="font-size:.8rem;color:var(--muted);font-weight:400"> / ${state.limite}</span></b><span>Aperturas</span></div>
-    <div class="stat"><b>${d.distraccion ? '~' + fmtMin(d.distraccion) : '0 min'}</b><span>En distracciones</span></div>`;
+    <div class="stat"><b class="${d.distraccion >= state.presupuesto ? 'over' : ''}">${d.distraccion}<span class="num" style="font-size:.8rem;color:var(--muted);font-weight:400"> / ${state.presupuesto} min</span></b><span>Distracciones</span></div>`;
 }
 function renderPend() {
   const p = pendientes(), el = $('#pend');
@@ -415,7 +477,10 @@ function renderWeek() {
   $('#week').innerHTML = days.map((k, i) => `<div class="bar${vals[i].enfoque ? ' on' : ''}${k === today() ? ' today' : ''}" title="${fmtMin(vals[i].enfoque)}">
     <i style="height:${Math.max(3, vals[i].enfoque / max * 92)}px;animation-delay:${i * 40}ms"></i><span>${DAY_L[wd(k)]}</span></div>`).join('');
   const sum = f => vals.reduce((a, v) => a + v[f], 0);
-  $('#week-sum').innerHTML = `Enfoque <b>${fmtMin(sum('enfoque'))}</b> · Resististe <b>${sum('resistidas') + sum('alternativas')}</b> · Aperturas <b>${sum('aperturas')}</b> · Distracciones <b>~${fmtMin(sum('distraccion'))}</b>`;
+  const all = Object.values(state.dias), si = all.reduce((a, v) => a + (v.fomoSi || 0), 0), tot = si + all.reduce((a, v) => a + (v.fomoNo || 0), 0);
+  $('#week-sum').innerHTML = `Enfoque <b>${fmtMin(sum('enfoque'))}</b> · Iniciativas <b>${sum('iniciativas')}</b> · Resististe <b>${sum('resistidas') + sum('alternativas')}</b> · Aperturas <b>${sum('aperturas')}</b> · Distracciones <b>~${fmtMin(sum('distraccion'))}</b>
+    ${sesgo() ? `<br>${sesgoTxt(sesgo())}` : ''}
+    ${tot ? `<br>Prueba de realidad: en <b>${si} de ${tot}</b> aperturas había algo importante (${Math.round(si / tot * 100)} %). El resto era miedo a perderse algo.` : ''}`;
 }
 
 // ---------- Hojas, avisos
@@ -451,8 +516,11 @@ function alternativas(titulo, sub) {
   const p = pendientes();
   const hs = (p?.habits || []).slice(0, 2);
   const alts = [...state.alternativas].sort(() => Math.random() - .5).slice(0, 3);
+  const per = personasDue()[0], pro = proyectosActivos().find(x => x.paso);
   showSheet(`<h2>${esc(titulo)}</h2><p class="note">${esc(sub)}</p>
     <div class="rows">
+      ${per ? `<button class="row" data-alt-per="${esc(per.id)}"><span class="dot" style="--c:var(--green)"></span><span class="t"><div>Escríbele a ${esc(per.nombre)}</div><small>Contacto real en vez de mirar perfiles · ${fmtDias(daysSince(per.ultimo))}</small></span></button>` : ''}
+      ${pro ? `<button class="row" data-alt-pro="${esc(pro.id)}"><span class="dot" style="--c:var(--accent)"></span><span class="t"><div>${esc(pro.paso)}</div><small>Siguiente paso de «${esc(pro.nombre)}»</small></span></button>` : ''}
       ${hs.map(h => `<button class="row" data-alt-h="${esc(h.id)}" style="${h.color ? `--c:${esc(h.color)}` : ''}"><span class="dot"></span>
         <span class="t"><div>${esc(h.minima || h.nombre)}</div><small>${h.minima ? `Versión de 2 min de «${esc(h.nombre)}»` : 'Hábito pendiente de hoy'}</small></span></button>`).join('')}
       ${alts.map(a => `<button class="row" data-alt="${esc(a)}"><span class="box" style="border-radius:4px"></span><span class="t"><div>${esc(a)}</div></span></button>`).join('')}
@@ -467,6 +535,8 @@ function alternativas(titulo, sub) {
     habitSheet(h, true);
   });
   $('#sheet-body').querySelector('[data-alt-focus]').onclick = () => focusForm();
+  $('#sheet-body').querySelector('[data-alt-per]')?.addEventListener('click', () => personaSheet(per));
+  $('#sheet-body').querySelector('[data-alt-pro]')?.addEventListener('click', () => proyectoSheet(pro));
 }
 
 // ---------- Ficha de un hábito o tarea del Habit Tracker
@@ -502,10 +572,10 @@ $('#pend').addEventListener('click', e => {
 });
 
 // ---------- Sesión de enfoque
-function focusForm(que = '', min = 25) {
+function focusForm(que = '', min = 25, pro = '') {
   const p = pendientes();
   const sug = p ? [...p.habits.map(h => h.nombre), ...p.due.map(x => x.titulo), ...p.sinFecha.slice(0, 8).map(x => x.titulo)] : [];
-  if (!MINUTOS_ENFOQUE.includes(min)) min = Math.max(5, Math.min(180, Math.round(+min || 25)));
+  if (!MINUTOS_ENFOQUE.includes(min)) min = Math.max(2, Math.min(180, Math.round(+min || 25)));
   const opts = [...new Set([...MINUTOS_ENFOQUE, min])].sort((a, b) => a - b);
   showSheet(`<h2>Sesión de enfoque</h2>
     <div class="field"><label>¿En qué?</label><input id="f-que" maxlength="80" value="${esc(que)}" placeholder="Una sola cosa" list="f-sug">
@@ -516,11 +586,11 @@ function focusForm(que = '', min = 25) {
   let chosen = min;
   $('#f-min').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; chosen = +c.dataset.m; $('#f-min').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c)); });
   $('#f-cancel').onclick = closeSheet;
-  $('#f-go').onclick = () => { closeSheet(); startFocus($('#f-que').value.trim(), chosen); };
+  $('#f-go').onclick = () => { closeSheet(); startFocus($('#f-que').value.trim(), chosen, pro); };
 }
 let focusTick = 0;
-function startFocus(que, min) {
-  state.sesion = { inicio: Date.now(), min, que, ints: 0, fuera: 0 };
+function startFocus(que, min, pro = '') {
+  state.sesion = { inicio: Date.now(), min, que, pro, ints: 0, fuera: 0 };
   save(); showFocus(); buzz(15);
 }
 function focusLeft() { const s = state.sesion; return s ? s.min * 60 - (Date.now() - s.inicio) / 1000 : 0; }
@@ -529,6 +599,7 @@ function showFocus() {
   $('#focus-body').innerHTML = `
     <p class="lead">${s.que ? 'Enfocado en' : 'Sesión de enfoque'}</p>
     ${s.que ? `<p class="focus-what">${esc(s.que)}</p>` : ''}
+    ${state.proyectos.find(x => x.id === s.pro)?.recompensa ? `<p class="meta" style="margin:0">Mientras tanto: ${esc(state.proyectos.find(x => x.id === s.pro).recompensa)}</p>` : ''}
     <div class="ring" id="ring"><p class="count" id="f-left"></p></div>
     <p class="lead" id="f-ints"></p>
     <p class="note">Bloquea el teléfono y déjalo boca abajo.</p>
@@ -560,15 +631,20 @@ function finishFocus(completa) {
   state.sesion = null; save();
   $('#focus').hidden = true; renderAll();
   if (completa) buzz([60, 80, 60, 80, 120]);
+  const pr = state.proyectos.find(x => x.id === s.pro);
   showSheet(`<h2>${completa ? 'Sesión completa' : 'Sesión terminada'}</h2>
     <p class="note">${fmtMin(mins)} de enfoque${s.que ? ` en «${esc(s.que)}»` : ''} · ${s.ints ? `${s.ints} ${s.ints === 1 ? 'interrupción' : 'interrupciones'}` : 'sin interrupciones'}. Hoy llevas ${fmtMin(dayOf(k).enfoque)}.</p>
     ${s.ints === 0 && completa ? `<p class="meta green">Ni una mirada al teléfono. Así se entrena la atención.</p>` : ''}
     <div class="actions stack">
-      ${s.que ? `<a class="primary" style="text-align:center;text-decoration:none" href="${HT_URL}" target="_blank" rel="noopener">Marcarlo en el Habit Tracker</a>` : ''}
+      ${pr ? `<div class="field" style="margin:0"><label>¿Dónde lo dejas? (la siguiente frase o línea, para retomarlo sin esfuerzo)</label><input id="fr-nota" maxlength="120" value="${esc(pr.nota)}"></div>
+        <button class="primary" id="fr-step">Paso hecho: definir el siguiente</button><button class="outline" id="fr-keep">Sigue pendiente: guardar nota</button>` : s.que ? `<a class="primary btn" href="${HT_URL}" target="_blank" rel="noopener">Marcarlo en el Habit Tracker</a>` : ''}
       <button class="${s.que ? 'link' : 'primary'}" id="fr-again">Otra sesión</button>
       <button class="link" id="fr-close">Cerrar</button>
     </div>`);
-  $('#fr-again').onclick = () => focusForm(s.que, s.min);
+  $('#fr-again').onclick = () => focusForm(s.que, s.min, s.pro);
+  const nota = () => { if (pr && $('#fr-nota')) { pr.nota = $('#fr-nota').value.trim(); bump('pasos', 0); save(); } };
+  $('#fr-step')?.addEventListener('click', () => { nota(); pasoHecho(pr); });
+  $('#fr-keep')?.addEventListener('click', () => { nota(); closeSheet(); renderAll(); toast('Nota guardada: mañana empiezas por ahí.'); });
   $('#fr-close').onclick = closeSheet;
 }
 
@@ -576,7 +652,8 @@ function finishFocus(completa) {
 function appPicker() {
   const d = dayOf(), wait = gateWait();
   showSheet(`<h2>¿Qué quieres abrir?</h2>
-    <p class="note">Aperturas hoy: ${d.aperturas} de ${state.limite}. La próxima espera es de ${fmtSec(wait)}${d.aperturas >= state.limite ? ' y tendrás que escribir una frase' : ''}.</p>
+    <p class="note">Aperturas hoy: ${d.aperturas} de ${state.limite} · ${d.distraccion} de ${state.presupuesto} min. La próxima espera es de ${fmtSec(wait)}${sobreLimite() ? ' y tendrás que escribir una frase' : ''}.</p>
+    <p class="sci">${enVentana() ? `Estás en tu ventana de revisión hasta las ${fmtHora(addMin(enVentana(), state.ventanaMin))}.` : `Fuera de tu ventana de revisión: la espera es el doble. La próxima es a las ${fmtHora(proximaVentana())}; lo que hay ahí seguirá ahí.`}</p>
     <div class="rows">${state.apps.map(a => `<button class="row" data-app="${esc(a.id)}"><span class="dot"></span><span class="t"><div>${esc(a.nombre)}</div></span><span class="tag">›</span></button>`).join('')}</div>
     ${state.apps.length ? '' : `<p class="empty">Añade tus apps en Ajustes.</p>`}
     <div class="actions"><button class="link" id="ap-close">Mejor no</button></div>`);
@@ -584,7 +661,13 @@ function appPicker() {
   $('#sheet-body').querySelectorAll('[data-app]').forEach(b => b.onclick = () => { closeSheet(); openGate(state.apps.find(a => a.id === b.dataset.app)); });
 }
 // Cada apertura del día duplica la espera: 10 s, 20 s, 40 s… hasta 3 minutos.
-const gateWait = () => Math.min(180, state.espera * 2 ** dayOf().aperturas);
+// Fuera de las ventanas de revisión la espera es el doble (revisar por lotes, no a cada rato).
+const gateWait = () => Math.min(240, state.espera * 2 ** dayOf().aperturas * (enVentana() ? 1 : 2));
+const toMin = hhmm => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+function enVentana() { const n = nowMin(); return state.ventanas.find(v => n >= toMin(v) && n < toMin(v) + state.ventanaMin) || ''; }
+function proximaVentana() { const n = nowMin(), vs = [...state.ventanas].sort(); return vs.find(v => toMin(v) > n) || vs[0]; }
+const sobreLimite = () => { const d = dayOf(); return d.aperturas >= state.limite || d.distraccion >= state.presupuesto; };
 let gate = null;
 function openGate(app) {
   if (!app) return;
@@ -596,10 +679,14 @@ function openGate(app) {
     <div class="breath"><span id="g-br">Inhala</span></div>
     <p class="count" id="g-count"></p>
     ${why ? `<div class="why">${why}</div>` : ''}
-    <p class="note" style="margin:0">Si sales de esta pantalla, la espera vuelve a empezar.</p>
+    <p class="note" style="margin:0">${enVentana() ? '' : `Fuera de tu ventana de revisión (próxima: ${fmtHora(proximaVentana())}). `}Si sales de esta pantalla, la espera vuelve a empezar.</p>
     <button class="primary wide" id="g-no">Mejor no</button>`;
   $('#gate').hidden = false;
   $('#g-no').onclick = () => gateNo();
+  $('#gate-body').querySelector('[data-gate-per]')?.addEventListener('click', e => {
+    const per = state.personas.find(p => p.id === e.target.dataset.gatePer);
+    bump('resistidas'); save(); closeGate(); renderAll(); personaSheet(per);
+  });
   clearInterval(gate.tick);
   let phase = 0;
   gate.breath = setInterval(() => { const el = $('#g-br'); if (el) el.textContent = (phase = 1 - phase) ? 'Exhala' : 'Inhala'; }, 4000);
@@ -612,13 +699,16 @@ function paintGate() {
   gate.listo = true; clearInterval(gate.tick); gateChoice();
 }
 function gateChoice() {
-  const d = dayOf(), over = d.aperturas >= state.limite, app = gate.app;
+  const d = dayOf(), over = sobreLimite(), app = gate.app;
   let min = 10;
   $('#gate-body').innerHTML = `
     <h2>¿Todavía quieres abrir ${esc(app.nombre)}?</h2>
-    <p class="lead">Aperturas hoy: ${d.aperturas} de ${state.limite}</p>
+    <p class="lead">Aperturas hoy: ${d.aperturas} de ${state.limite} · Te quedan ${Math.max(0, state.presupuesto - d.distraccion)} de ${state.presupuesto} min</p>
     ${over ? `<p class="lead red">Superaste tu límite de hoy. Para seguir, escribe: <b class="red">${FRASE}</b></p>
       <div class="field" style="width:100%"><input id="g-phrase" autocomplete="off" autocapitalize="sentences" placeholder="${FRASE}"></div>` : ''}
+    <div class="field" style="width:100%"><label style="text-align:left">¿Para qué entras?</label>
+      <div class="chips" id="g-modo"><button class="chip on" data-m="hablar">Hablar con alguien o publicar</button><button class="chip" data-m="mirar">Solo mirar</button></div>
+      <p class="meta" id="g-modo-note" style="text-align:left;margin:8px 0 0"></p></div>
     <div class="field" style="width:100%"><label style="text-align:left">¿Por cuánto tiempo?</label>
       <div class="chips" id="g-min">${MINUTOS_SALIDA.map(m => `<button class="chip${m === min ? ' on' : ''}" data-m="${m}">${m} min</button>`).join('')}</div></div>
     <button class="primary wide" id="g-no">Mejor no</button>
@@ -628,13 +718,19 @@ function gateChoice() {
     $('#g-min').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c));
     $('#g-yes').textContent = `Abrir ${app.nombre} ${min} min`;
   });
+  let modo = 'hablar';
+  $('#g-modo').addEventListener('click', e => {
+    const c = e.target.closest('.chip'); if (!c) return; modo = c.dataset.m;
+    $('#g-modo').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c));
+    $('#g-modo-note').textContent = modo === 'mirar' ? 'Mirar sin interactuar es el uso que más se asocia a envidia y peor ánimo (Verduyn et al., 2015). ¿Y si le escribes a alguien en vez de mirar su perfil?' : '';
+  });
   $('#g-phrase')?.addEventListener('input', e => {
     const ok = e.target.value.trim().toLowerCase() === FRASE.toLowerCase();
     $('#g-yes').disabled = !ok; $('#g-yes').style.opacity = ok ? '' : '.4';
   });
   $('#g-no').onclick = () => gateNo();
   $('#g-yes').onclick = () => {
-    bump('aperturas'); state.salida = { app: app.nombre, en: Date.now(), min }; save();
+    bump('aperturas'); state.salida = { app: app.nombre, en: Date.now(), min, modo }; save();
     closeGate(); renderAll();
     salidaOculta = false;
     // Con «noopener» window.open siempre devuelve null, así que se corta el vínculo a mano.
@@ -663,13 +759,431 @@ function checkSalida(force = false) {
   showSheet(`<h2>Volviste de ${esc(s.app)}</h2>
     <p class="note">${medido ? `Estuviste fuera unos ${fmtMin(real)}; planeaste ${fmtMin(s.min)}.` : 'No se pudo medir: pasaron más de 4 horas. Se cuentan los minutos que planeaste.'}</p>
     ${medido && extra > 1 ? `<p class="meta red">Te pasaste ${fmtMin(extra)}. La próxima espera será de ${fmtSec(gateWait())}.</p>` : medido ? `<p class="meta green">Cumpliste lo que planeaste.</p>` : ''}
-    <div class="actions stack">
-      <button class="primary" id="sv-focus">Ahora, una sesión de enfoque</button>
-      <button class="link" id="sv-close">Cerrar</button>
-    </div>`);
-  $('#sv-focus').onclick = () => focusForm();
-  $('#sv-close').onclick = closeSheet;
+    <h3 style="margin-top:20px">Prueba de realidad</h3>
+    <p style="margin:0 0 12px">¿Había algo que de verdad te habrías perdido?</p>
+    <div class="chips"><button class="chip" data-fomo="si">Sí, algo importante</button><button class="chip" data-fomo="no">No, nada importante</button></div>
+    <div id="sv-after"></div>`);
+  $('#sheet-body').querySelectorAll('[data-fomo]').forEach(b => b.onclick = () => {
+    bump(b.dataset.fomo === 'si' ? 'fomoSi' : 'fomoNo', 1, k); save(); renderAll();
+    const all = Object.values(state.dias), si = all.reduce((a, v) => a + (v.fomoSi || 0), 0), tot = si + all.reduce((a, v) => a + (v.fomoNo || 0), 0);
+    $('#sheet-body').querySelector('.chips').outerHTML = `<p class="meta">Hasta ahora, en <b style="color:var(--text)">${tot - si} de ${tot}</b> aperturas no había nada importante. El miedo a perderse algo es una predicción; tus datos dicen otra cosa.</p>`;
+    $('#sv-after').innerHTML = `<div class="actions stack">
+      ${personasDue()[0] ? `<button class="primary" id="sv-per">Escríbele a ${esc(personasDue()[0].nombre)}</button>` : ''}
+      <button class="${personasDue()[0] ? 'outline' : 'primary'}" id="sv-focus">Ahora, una sesión de enfoque</button>
+      <button class="link" id="sv-close">Cerrar</button></div>`;
+    $('#sv-per')?.addEventListener('click', () => personaSheet(personasDue()[0]));
+    $('#sv-focus').onclick = () => focusForm();
+    $('#sv-close').onclick = closeSheet;
+  });
 }
+
+// ---------- Tomar la iniciativa: personas, planes y proyectos
+const daysSince = d => d ? Math.round((new Date(today() + 'T12:00') - new Date(d + 'T12:00')) / 864e5) : Infinity;
+const fmtDias = n => n === Infinity ? 'sin registro' : n === 0 ? 'hoy' : n === 1 ? 'ayer' : `hace ${n} días`;
+const addMin = (hhmm, m) => { const t = (toMin(hhmm) + m) % 1440; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
+const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+const fechaLarga = f => new Date(f + 'T12:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+// A quién le toca: cuanto más se pasó de la frecuencia que elegiste, antes sale.
+function personasDue() {
+  return state.personas.map(p => ({ p, r: daysSince(p.ultimo) / p.cada })).filter(x => x.r >= 1).sort((a, b) => b.r - a.r).map(x => x.p);
+}
+const ultimoPaso = pr => pr.pasos.length ? pr.pasos[pr.pasos.length - 1].d : pr.creado;
+const proyectosActivos = () => state.proyectos.filter(p => !p.archivado).sort((a, b) => ultimoPaso(a) < ultimoPaso(b) ? -1 : ultimoPaso(a) > ultimoPaso(b) ? 1 : 0);
+const planesProximos = () => state.planes.filter(p => !p.hecho && p.fecha >= today()).sort((a, b) => (a.fecha + a.hora) < (b.fecha + b.hora) ? -1 : 1);
+const planesSinCerrar = () => state.planes.filter(p => !p.hecho && p.fecha < today());
+// Semana de lunes a hoy.
+const semanaKeys = () => { const back = wd(today()); return Array.from({ length: back + 1 }, (_, i) => dayKey(addDays(new Date(), i - back))); };
+const iniciativasSemana = () => semanaKeys().reduce((a, k) => a + dayOf(k).iniciativas, 0);
+// Predicción frente a resultado: cuánto más pesimista eres que la realidad.
+function sesgo() {
+  const xs = state.predicciones.filter(x => x.real); if (!xs.length) return null;
+  return { n: xs.length, d: xs.reduce((a, x) => a + x.real - x.pred, 0) / xs.length };
+}
+const sesgoTxt = b => b && b.n >= 1 ? (b.d > 0.2 ? `Tus predicciones fueron, de media, <b>${b.d.toFixed(1).replace('.', ',')} puntos más pesimistas</b> que la realidad (${b.n} ${b.n === 1 ? 'contacto' : 'contactos'}).` : b.d < -0.2 ? `La realidad fue ${(-b.d).toFixed(1).replace('.', ',')} puntos peor de lo que esperabas (${b.n}). Sigue: la media se ajusta con más contactos.` : `Tus predicciones aciertan con la realidad (${b.n}).`) : '';
+
+function renderIni() {
+  const due = personasDue(), prs = proyectosActivos(), prox = planesProximos(), cerrar = planesSinCerrar();
+  const n = iniciativasSemana(), meta = state.metaSemanal, rows = [];
+  for (const pl of cerrar.slice(0, 1)) rows.push(`<button class="row" data-plan="${esc(pl.id)}"><span class="dot" style="--c:var(--amber)"></span>
+    <span class="t"><div>¿Se hizo «${esc(cap(pl.titulo))}»?</div><small>${fmtFecha(pl.fecha)}${pl.con ? ' · con ' + esc(pl.con) : ''}</small></span><span class="tag">Cerrar</span></button>`);
+  for (const p of state.personas.filter(p => p.pred?.enviado).slice(0, 1)) rows.push(`<button class="row" data-per="${esc(p.id)}"><span class="dot" style="--c:var(--amber)"></span>
+    <span class="t"><div>¿Cómo respondió ${esc(p.nombre)}?</div><small>Compara con lo que predijiste</small></span><span class="tag">Resultado</span></button>`);
+  for (const p of due.filter(p => !p.pred?.enviado).slice(0, 2)) rows.push(`<button class="row" data-per="${esc(p.id)}"><span class="dot" style="--c:var(--green)"></span>
+    <span class="t"><div>Escríbele a ${esc(p.nombre)}</div><small>Último contacto: ${fmtDias(daysSince(p.ultimo))}</small></span><span class="tag">Contacto</span></button>`);
+  for (const pr of prs.slice(0, 2)) {
+    const d = daysSince(ultimoPaso(pr));
+    rows.push(`<button class="row" data-pro="${esc(pr.id)}"><span class="dot" style="--c:var(--accent)"></span>
+      <span class="t"><div>${esc(pr.paso || 'Define el siguiente paso')}</div><small>${esc(pr.nombre)}${pr.cuando ? ` · ${fmtFecha(pr.cuando)}${pr.hora ? ' ' + fmtHora(pr.hora) : ''}` : ''}${d >= 7 ? ` · <span class="amber">sin avanzar ${fmtDias(d)}</span>` : ''}</small></span><span class="tag">Proyecto</span></button>`);
+  }
+  for (const pl of prox.slice(0, 2)) rows.push(`<button class="row" data-plan="${esc(pl.id)}"><span class="dot" style="--c:var(--muted)"></span>
+    <span class="t"><div>${esc(cap(pl.titulo))}${pl.con ? ' con ' + esc(pl.con) : ''}</div><small>${fmtFecha(pl.fecha)} · ${fmtHora(pl.hora)}</small></span><span class="tag">Plan</span></button>`);
+  const hoyD = new Date(), nuevo = (wd(today()) === 0 || hoyD.getDate() === 1) && state.revision !== today();
+  const revisionRow = nuevo || wd(today()) === 6 ? `<button class="row" data-man="revision"><span class="dot" style="--c:var(--accent)"></span>
+    <span class="t"><div>${nuevo ? 'Nuevo comienzo: revisión semanal' : 'Revisión semanal'}</div><small>10 minutos: logros, siguientes pasos y bloques de la semana</small></span><span class="tag">${hoyD.getDate() === 1 ? 'Mes nuevo' : wd(today()) === 0 ? 'Lunes' : 'Domingo'}</span></button>` : '';
+  if (revisionRow) rows.unshift(revisionRow);
+  $('#ini').innerHTML = `
+    <div class="meter"><span>Iniciativas esta semana</span><b>${n} de ${meta}</b></div>
+    <div class="meter-bar"><i style="width:${Math.min(100, n / meta * 100)}%"></i></div>
+    ${rows.length ? `<div class="rows">${rows.join('')}</div>` : `<p class="empty">Añade a las personas con las que quieres mantener el contacto y tus proyectos. Aquí aparecerá, cada día, a quién escribir y el siguiente paso de cada proyecto.</p>`}
+    <p class="more"><button class="link" data-man="revision">Revisión semanal</button> · <button class="link" data-man="personas">Personas (${state.personas.length})</button> · <button class="link" data-man="proyectos">Proyectos (${prs.length})</button> · <button class="link" data-man="plan">Proponer un plan</button></p>`;
+}
+$('#ini').addEventListener('click', e => {
+  const b = e.target.closest('[data-per],[data-pro],[data-plan],[data-man]'); if (!b) return;
+  if (b.dataset.per) personaSheet(state.personas.find(p => p.id === b.dataset.per));
+  if (b.dataset.pro) proyectoSheet(state.proyectos.find(p => p.id === b.dataset.pro));
+  if (b.dataset.plan) planSheet(state.planes.find(p => p.id === b.dataset.plan));
+  if (b.dataset.man === 'personas') personasManager();
+  if (b.dataset.man === 'proyectos') proyectosManager();
+  if (b.dataset.man === 'plan') planForm();
+  if (b.dataset.man === 'revision') revisionSemanal();
+});
+
+// Personas
+function registrar(p, tipo) {
+  const t = today(), repetido = p.historial.some(h => h.d === t && h.tipo === tipo);
+  p.ultimo = t;
+  if (p.pred && !p.pred.enviado) p.pred.enviado = true;
+  if (!repetido) { p.historial.push({ d: t, tipo }); p.historial = p.historial.slice(-30); bump('iniciativas'); }
+  save(); renderAll();
+}
+function personasManager() {
+  const list = [...state.personas].sort((a, b) => daysSince(b.ultimo) / b.cada - daysSince(a.ultimo) / a.cada);
+  showSheet(`<h2>Personas</h2>
+    <p class="sci">Las personas a las que escribes valoran tu mensaje más de lo que crees, sobre todo si es inesperado (Liu et al., 2023). Elige con quién quieres mantener el contacto y en qué círculo está.</p>
+    ${sesgo() ? `<p class="meta">${sesgoTxt(sesgo())}</p>` : ''}
+    <div class="rows">${list.map(p => `<button class="row" data-p="${esc(p.id)}"><span class="dot" style="--c:${daysSince(p.ultimo) >= p.cada ? 'var(--green)' : 'var(--empty)'}"></span>
+      <span class="t"><div>${esc(p.nombre)}</div><small>${CADA[p.cada] || ''} · último contacto ${fmtDias(daysSince(p.ultimo))}</small></span></button>`).join('')}</div>
+    ${list.length ? '' : '<p class="empty">Aún no hay nadie.</p>'}
+    <div class="actions"><button class="link" id="pm-close">Cerrar</button><button class="primary" id="pm-add">Añadir persona</button></div>`);
+  $('#sheet-body').querySelectorAll('[data-p]').forEach(b => b.onclick = () => personaSheet(state.personas.find(p => p.id === b.dataset.p)));
+  $('#pm-add').onclick = () => personaForm();
+  $('#pm-close').onclick = closeSheet;
+}
+function personaForm(p = null) {
+  showSheet(`<h2>${p ? 'Editar' : 'Añadir'} persona</h2>
+    <div class="field"><label>Nombre</label><input id="pf-n" maxlength="40" value="${esc(p?.nombre)}" placeholder="Ana"></div>
+    <div class="field"><label>Teléfono con código de país (opcional)</label><input id="pf-t" inputmode="tel" value="${esc(p?.tel)}" placeholder="58 412 1234567"></div>
+    <div class="field"><label>Círculo y frecuencia de contacto</label><select id="pf-c">${Object.entries(CADA).map(([k, v]) => `<option value="${k}" ${+k === (p?.cada || 30) ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+    <div class="actions">${p ? '<button class="link red" id="pf-del">Eliminar</button>' : ''}<button class="link" id="pf-cancel">Cancelar</button><button class="primary" id="pf-ok">Guardar</button></div>`);
+  $('#pf-n').focus();
+  $('#pf-cancel').onclick = () => p ? personaSheet(p) : personasManager();
+  $('#pf-del')?.addEventListener('click', () => { state.personas = state.personas.filter(x => x !== p); save(); renderAll(); personasManager(); });
+  $('#pf-ok').onclick = () => {
+    const nombre = $('#pf-n').value.trim(); if (!nombre) { $('#pf-n').focus(); return; }
+    const data = { nombre, tel: $('#pf-t').value.trim(), cada: +$('#pf-c').value };
+    if (p) Object.assign(p, data); else state.personas.push(p = { id: crypto.randomUUID(), ultimo: '', historial: [], ...data });
+    save(); renderAll(); personaSheet(p);
+  };
+}
+function personaSheet(p) {
+  if (!p) return;
+  const tel = p.tel.replace(/\D/g, '');
+  if (p.pred?.enviado) {
+    showSheet(`<h2>¿Cómo respondió ${esc(p.nombre)}?</h2>
+      <p class="note">Predijiste que lo valoraría un ${p.pred.v} de 7. ¿Cuánto lo valoró de verdad?</p>
+      <div class="chips" id="pr-real">${[1, 2, 3, 4, 5, 6, 7].map(n => `<button class="chip" data-v="${n}">${n}</button>`).join('')}</div>
+      <p class="meta" style="margin-top:8px">1 = nada · 7 = muchísimo</p>
+      <div class="actions"><button class="link" id="pr-skip">Aún no respondió</button></div>`);
+    $('#pr-real').addEventListener('click', e => {
+      const c = e.target.closest('.chip'); if (!c) return;
+      state.predicciones.push({ d: today(), quien: p.nombre, pred: p.pred.v, real: +c.dataset.v }); state.predicciones = state.predicciones.slice(-200);
+      delete p.pred; save(); renderAll();
+      showSheet(`<h2>Anotado</h2><p class="note">${sesgoTxt(sesgo())}</p>
+        <p class="sci">Corregir las predicciones pesimistas sobre los demás es lo que mejor funciona contra la soledad (Masi et al., 2011).</p>
+        <div class="actions"><button class="primary" id="pr-ok">Listo</button></div>`);
+      $('#pr-ok').onclick = closeSheet;
+    });
+    $('#pr-skip').onclick = () => { delete p.pred; save(); renderAll(); personaSheet(p); };
+    return;
+  }
+  showSheet(`<h2>${esc(p.nombre)}</h2>
+    <p class="note">Último contacto: ${fmtDias(daysSince(p.ultimo))} · ${CADA[p.cada] || ''}.</p>
+    <p class="sci">Quien recibe un mensaje inesperado lo valora más de lo que predice quien lo envía (Liu et al., 2023), y agradecer causa más alegría de la que imaginamos (Kumar y Epley, 2018).</p>
+    <div class="field"><label>Mensaje</label><div class="chips" id="pe-tpl" style="margin-bottom:8px">${Object.keys(PLANTILLAS).map((k, i) => `<button class="chip${i ? '' : ' on'}" data-t="${k}">${k}</button>`).join('')}</div>
+      <textarea id="pe-txt" style="min-height:84px">${esc(PLANTILLAS.Saludo(p.nombre))}</textarea></div>
+    <div class="field"><label>Antes de enviarlo: ¿cuánto crees que lo valorará? (1–7)</label>
+      <div class="chips" id="pe-pred">${[1, 2, 3, 4, 5, 6, 7].map(n => `<button class="chip${p.pred?.v === n ? ' on' : ''}" data-v="${n}">${n}</button>`).join('')}</div></div>
+    <div class="actions stack" style="margin-top:0">
+      <a class="primary btn" href="#" target="_blank" rel="noopener" id="pe-wa">Enviar por WhatsApp</a>
+      ${tel ? `<a class="outline btn" href="tel:+${tel}" data-log="Llamada">Llamar</a>` : ''}
+      <button class="outline" id="pe-plan">Proponer un plan</button>
+    </div>
+    <div class="field" style="margin-top:22px"><label>Registrar lo que hiciste</label><div class="chips">${TIPOS.map(t => `<button class="chip" data-reg="${t}">${t}</button>`).join('')}</div></div>
+    ${p.historial.length ? `<p class="meta">${p.historial.slice(-4).reverse().map(h => `${esc(h.tipo)} · ${fmtFecha(h.d)}`).join('<br>')}</p>` : ''}
+    <div class="actions"><button class="link" id="pe-edit">Editar</button><button class="link" id="pe-all">Todas las personas</button></div>`);
+  const body = $('#sheet-body');
+  let tipo = 'Saludo';
+  const wa = () => { $('#pe-wa').href = `https://wa.me/${tel}?text=${encodeURIComponent($('#pe-txt').value)}`; };
+  wa(); $('#pe-txt').addEventListener('input', wa);
+  $('#pe-tpl').addEventListener('click', e => {
+    const c = e.target.closest('.chip'); if (!c) return; tipo = c.dataset.t;
+    $('#pe-tpl').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c));
+    $('#pe-txt').value = PLANTILLAS[tipo](p.nombre); wa();
+  });
+  $('#pe-pred').addEventListener('click', e => {
+    const c = e.target.closest('.chip'); if (!c) return;
+    p.pred = { v: +c.dataset.v, d: today(), enviado: false }; save();
+    $('#pe-pred').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c));
+  });
+  $('#pe-wa').addEventListener('click', () => { registrar(p, tipo === 'Gracias' ? 'Gracias' : tipo === 'Plan' ? 'Plan' : 'Mensaje'); toast('Registrado. Bien por escribir primero.'); });
+  body.querySelectorAll('[data-log]').forEach(a => a.addEventListener('click', () => { registrar(p, a.dataset.log); toast('Registrado. Bien por tomar la iniciativa.'); }));
+  body.querySelectorAll('[data-reg]').forEach(b => b.onclick = () => { registrar(p, b.dataset.reg); closeSheet(); buzz(20); toast(`${b.dataset.reg} con ${p.nombre}: registrado.`); });
+  $('#pe-plan').onclick = () => planForm(p.nombre);
+  $('#pe-edit').onclick = () => personaForm(p);
+  $('#pe-all').onclick = personasManager;
+}
+
+// Planes
+function planForm(con = '') {
+  const man = dayKey(addDays(new Date(), 1));
+  showSheet(`<h2>Proponer un plan</h2>
+    <p class="sci">Predecimos que hablar con otros será más incómodo y menos agradable de lo que resulta (Epley y Schroeder, 2014). Quien propone día y hora es quien hace que el plan ocurra.</p>
+    <div class="field"><label>¿Qué?</label><input id="pl-t" maxlength="60" placeholder="tomar un café">
+      <div class="chips" style="margin-top:10px" id="pl-ideas">${PLAN_IDEAS.map(i => `<button class="chip" data-i="${esc(i)}">${esc(cap(i))}</button>`).join('')}</div></div>
+    <div class="field"><label>¿Con quién?</label><input id="pl-c" maxlength="40" value="${esc(con)}" list="pl-people" placeholder="Nombre">
+      <datalist id="pl-people">${state.personas.map(p => `<option value="${esc(p.nombre)}">`).join('')}</datalist></div>
+    <div class="times"><div class="field"><label>Fecha</label><input id="pl-f" type="date" value="${man}" min="${today()}"></div>
+      <div class="field"><label>Hora</label><input id="pl-h" type="time" value="18:00"></div></div>
+    <div class="actions"><button class="link" id="pl-cancel">Cancelar</button><button class="primary" id="pl-ok">Guardar plan</button></div>`);
+  $('#pl-ideas').addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) $('#pl-t').value = c.dataset.i; });
+  $('#pl-cancel').onclick = closeSheet;
+  $('#pl-ok').onclick = () => {
+    const titulo = $('#pl-t').value.trim(), fecha = $('#pl-f').value, hora = $('#pl-h').value || '18:00';
+    if (!titulo) { $('#pl-t').focus(); return; }
+    if (!fecha) { $('#pl-f').focus(); return; }
+    const pl = { id: crypto.randomUUID(), titulo, con: $('#pl-c').value.trim(), fecha, hora, hecho: false };
+    state.planes.push(pl);
+    const per = state.personas.find(p => p.nombre.toLowerCase() === pl.con.toLowerCase());
+    if (per) registrar(per, 'Plan'); else { bump('iniciativas'); save(); renderAll(); }
+    planSheet(pl, true);
+  };
+}
+function planSheet(pl, nuevo = false) {
+  if (!pl) return;
+  const per = state.personas.find(p => p.nombre.toLowerCase() === (pl.con || '').toLowerCase());
+  const tel = per?.tel.replace(/\D/g, '') || '';
+  const texto = `Hola${pl.con ? `, ${pl.con}` : ''}. ¿Te animas a ${pl.titulo} el ${fechaLarga(pl.fecha)} a las ${fmtHora(pl.hora)}?`;
+  const ini = pl.fecha.replaceAll('-', '') + 'T' + pl.hora.replace(':', '') + '00';
+  const finD = new Date(`${pl.fecha}T${pl.hora}`); finD.setHours(finD.getHours() + 1);
+  const fin = dayKey(finD).replaceAll('-', '') + 'T' + String(finD.getHours()).padStart(2, '0') + String(finD.getMinutes()).padStart(2, '0') + '00';
+  const cal = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(cap(pl.titulo) + (pl.con ? ' con ' + pl.con : ''))}&dates=${ini}/${fin}`;
+  const pasado = pl.fecha < today();
+  showSheet(`<h2>${esc(cap(pl.titulo))}${pl.con ? ' con ' + esc(pl.con) : ''}</h2>
+    <p class="note">${cap(fechaLarga(pl.fecha))} · ${fmtHora(pl.hora)}${nuevo ? '. Ahora, envía la invitación y apártalo en el calendario.' : ''}</p>
+    ${pasado ? `<p style="margin:0 0 12px">¿Se hizo?</p><div class="chips"><button class="chip" data-done="si">Sí</button><button class="chip" data-done="no">No, se canceló</button></div>` : `
+    <div class="actions stack" style="margin-top:0">
+      <a class="primary btn" href="https://wa.me/${tel}?text=${encodeURIComponent(texto)}" target="_blank" rel="noopener">Enviar invitación por WhatsApp</a>
+      <a class="outline btn" href="${cal}" target="_blank" rel="noopener">Añadir a Google Calendar</a>
+    </div>
+    <h3>Para la conversación</h3>
+    <ul class="pros">${[...PREGUNTAS].sort(() => Math.random() - .5).slice(0, 3).map(q => `<li>${esc(q)}</li>`).join('')}</ul>
+    <p class="meta">Pasa pronto de lo superficial a lo profundo: resulta menos incómodo de lo que crees (Kardas et al., 2022). Haz preguntas de seguimiento y, ante una buena noticia, responde con entusiasmo y pregunta más (Gable et al., 2004).</p>`}
+    <div class="actions"><button class="link red" id="ps-del">Eliminar</button><button class="link" id="ps-close">Cerrar</button></div>`);
+  $('#sheet-body').querySelectorAll('[data-done]').forEach(b => b.onclick = () => {
+    pl.hecho = true; pl.resultado = b.dataset.done; save(); renderAll();
+    showSheet(b.dataset.done === 'si'
+      ? `<h2>Plan cumplido</h2><p class="note">Probablemente le caíste mejor de lo que piensas: después de conversar, casi todos subestimamos cuánto le gustamos a la otra persona (Boothby et al., 2018).</p>
+        <div class="actions stack"><button class="primary" id="pd-next">Proponer el siguiente encuentro</button><button class="link" id="pd-close">Cerrar</button></div>`
+      : `<h2>Se canceló</h2><p class="note">Pasa. Lo que cuenta es volver a proponerlo, con día y hora.</p>
+        <div class="actions stack"><button class="primary" id="pd-next">Proponer otra fecha</button><button class="link" id="pd-close">Cerrar</button></div>`);
+    $('#pd-next').onclick = () => planForm(pl.con);
+    $('#pd-close').onclick = closeSheet;
+  });
+  $('#ps-del').onclick = () => { state.planes = state.planes.filter(x => x !== pl); save(); renderAll(); closeSheet(); };
+  $('#ps-close').onclick = closeSheet;
+}
+
+// Proyectos: WOOP (deseo, resultado, obstáculo, plan si-entonces) y un siguiente paso siempre visible.
+function proyectosManager() {
+  const list = proyectosActivos(), arch = state.proyectos.filter(p => p.archivado);
+  showSheet(`<h2>Proyectos</h2>
+    <p class="sci">Cada proyecto vive de su siguiente paso: una acción física de menos de 25 minutos. Registrar los avances pequeños es lo que más sostiene la motivación (Amabile y Kramer, 2011).</p>
+    <div class="rows">${list.map(p => { const d = daysSince(ultimoPaso(p)); return `<button class="row" data-p="${esc(p.id)}"><span class="dot" style="--c:${d >= 7 ? 'var(--amber)' : 'var(--accent)'}"></span>
+      <span class="t"><div>${esc(p.nombre)}</div><small>${esc(p.paso || 'Sin siguiente paso')} · ${p.pasos.length} ${p.pasos.length === 1 ? 'paso' : 'pasos'}</small></span></button>`; }).join('')}</div>
+    ${list.length ? '' : '<p class="empty">Aún no hay proyectos.</p>'}
+    ${arch.length ? `<p class="meta" style="margin-top:12px">Terminados o archivados: ${arch.map(p => esc(p.nombre)).join(', ')}</p>` : ''}
+    <div class="actions"><button class="link" id="prm-close">Cerrar</button><button class="primary" id="prm-add">Nuevo proyecto</button></div>`);
+  $('#sheet-body').querySelectorAll('[data-p]').forEach(b => b.onclick = () => proyectoSheet(state.proyectos.find(p => p.id === b.dataset.p)));
+  $('#prm-add').onclick = () => proyectoForm();
+  $('#prm-close').onclick = closeSheet;
+}
+function proyectoForm(pr = null) {
+  showSheet(`<h2>${pr ? 'Editar proyecto' : 'Nuevo proyecto'}</h2>
+    <p class="sci">Método WOOP: imaginar el deseo y luego el obstáculo interno, con un plan «si…, entonces…», mejora el logro de metas más que solo visualizar el éxito (Oettingen; Gollwitzer y Sheeran, 2006).</p>
+    <div class="field"><label>Proyecto</label><input id="pr-n" maxlength="60" value="${esc(pr?.nombre)}" placeholder="Lanzar mi web"></div>
+    <div class="field"><label>Deseo: ¿qué quieres lograr? (medible y con fecha)</label><input id="pr-d" maxlength="120" value="${esc(pr?.deseo)}" placeholder="Tener la web publicada antes del 15 de diciembre"></div>
+    <div class="field"><label>Resultado: ¿qué es lo mejor que pasaría?</label><input id="pr-r" maxlength="120" value="${esc(pr?.resultado)}" placeholder="Recibir los primeros clientes"></div>
+    <div class="field"><label>Obstáculo: ¿qué en ti podría frenarte?</label><input id="pr-o" maxlength="120" value="${esc(pr?.obstaculo)}" placeholder="Abrir Instagram cuando me trabo"></div>
+    <div class="field"><label>Plan: si aparece ese obstáculo, entonces…</label><input id="pr-p" maxlength="120" value="${esc(pr?.plan)}" placeholder="Escribo la siguiente frase durante 2 minutos"></div>
+    <div class="field"><label>Siguiente paso (acción física, menos de 25 min)</label><input id="pr-s" maxlength="100" value="${esc(pr?.paso)}" placeholder="Escribir el texto de la portada"></div>
+    ${pasoCampos(pr)}
+    <div class="field"><label>Recompensa ligada (solo mientras trabajas en esto)</label><input id="pr-rw" maxlength="80" value="${esc(pr?.recompensa)}" placeholder="Mi podcast favorito, un café especial"></div>
+    <div class="actions">${pr ? `<button class="link" id="pr-arch">${pr.archivado ? 'Reactivar' : 'Archivar'}</button>` : ''}<button class="link" id="pr-cancel">Cancelar</button><button class="primary" id="pr-ok">Guardar</button></div>`);
+  $('#pr-n').focus();
+  $('#pr-cancel').onclick = () => pr ? proyectoSheet(pr) : proyectosManager();
+  $('#pr-arch')?.addEventListener('click', () => { pr.archivado = !pr.archivado; save(); renderAll(); proyectosManager(); });
+  $('#pr-ok').onclick = () => {
+    const nombre = $('#pr-n').value.trim(); if (!nombre) { $('#pr-n').focus(); return; }
+    const data = { nombre, deseo: $('#pr-d').value.trim(), resultado: $('#pr-r').value.trim(), obstaculo: $('#pr-o').value.trim(), plan: $('#pr-p').value.trim(), paso: $('#pr-s').value.trim(), recompensa: $('#pr-rw').value.trim(), ...leerPaso() };
+    if (pr) Object.assign(pr, data); else state.proyectos.push(pr = { id: crypto.randomUUID(), creado: today(), pasos: [], ...data });
+    save(); renderAll(); proyectoSheet(pr);
+  };
+}
+function proyectoSheet(pr) {
+  if (!pr) return;
+  const d = daysSince(ultimoPaso(pr));
+  showSheet(`<h2>${esc(pr.nombre)}</h2>
+    ${d >= 7 ? `<p class="meta amber">Sin avanzar ${fmtDias(d)}. Hoy basta con un paso pequeño.</p>` : ''}
+    <p class="meta" style="margin:0">Siguiente paso</p>
+    <p style="font-size:1.15rem;font-weight:500;margin:0 0 6px">${esc(pr.paso || 'Sin definir')}</p>
+    ${pr.paso && (pr.cuando || pr.donde) ? `<p class="meta" style="margin:0 0 6px">Si ${pr.cuando ? `es ${fechaLarga(pr.cuando)}${pr.hora ? ' a las ' + fmtHora(pr.hora) : ''}` : 'llega el momento'}${pr.donde ? ` en ${esc(pr.donde)}` : ''}, entonces: <b style="color:var(--text);font-weight:500">${esc(pr.paso)}</b>.</p>` : pr.paso ? `<p class="meta amber" style="margin:0 0 6px">Ponle día, hora y lugar: con fecha y hora concretas, el plan se cumple mucho más (Milkman et al., 2011).</p>` : ''}
+    ${pr.minima ? `<p class="meta" style="margin:0 0 6px">Versión de 2 minutos: ${esc(pr.minima)}</p>` : ''}
+    ${pr.nota ? `<p class="why" style="margin:8px 0">Lo dejaste en: ${esc(pr.nota)}</p>` : ''}
+    <div class="chain" style="display:flex;gap:4px;margin:10px 0 14px">${Array.from({ length: 14 }, (_, i) => dayKey(addDays(new Date(), i - 13))).map(k => `<i title="${k}" style="flex:1;height:8px;border-radius:2px;background:${pr.pasos.some(x => x.d === k) ? 'var(--accent)' : 'var(--empty)'}"></i>`).join('')}</div>
+    <dl class="woop">
+      ${pr.deseo ? `<dt>Deseo</dt><dd>${esc(pr.deseo)}</dd>` : ''}
+      ${pr.resultado ? `<dt>Resultado</dt><dd>${esc(pr.resultado)}</dd>` : ''}
+      ${pr.obstaculo ? `<dt>Obstáculo</dt><dd>${esc(pr.obstaculo)}</dd>` : ''}
+      ${pr.plan ? `<dt>Si aparece, entonces</dt><dd>${esc(pr.plan)}</dd>` : ''}
+    </dl>
+    <div class="actions stack">
+      ${pr.paso ? `<button class="primary" id="ps-focus">Hacerlo ahora · 25 min</button>
+        <a class="outline btn" target="_blank" rel="noopener" href="${calUrl(pr.paso + ' · ' + pr.nombre, pr.cuando || dayKey(addDays(new Date(), 1)), pr.hora || '09:00', 60, pr.donde)}">Agendar un bloque en Google Calendar</a>
+        <button class="outline" id="ps-done">Paso hecho</button>
+        <button class="link" id="ps-proc">Estoy procrastinando</button>` : `<button class="primary" id="ps-edit2">Definir el siguiente paso</button>`}
+    </div>
+    ${pr.pasos.length ? `<h3>Pequeñas victorias (${pr.pasos.length})</h3><p class="meta">${pr.pasos.slice(-5).reverse().map(x => `${esc(x.t)} · ${fmtFecha(x.d)}`).join('<br>')}</p>` : ''}
+    <div class="actions"><button class="link" id="ps-edit">Editar</button><button class="link" id="ps-all">Todos los proyectos</button></div>`);
+  $('#ps-focus')?.addEventListener('click', () => focusForm(pr.paso, 25, pr.id));
+  $('#ps-done')?.addEventListener('click', () => pasoHecho(pr));
+  $('#ps-proc')?.addEventListener('click', () => procrastinando(pr));
+  $('#ps-edit2')?.addEventListener('click', () => proyectoForm(pr));
+  $('#ps-edit').onclick = () => proyectoForm(pr);
+  $('#ps-all').onclick = proyectosManager;
+}
+function pasoHecho(pr) {
+  if (!pr) return;
+  showSheet(`<h2>Pequeña victoria</h2>
+    <p class="note">«${esc(pr.paso)}» queda hecho. Cada paso registrado cuenta como una iniciativa.</p>
+    <div class="field"><label>¿Cuál es el siguiente paso?</label><input id="ph-s" maxlength="100" placeholder="Una acción física de menos de 25 minutos"></div>
+    ${pasoCampos(null)}
+    <div class="actions"><button class="link" id="ph-cancel">Cancelar</button><button class="primary" id="ph-ok">Guardar</button></div>`);
+  $('#ph-s').focus();
+  $('#ph-cancel').onclick = () => proyectoSheet(pr);
+  $('#ph-ok').onclick = () => {
+    pr.pasos.push({ t: pr.paso, d: today() }); pr.pasos = pr.pasos.slice(-200);
+    pr.paso = $('#ph-s').value.trim(); Object.assign(pr, leerPaso()); pr.nota = '';
+    bump('pasos'); bump('iniciativas'); save(); renderAll(); buzz([30, 60, 30]);
+    proyectoSheet(pr); toast('Avance registrado.');
+  };
+}
+
+// Día, hora y lugar del siguiente paso: el plan «si…, entonces…» con fecha y hora concretas.
+function pasoCampos(pr) {
+  return `<div class="times"><div class="field"><label>¿Qué día?</label><input id="pp-c" type="date" value="${esc(pr?.cuando)}"></div>
+      <div class="field"><label>¿A qué hora?</label><input id="pp-h" type="time" value="${esc(pr?.hora)}"></div></div>
+    <div class="field"><label>¿Dónde?</label><input id="pp-d" maxlength="60" value="${esc(pr?.donde)}" placeholder="En mi escritorio"></div>
+    <div class="field"><label>Versión de 2 minutos (para los días difíciles)</label><input id="pp-m" maxlength="100" value="${esc(pr?.minima)}" placeholder="Abrir el documento y escribir el título"></div>`;
+}
+const leerPaso = () => ({ cuando: $('#pp-c').value, hora: $('#pp-h').value, donde: $('#pp-d').value.trim(), minima: $('#pp-m').value.trim() });
+function calUrl(texto, fecha, hora, mins, lugar = '') {
+  const a = new Date(`${fecha}T${hora}`), b = new Date(a.getTime() + mins * 60000);
+  const f = d => dayKey(d).replaceAll('-', '') + 'T' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + '00';
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(texto)}&dates=${f(a)}/${f(b)}${lugar ? '&location=' + encodeURIComponent(lugar) : ''}`;
+}
+// «Estoy procrastinando»: nombrar la emoción, reformular el pensamiento y empezar por 2 minutos (TCC + autocompasión).
+const TRABAS = {
+  'Miedo a hacerlo mal': 'Cambia «tiene que quedar perfecto» por «solo un borrador feo». Lo feo se corrige; lo que no existe, no.',
+  'No sé por dónde empezar': 'Eso indica que el paso es demasiado grande. Escribe la acción física más pequeña: abrir el archivo, escribir un título.',
+  'Aburrimiento': 'Liga la tarea a algo que disfrutes solo mientras la haces (música, un café) y ponle un tope de 10 minutos.',
+  'Cansancio': 'Haz la versión de 2 minutos. Actuar según el plan, no según el ánimo, suele subir la energía al empezar.',
+  'Me siento abrumado': 'Elige una sola cosa. Todo lo demás puede esperar 10 minutos.',
+};
+function procrastinando(pr) {
+  showSheet(`<h2>Estoy procrastinando</h2>
+    <p class="note">Le pasa a todo el mundo. Perdonarte la última vez reduce la procrastinación en la siguiente (Wohl et al., 2010). ¿Qué sientes ahora?</p>
+    <div class="rows">${Object.keys(TRABAS).map(t => `<button class="row" data-t="${esc(t)}"><span class="box"></span><span class="t"><div>${esc(t)}</div></span></button>`).join('')}</div>
+    <div class="actions"><button class="link" id="pc-close">Cerrar</button></div>`);
+  $('#pc-close').onclick = () => proyectoSheet(pr);
+  $('#sheet-body').querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
+    showSheet(`<h2>${esc(b.dataset.t)}</h2>
+      <p style="margin:0 0 14px">${esc(TRABAS[b.dataset.t])}</p>
+      <p class="sci">Las intervenciones basadas en terapia cognitivo-conductual son las que más reducen la procrastinación (Rozental et al., 2018; van Eerde y Klingsieck, 2018).</p>
+      <div class="field"><label>Lo más pequeño que puedes hacer ahora</label><input id="pc-min" maxlength="100" value="${esc(pr.minima || pr.paso)}"></div>
+      <div class="actions stack"><button class="primary" id="pc-go">Empezar 2 minutos</button><button class="link" id="pc-back">Volver</button></div>`);
+    $('#pc-go').onclick = () => { closeSheet(); startFocus($('#pc-min').value.trim() || pr.paso, 2, pr.id); };
+    $('#pc-back').onclick = () => procrastinando(pr);
+  });
+}
+// Revisión semanal: logros, proyectos sin siguiente paso y bloques para la semana. Los lunes y el día 1 se ofrece sola.
+function revisionSemanal() {
+  state.revision = today(); save();
+  const ks = Array.from({ length: 7 }, (_, i) => dayKey(addDays(new Date(), i - 6)));
+  const sum = f => ks.reduce((a, k) => a + dayOf(k)[f], 0);
+  const victorias = state.proyectos.flatMap(p => p.pasos.filter(x => ks.includes(x.d)).map(x => ({ ...x, p: p.nombre })));
+  const prs = proyectosActivos(), sinPaso = prs.filter(p => !p.paso), sinFecha = prs.filter(p => p.paso && !p.cuando);
+  const reporte = `Mi semana: ${fmtMin(sum('enfoque'))} de enfoque, ${sum('iniciativas')} iniciativas, ${victorias.length} pasos en proyectos${victorias.length ? ` (${victorias.slice(-3).map(v => v.t).join('; ')})` : ''}. Esta semana me comprometo a: ${prs.filter(p => p.paso).slice(0, 3).map(p => p.paso).join('; ') || '…'}.`;
+  showSheet(`<h2>Revisión semanal</h2>
+    <p class="note">Los comienzos (un lunes, un mes nuevo) son buen momento para retomar metas (Dai et al., 2014). Diez minutos bastan.</p>
+    <h3 style="margin-top:8px">1. Lo que lograste</h3>
+    <p class="meta">${fmtMin(sum('enfoque'))} de enfoque · ${sum('iniciativas')} iniciativas · ${victorias.length} pasos · resististe ${sum('resistidas') + sum('alternativas')} veces</p>
+    ${victorias.length ? `<ul class="pros">${victorias.slice(-6).map(v => `<li>${esc(v.t)} <span class="meta">· ${esc(v.p)}</span></li>`).join('')}</ul>` : ''}
+    <h3>2. Siguientes pasos</h3>
+    ${sinPaso.length || sinFecha.length ? `<div class="rows">${[...sinPaso, ...sinFecha].map(p => `<button class="row" data-p="${esc(p.id)}"><span class="dot" style="--c:var(--amber)"></span><span class="t"><div>${esc(p.nombre)}</div><small>${p.paso ? 'Ponle día y hora' : 'Sin siguiente paso'}</small></span></button>`).join('')}</div>` : '<p class="meta">Cada proyecto tiene paso con día y hora.</p>'}
+    <h3>3. Personas</h3>
+    <p class="meta">${personasDue().length ? `Te toca escribir a ${personasDue().slice(0, 4).map(p => esc(p.nombre)).join(', ')}.` : 'Estás al día con tus círculos.'} Meta: ${state.metaSemanal} iniciativas esta semana.</p>
+    <h3>4. Compártelo</h3>
+    <p class="meta">Hacer público el progreso aumenta su efecto (Harkin et al., 2016).</p>
+    <div class="actions stack"><a class="outline btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(reporte)}">Enviar mi reporte por WhatsApp</a><button class="primary" id="rv-ok">Listo</button></div>`);
+  $('#sheet-body').querySelectorAll('[data-p]').forEach(b => b.onclick = () => proyectoForm(state.proyectos.find(p => p.id === b.dataset.p)));
+  $('#rv-ok').onclick = () => { closeSheet(); renderAll(); };
+}
+
+function configSheet() {
+  showSheet(`<h2>Configura tu teléfono</h2>
+    <p class="sci">Un paquete de cambios así redujo el uso problemático y el tiempo de pantalla, y mejoró el sueño, en un ensayo aleatorizado (Olson et al., 2022).</p>
+    <div class="rows">${CONFIG.map(([k, t, d]) => `<button class="row" data-c="${k}"><span class="box" style="${state.config[k] ? 'background:var(--green);border-color:var(--green)' : ''}"></span>
+      <span class="t"><div>${esc(t)}</div><small style="white-space:normal">${esc(d)}</small></span></button>`).join('')}</div>
+    <div class="actions"><button class="primary" id="cf-ok">Listo</button></div>`);
+  $('#sheet-body').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { state.config[b.dataset.c] = !state.config[b.dataset.c]; save(); configSheet(); });
+  $('#cf-ok').onclick = closeSheet;
+}
+
+// ---------- Por qué funciona: cada herramienta con su fuente
+const CIENCIA = [
+  ['Puerta con espera y «Mejor no»', 'Una pausa breve con opción visible de no abrir redujo las aperturas un 57 % en 6 semanas; un 36 % de los intentos se abandonaba. El botón de abandonar fue lo más eficaz.', 'Grüning, Riedel y Lorenz-Spreen (2023), PNAS. Nota: el primer autor trabaja en la app one sec.'],
+  ['Presupuesto diario de 30 minutos', 'Limitar redes a ~30 min al día durante 3 semanas redujo soledad y síntomas depresivos. Un meta-análisis de 32 ensayos halla un efecto pequeño (g = 0,17), igual reduciendo que dejándolas del todo, y solo con una semana o más.', 'Hunt et al. (2018), J. Social and Clinical Psychology; Burnell et al. (2025), SSM – Mental Health'],
+  ['Tres ventanas de revisión', 'Recibir las notificaciones en 3 lotes al día mejoró atención y control y bajó el estrés; apagarlas todas aumentó la ansiedad y el FOMO.', 'Fitz et al. (2019), Computers in Human Behavior; Kushlev y Dunn (2015), Computers in Human Behavior'],
+  ['«Hablar» frente a «solo mirar»', 'Mirar redes sin interactuar empeoró el ánimo a través de la envidia.', 'Verduyn et al. (2015), J. Experimental Psychology: General'],
+  ['Prueba de realidad', 'El FOMO es una predicción. Contrastarla con lo que pasó es un experimento conductual de la terapia cognitivo-conductual (evidencia indirecta: aún no hay ensayos específicos para FOMO).', 'Przybylski et al. (2013), definición de FOMO; Mayo-Wilson et al. (2014), Lancet Psychiatry, sobre TCC'],
+  ['Configurar el teléfono', 'Quitar apps del inicio, notificaciones mínimas, grises y el teléfono fuera del dormitorio redujeron el uso problemático y mejoraron el sueño.', 'Olson et al. (2022), Int. J. Mental Health and Addiction'],
+  ['Escribir primero', 'Quien recibe un mensaje inesperado lo valora más de lo que predice quien lo envía, sobre todo con vínculos débiles.', 'Liu, Rim, Min y Min (2023), J. Personality and Social Psychology'],
+  ['Mensaje de gratitud', 'Quien agradece subestima la alegría que causa y sobreestima la incomodidad; por eso no lo envía.', 'Kumar y Epley (2018), Psychological Science'],
+  ['Predicción frente a resultado', 'Las intervenciones contra la soledad que corrigen las predicciones pesimistas sobre los demás son las más eficaces.', 'Masi, Chen, Hawkley y Cacioppo (2011), Personality and Social Psychology Review'],
+  ['Círculos de contacto', 'Las relaciones se organizan en capas (~5, 15, 50, 150) y la cercanía va ligada a la frecuencia de contacto. Las frecuencias son una guía, no una regla exacta.', 'Sutcliffe, Dunbar, Binder y Arrow (2012), British J. Psychology'],
+  ['Proponer planes', 'Hablar con otros, incluso con desconocidos, resulta más agradable de lo que predecimos.', 'Epley y Schroeder (2014), J. Experimental Psychology: General'],
+  ['Le caíste mejor de lo que crees', 'Tras conversar, subestimamos cuánto le gustamos a la otra persona («liking gap»).', 'Boothby, Cooney, Sandstrom y Clark (2018), Psychological Science'],
+  ['Preguntas profundas', 'Las conversaciones profundas son menos incómodas y más cercanas de lo esperado; hacer preguntas de seguimiento aumenta el agrado.', 'Kardas, Kumar y Epley (2022), JPSP; Huang et al. (2017), JPSP; Gable et al. (2004), JPSP'],
+  ['Plan «si…, entonces…»', 'Las intenciones de implementación tienen un efecto medio-alto sobre el logro de metas (d ≈ 0,65).', 'Gollwitzer y Sheeran (2006), Advances in Experimental Social Psychology'],
+  ['WOOP en cada proyecto', 'Contrastar el deseo con el obstáculo interno y planear cómo superarlo mejora el logro frente a solo soñar con la meta.', 'Oettingen (2014), Rethinking Positive Thinking; Wang et al. (2021), Frontiers in Psychology'],
+  ['Día, hora y lugar del paso', 'Escribir fecha y hora concretas aumentó el cumplimiento de un plan; solo la fecha, no. El formato «si…, entonces…» estricto es el de mayor efecto.', 'Milkman et al. (2011), PNAS; Sheeran, Listrom y Gollwitzer (2024), European Review of Social Psychology'],
+  ['Estoy procrastinando', 'La terapia cognitivo-conductual es la intervención más eficaz contra la procrastinación (g ≈ 0,34 frente a control en ensayos aleatorizados). Perdonarse reduce la procrastinación siguiente.', 'Rozental et al. (2018), Frontiers in Psychology; Wohl, Pychyl y Bennett (2010), Personality and Individual Differences'],
+  ['Registrar el avance', 'Monitorear el progreso mejora el logro de metas (d = 0,40), más si se anota y se comparte.', 'Harkin et al. (2016), Psychological Bulletin'],
+  ['Revisión el lunes y el día 1', 'Tras los «nuevos comienzos» la gente retoma metas con más facilidad.', 'Dai, Milkman y Riis (2014), Management Science'],
+  ['Recompensa ligada', 'Permitirse un placer solo mientras se hace la tarea difícil aumentó la constancia, aunque el efecto se diluye con el tiempo.', 'Milkman, Minson y Volpp (2014), Management Science'],
+  ['Dónde lo dejaste', 'Lo interrumpido tiende a retomarse (efecto Ovsiankina); anotar el punto exacto facilita volver.', 'Ghibellini y Meier (2025), Humanities and Social Sciences Communications'],
+  ['Siguiente paso y pequeñas victorias', 'Avanzar en un trabajo significativo, aunque sea poco, es lo que más eleva la motivación diaria.', 'Amabile y Kramer (2011), The Progress Principle'],
+  ['Sesiones de enfoque', 'Las interrupciones obligan a compensar trabajando más rápido, con más estrés; cada vuelta al teléfono se registra para que la veas.', 'Mark, Gudith y Klocke (2008), CHI'],
+  ['Alternativas en vez de solo quitar', 'Programar actividades gratificantes tiene efectos sólidos sobre el ánimo (activación conductual).', 'Cuijpers, van Straten y Warmerdam (2007), Clinical Psychology Review'],
+];
+function ciencia() {
+  showSheet(`<h2>Por qué funciona</h2>
+    <p class="note">Cada herramienta de Enfoque sale de un estudio. Si una función no se puede justificar con uno, sobra.</p>
+    <ol class="refs" style="padding-left:20px">${CIENCIA.map(([t, d, r]) => `<li><b>${esc(t)}</b><br>${esc(d)}<small>${esc(r)}</small></li>`).join('')}</ol>
+    <div class="actions"><button class="primary" id="ci-ok">Cerrar</button></div>`);
+  $('#ci-ok').onclick = closeSheet;
+}
+$('#open-sci').onclick = ciencia;
 
 // ---------- Lo que pasa al salir y volver a la app
 document.addEventListener('visibilitychange', () => {
@@ -702,6 +1216,15 @@ function settings() {
       <select id="s-lim">${Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<option ${n === state.limite ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
     <div class="set-row"><span>Espera inicial<small>Se duplica con cada apertura del día</small></span>
       <select id="s-wait">${[5, 10, 20, 30].map(n => `<option value="${n}" ${n === state.espera ? 'selected' : ''}>${n} s</option>`).join('')}</select></div>
+    <div class="set-row"><span>Presupuesto de distracción<small>Unos 30 min al día reducen el FOMO (Hunt et al., 2018)</small></span>
+      <select id="s-bud">${[15, 30, 45, 60].map(n => `<option value="${n}" ${n === state.presupuesto ? 'selected' : ''}>${n} min</option>`).join('')}</select></div>
+    <div class="set-row"><span>Meta de iniciativas<small>Contactos, planes y pasos de proyecto por semana</small></span>
+      <select id="s-meta">${Array.from({ length: 14 }, (_, i) => i + 1).map(n => `<option ${n === state.metaSemanal ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+    <h3>Ventanas de revisión</h3>
+    <p class="meta">Revisar por lotes tres veces al día mejora la atención y baja el estrés (Fitz et al., 2019). Fuera de estas horas, la espera es el doble.</p>
+    <div class="times" style="grid-template-columns:1fr 1fr 1fr">${[0, 1, 2].map(i => `<div class="field"><label>${['Primera', 'Segunda', 'Tercera'][i]}</label><input id="s-v${i + 1}" type="time" value="${state.ventanas[i] || ''}"></div>`).join('')}</div>
+    <div class="set-row"><span>Duración de cada ventana</span>
+      <select id="s-vmin">${[10, 15, 20, 30].map(n => `<option value="${n}" ${n === state.ventanaMin ? 'selected' : ''}>${n} min</option>`).join('')}</select></div>
     <h3>Apps que te distraen</h3>
     <div id="s-apps">${state.apps.map(a => `<div class="app-row"><span class="t">${esc(a.nombre)}<small>${esc(a.url)}</small></span><button class="x" data-del="${esc(a.id)}" aria-label="Quitar">×</button></div>`).join('')}</div>
     <div class="add-app"><input id="s-an" placeholder="Nombre"><input id="s-au" placeholder="https://…" inputmode="url"><button class="link" id="s-add">Añadir</button></div>
@@ -714,6 +1237,7 @@ function settings() {
     <div class="set-row"><span>Guardar copia<small>Archivo .json con tu historial y ajustes</small></span><button class="link" id="s-exp">Guardar</button></div>
     <div class="set-row"><span>Restaurar copia</span><button class="link" id="s-imp">Elegir archivo</button></div>
     ${installEvt ? `<div class="set-row"><span>Instalar en el teléfono</span><button class="link" id="s-inst">Instalar</button></div>` : ''}
+    <div class="set-row"><span>Configura tu teléfono<small>${CONFIG.filter(c => state.config[c[0]]).length} de ${CONFIG.length} hechos</small></span><button class="link" id="s-conf">Ver</button></div>
     <div class="set-row"><span>Cómo usar Enfoque</span><button class="link" id="s-help">Ver</button></div>
     <div class="set-row"><span>Versión ${APP_VERSION}</span><button class="link" id="s-upd">Buscar actualización</button></div>
     <div class="actions"><button class="primary" id="s-ok">Listo</button></div>`);
@@ -739,6 +1263,7 @@ function settings() {
   };
   $('#s-inst')?.addEventListener('click', async () => { installEvt.prompt(); await installEvt.userChoice; installEvt = null; closeSheet(); });
   $('#s-help').onclick = welcome;
+  $('#s-conf').onclick = configSheet;
   $('#s-upd').onclick = async () => {
     const reg = await navigator.serviceWorker?.getRegistration();
     if (!reg) { toast('Sin conexión con el servidor.'); return; }
@@ -748,6 +1273,8 @@ function settings() {
   $('#s-ok').onclick = () => {
     state.nombre = $('#s-name').value.trim().split(/\s+/)[0] || '';
     state.limite = +$('#s-lim').value; state.espera = +$('#s-wait').value;
+    state.presupuesto = +$('#s-bud').value; state.metaSemanal = +$('#s-meta').value; state.ventanaMin = +$('#s-vmin').value;
+    const vs = [$('#s-v1').value, $('#s-v2').value, $('#s-v3').value].filter(Boolean); if (vs.length) state.ventanas = vs;
     const alts = $('#s-alts').value.split('\n').map(s => s.trim()).filter(Boolean);
     if (alts.length) state.alternativas = alts;
     save(); closeSheet(); renderAll();
@@ -764,9 +1291,11 @@ function welcome() {
       <li style="margin-bottom:8px"><b>Quita Instagram, TikTok y demás de la pantalla de inicio</b>: mantén pulsado el icono → «Quitar» (no desinstalar). Siguen en el cajón de apps, pero ya no a un toque.</li>
       <li><b>Pon Enfoque en su lugar.</b> Cuando el pulgar vaya solo a ese rincón, abrirás esta pregunta en vez del feed.</li>
     </ol>
+    <p class="note">Después, añade a las personas con las que quieres mantener el contacto y tus proyectos en «Tomar la iniciativa»: cada día verás a quién escribir y el siguiente paso.</p>
     <p class="note">Para un tope estricto, combínalo con Bienestar digital de Android: Ajustes → Bienestar digital → Temporizadores de apps.</p>
     ${state.bienvenida ? '' : `<div class="field"><label>¿Cómo te llamas?</label><input id="w-name" maxlength="30" value="${esc(nombre())}" placeholder="Nombre"></div>`}
-    <div class="actions"><button class="primary" id="w-go">Empezar</button></div>`);
+    <div class="actions"><button class="link" id="w-conf">Configurar el teléfono</button><button class="primary" id="w-go">Empezar</button></div>`);
+  $('#w-conf').onclick = () => { state.bienvenida = true; const n = $('#w-name')?.value.trim().split(/\s+/)[0]; if (n) state.nombre = n; save(); renderAll(); configSheet(); };
   $('#w-go').onclick = () => {
     const n = $('#w-name')?.value.trim().split(/\s+/)[0];
     if (n !== undefined) state.nombre = n || state.nombre;

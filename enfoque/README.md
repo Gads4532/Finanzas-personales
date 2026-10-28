@@ -1,8 +1,13 @@
 # Enfoque
 
-Menos teléfono, más de lo que importa. Cada vez que tomas el teléfono, Enfoque pregunta
-**«¿Para qué?»**: algo concreto, una sesión de enfoque, una alternativa a la costumbre
-o una distracción, que se abre solo después de una espera, con límite diario.
+Menos teléfono, más de lo que importa. Herramientas basadas en estudios para **erradicar el FOMO**
+y **tomar la iniciativa** en conversaciones, reuniones, planes y proyectos.
+
+Cada vez que tomas el teléfono, Enfoque pregunta **«¿Para qué?»**: algo concreto, una sesión de
+enfoque, una alternativa a la costumbre o una distracción, que se abre solo después de una espera,
+dentro de tus ventanas de revisión y de un presupuesto diario. «Tomar la iniciativa» te dice cada día
+a quién escribir, qué plan proponer y el siguiente paso de cada proyecto. Las fuentes están en
+«Por qué funciona» y en `IDEAS.md`.
 Debajo están tus hábitos y tareas pendientes de hoy del
 [Habit Tracker](https://github.com/Gads4532/habit-tracker). Un solo archivo, sin dependencias.
 
