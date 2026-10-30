@@ -443,7 +443,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.10.0';
+const APP_VERSION = '1.10.1';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -821,7 +821,7 @@ function pctOf(parte, base) {
   if (!parte && !base) return null;
   if (!base) return parte > 0 ? 100 : -100;
   const v = parte / Math.abs(base) * 100;
-  return Number.isFinite(v) ? v : null;
+  return Number.isFinite(v) ? Math.max(-9999, Math.min(9999, v)) : null;
 }
 // Texto del porcentaje: un decimal hasta 100 %, entero de ahí en adelante, con puntos de miles.
 const nf0 = new Intl.NumberFormat('es-VE', { maximumFractionDigits: 0 });
@@ -2140,13 +2140,16 @@ const showUpdate = () => { $('#upd').hidden = false; };
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('sw.js').then(r => {
     swReg = r;
-    if (r.waiting) showUpdate();
+    // Si al abrir ya hay una versión nueva lista, se aplica sola: nadie se queda con un error viejo.
+    if (r.waiting) { r.waiting.postMessage('SKIP_WAITING'); return; }
+    r.update().catch(() => {});
     r.addEventListener('updatefound', () => {
       const w = r.installing;
       w?.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) showUpdate(); });
     });
   }).catch(() => {});
   navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') swReg?.update().catch(() => {}); });
 }
 $('#upd-go').onclick = () => { swReg?.waiting?.postMessage('SKIP_WAITING'); setTimeout(() => location.reload(), 600); };
 async function checkUpdate() {
