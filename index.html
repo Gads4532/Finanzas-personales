@@ -340,7 +340,7 @@
   /* ---------- 1.9.0: accesos circulares, tarjetas de cuentas con bandera, calculadora de dos pasos (lo bueno de Rial). */
   .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .curpill { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 999px; background: var(--soft); font-size: .78rem; font-weight: 600; }
-  .pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: .74rem; font-weight: 600; margin-left: 10px; vertical-align: middle;
+  .pill { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: .74rem; font-weight: 500; letter-spacing: 0; white-space: nowrap; font-variant-numeric: tabular-nums; margin-left: 10px; vertical-align: middle;
     background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green); }
   .pill.neg { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); }
   .qa { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 4px 0 26px; }
@@ -990,7 +990,7 @@ function renderInicio() {
   $('#view-inicio').innerHTML = `
     <div class="hero">
       <div class="hero-top"><div class="hero-label">Saldo total</div><button class="curpill" data-act="flip">${badge(state.verEn, 'sm')} ${state.verEn === 'VES' ? 'Bs' : 'USD'} ▾</button></div>
-      <div class="hero-total${prev !== undefined && +prev !== Math.round(total * 100) ? ' bump' : ''}" data-v="${Math.round(total * 100)}">${view$(total)}${varPct !== null ? `<span class="pill${varPct < 0 ? ' neg' : ''}" title="Variación del saldo en el mes: ingresos menos gastos frente al saldo con que empezó el mes">${varPct < 0 ? '▼' : '▲'} ${pctTxt(Math.abs(varPct))} este mes</span>` : ''}</div>
+      <div class="hero-total${prev !== undefined && +prev !== Math.round(total * 100) ? ' bump' : ''}" data-v="${Math.round(total * 100)}">${view$(total)}${varPct !== null ? `<span class="pill${varPct < 0 ? ' neg' : ''}" title="Variación del saldo en el mes: ingresos menos gastos frente al saldo con que empezó el mes">${varPct < 0 ? '−' : '+'}${pctTxt(Math.abs(varPct), false, 0)} este mes</span>` : ''}</div>
       <div class="hero-alt">${alt ? '≈ ' + alt : ''}</div>
     </div>
     <form class="quick" id="quick">
