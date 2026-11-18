@@ -443,7 +443,7 @@
 
 <script>
 const KEY = 'finanzas-v1';
-const APP_VERSION = '1.10.1';
+const APP_VERSION = '1.10.2';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -990,7 +990,7 @@ function renderInicio() {
   $('#view-inicio').innerHTML = `
     <div class="hero">
       <div class="hero-top"><div class="hero-label">Saldo total</div><button class="curpill" data-act="flip">${badge(state.verEn, 'sm')} ${state.verEn === 'VES' ? 'Bs' : 'USD'} ▾</button></div>
-      <div class="hero-total${prev !== undefined && +prev !== Math.round(total * 100) ? ' bump' : ''}" data-v="${Math.round(total * 100)}">${view$(total)}${varPct !== null ? `<span class="pill${varPct < 0 ? ' neg' : ''}">${pctTxt(varPct, true)}</span>` : ''}</div>
+      <div class="hero-total${prev !== undefined && +prev !== Math.round(total * 100) ? ' bump' : ''}" data-v="${Math.round(total * 100)}">${view$(total)}${varPct !== null ? `<span class="pill${varPct < 0 ? ' neg' : ''}" title="Variación del saldo en el mes: ingresos menos gastos frente al saldo con que empezó el mes">${varPct < 0 ? '▼' : '▲'} ${pctTxt(Math.abs(varPct))} este mes</span>` : ''}</div>
       <div class="hero-alt">${alt ? '≈ ' + alt : ''}</div>
     </div>
     <form class="quick" id="quick">
