@@ -1,5 +1,5 @@
 // Guarda Cuanti en el teléfono para que abra sin internet (red primero, caché si no hay red).
-const CACHE = 'cuanti-v2.0.0';
+const CACHE = 'cuanti-v2.0.1';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-512.png'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
