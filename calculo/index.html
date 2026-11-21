@@ -211,14 +211,78 @@
   .mist .q { font-weight: 500; overflow-wrap: anywhere; }
   .mist .s { grid-column: 1 / -1; color: var(--muted); font-size: .85rem; }
 
+  /* Razonamiento */
+  .lead2 { color: var(--muted); margin: 10px 0 0; }
+  .startcard { margin-top: 22px; padding: 18px; border-radius: 20px; background: var(--text); color: var(--bg); display: grid; gap: 4px; text-align: left; width: 100%; }
+  .startcard b { font-size: 1.15rem; font-weight: 600; }
+  .startcard span { font-size: .85rem; opacity: .7; }
+  .linkbtn { display: block; margin: 10px auto 0; color: var(--muted); font-size: .88rem; }
+  .bullets { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; color: var(--muted); font-size: .92rem; }
+  .bullets b { color: var(--text); font-weight: 600; }
+  details.rule { border-bottom: 1px solid var(--line); }
+  details.rule summary { list-style: none; cursor: pointer; padding: 12px 0; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+  details.rule summary::-webkit-details-marker { display: none; }
+  details.rule summary .t { font-weight: 500; }
+  details.rule summary .m { color: var(--muted); font-size: .8rem; }
+  details.rule p { margin: 0 0 12px; color: var(--muted); font-size: .92rem; }
+  details.rule[open] p { animation: rise .3s var(--ease); }
+  .areah { margin-top: 18px; }
+  #reason { overflow-y: auto; z-index: 12; }
+  .rtop { position: sticky; top: 0; z-index: 2; background: var(--bg); max-width: 520px; margin: 0 auto;
+    padding: max(14px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); }
+  .rtop .row1 { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .chip { font-size: .75rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: var(--soft); color: var(--muted); }
+  #rsBody { max-width: 520px; margin: 0 auto; padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 22px; }
+  .rcard { padding: 18px; border-radius: 18px; background: var(--soft); }
+  .rs { margin: 0 0 14px; font-size: 1.04rem; line-height: 1.55; }
+  .rc { margin: 0; font-weight: 600; font-size: 1.04rem; }
+  .rc span { display: block; font-size: .72rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .rstep h3 { font-size: .95rem; font-weight: 600; margin: 0 0 10px; display: flex; gap: 10px; align-items: center; }
+  .rstep h3 b { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: .75rem; background: var(--accent); color: var(--accent-ink); flex: none; }
+  .rbtns { display: grid; gap: 8px; }
+  .rbtns.two { grid-template-columns: 1fr 1fr; }
+  .rbtns.four { grid-template-columns: repeat(4, 1fr); }
+  .ropt { padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line); text-align: left; font-weight: 500; transition: border-color .2s, background-color .2s, opacity .2s, transform .18s var(--ease); }
+  .rbtns.two .ropt, .rbtns.four .ropt { text-align: center; }
+  .ropt:hover:not(:disabled) { background: var(--soft); }
+  .ropt:disabled { opacity: .4; cursor: default; }
+  .ropt.chosen { opacity: 1; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .verdict { display: grid; gap: 8px; }
+  .verdict > div { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: baseline; font-weight: 500; }
+  .verdict .ic { font-weight: 700; }
+  .verdict .ok .ic { color: var(--green); } .verdict .no .ic { color: var(--red); } .verdict .cal .ic { color: var(--accent); }
+  .verdict em { font-style: normal; color: var(--muted); font-size: .85rem; }
+  .verdict small { color: var(--muted); font-weight: 400; }
+  .warnline { margin: 10px 0 0; color: var(--red); font-size: .9rem; }
+  .lesson-fb { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .lesson-fb h4 { margin: 0; font-size: 1.15rem; font-weight: 600; }
+  .lesson-fb h4 small { font-size: .75rem; color: var(--muted); font-weight: 500; margin-left: 6px; }
+  .lesson-fb h5 { margin: 16px 0 6px; font-size: .72rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+  .lesson-fb .rd { margin: 4px 0 0; color: var(--muted); }
+  .lesson-fb ol { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+  .lesson-fb .fix { margin: 0; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 9%, transparent); }
+  .lesson-fb .fix b { font-weight: 600; }
+  #rres { overflow-y: auto; z-index: 13; }
+  .mist .r.bad { color: var(--red); }
+  .cal-chart { width: 100%; height: 200px; display: block; }
+  .cal-chart text { fill: var(--muted); font-size: 10px; font-family: var(--font); }
+  .cal-chart circle { animation: pop .5s var(--spring) both; transform-box: fill-box; transform-origin: center; }
+  .tag-honest { display: inline-block; margin-top: 10px; padding: 4px 10px; border-radius: 99px; font-size: .78rem; background: var(--soft); color: var(--muted); }
+  .datos textarea { width: 100%; height: 140px; font: .75rem/1.4 ui-monospace, monospace; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+  .lvbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; } }
 </style>
 </head>
 <body>
 <main>
-  <!-- PRACTICAR -->
-  <section id="tab-home">
-    <h1><small id="hello">Hola</small>Cuanti</h1>
+  <!-- RAZONAR: pista principal -->
+  <section id="tab-reason"></section>
+
+  <!-- CÁLCULO: pista A (fluidez y velocidad) -->
+  <section id="tab-home" hidden>
+    <h1><small id="hello">Pista de cálculo</small>Cálculo</h1>
+    <span class="tag-honest">Fluidez y velocidad · no mide razonamiento</span>
     <div class="today">
       <div class="ring" aria-hidden="true">
         <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--empty)" stroke-width="3"/>
@@ -254,7 +318,8 @@
   <!-- PROGRESO -->
   <section id="tab-stats" hidden>
     <h1><small>Tu avance</small>Progreso</h1>
-    <h2>Totales</h2>
+    <div id="razonStats"></div>
+    <h2 style="margin-top:44px">Pista de cálculo · totales</h2>
     <div class="kpis">
       <div class="kpi"><b class="num" id="kTotal">0</b><span>respuestas</span></div>
       <div class="kpi"><b class="num" id="kAcc">—</b><span>precisión</span></div>
@@ -276,12 +341,17 @@
     <button class="ghost" id="resetBtn">Borrar todo el progreso</button>
     <p class="note" style="text-align:center" id="verNote"></p>
   </section>
+
+  <!-- MÁS: Trucos, Patrones y datos -->
+  <section id="tab-more" hidden></section>
 </main>
 
 <nav class="tabs" aria-label="Secciones">
-  <button data-tab="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Practicar</button>
+  <button data-tab="reason" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/></svg>Razonar</button>
+  <button data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Cálculo</button>
   <button data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5C4.5 4 8 4 12 6c4-2 7.5-2 10-.5V19c-2.5-1.5-6-1.5-10 .5-4-2-7.5-2-10-.5zM12 6v13.5"/></svg>Lecciones</button>
   <button data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Progreso</button>
+  <button data-tab="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg>Más</button>
 </nav>
 
 <!-- JUEGO -->
@@ -328,9 +398,23 @@
   </main>
 </div>
 
+<!-- SESIÓN DE RAZONAMIENTO -->
+<div id="reason" class="overlay" hidden>
+  <div class="rtop">
+    <div class="row1">
+      <button class="ptop-x x" id="rsQuit" aria-label="Terminar sesión" style="width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--soft)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <span class="chip" id="rsCtx"></span>
+      <b class="num" id="rsProg"></b>
+    </div>
+    <div class="pbar"><span id="rsBar"></span></div>
+  </div>
+  <div id="rsBody"></div>
+</div>
+<div id="rres" class="overlay" hidden><main id="rrBody"></main></div>
+
 <script>
 'use strict';
-const APP_VERSION = '1.1.0'; // súbela en cada cambio: así los teléfonos detectan la versión nueva
+const APP_VERSION = '2.0.0'; // súbela en cada cambio: así los teléfonos detectan la versión nueva
 /* ================= Utilidades ================= */
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
@@ -429,11 +513,10 @@ const TOPICS = {
   }},
   pot: { name: 'Potencias y raíces', sym: 'x²', gen(L) {
     const t = rnd(0, 99);
-    const sq = [10, 15, 15, 25, 25, 50, 30, 125, 99, 130][L-1];
-    if (L === 8 && t < 60) { const k = rnd(1, 12), n = k * 10 + 5; return { q: `${n}²`, a: n * n, tip: `Termina en 5: ${k} × ${k + 1} = ${k * (k + 1)} y pega 25.` }; }
+    const sq = [10, 15, 15, 25, 25, 30, 30, 40, 50, 50][L-1]; // cuadrados grandes y cubos grandes: sección Trucos
     if (L >= 3 && t < 30) { const n = rnd(2, Math.min(sq, 40)); return { q: `√${n * n}`, a: n, tip: 'La última cifra orienta: si el número termina en 6, la raíz termina en 4 o 6.' }; }
     if (L >= 5 && t < 45) { const n = rnd(2, 12); return { q: `2^${n}`, a: 2 ** n, tip: '2¹⁰ = 1024. Desde ahí, divide o multiplica por 2.' }; }
-    if (L >= 7 && t < 60) { const n = rnd(2, L === 10 ? 20 : 10); return L >= 9 && Math.random() < .5 ? { q: `∛${n ** 3}`, a: n, tip: 'La última cifra del cubo delata la de la raíz (8 → 2, 7 → 3).' } : { q: `${n}³`, a: n ** 3, tip: `${n}³ = ${n}² × ${n} = ${n * n} × ${n}.` }; }
+    if (L >= 7 && t < 60) { const n = rnd(2, 10); return L >= 9 && Math.random() < .5 ? { q: `∛${n ** 3}`, a: n, tip: 'La última cifra del cubo delata la de la raíz (8 → 2, 7 → 3).' } : { q: `${n}³`, a: n ** 3, tip: `${n}³ = ${n}² × ${n} = ${n * n} × ${n}.` }; }
     const n = rnd(2, sq), r = n % 10, b = n - r;
     const tip = n > 20 && r ? `(a + b)²: ${b}² + 2·${b}·${r} + ${r}² = ${b * b} + ${2 * b * r} + ${r * r}.` : 'Memoriza los cuadrados hasta 20: son la base de todo lo demás.';
     return { q: `${n}²`, a: n * n, tip };
@@ -536,12 +619,12 @@ const TOPICS = {
 };
 const CATS = [
   ['Aritmética', ['suma', 'resta', 'mult', 'div', 'dec']],
-  ['Números', ['pot', 'frac', 'mcd', 'serie']],
+  ['Números', ['pot', 'frac', 'mcd']], // las series están en «Patrones»
   ['Proporciones y dinero', ['pct', 'tres', 'fin']],
   ['Álgebra y datos', ['ecu', 'prom', 'prob', 'est']],
 ];
 const MIX = ['suma', 'resta', 'mult', 'div', 'pct', 'frac', 'pot', 'dec'];
-const ALL = Object.keys(TOPICS);
+const ALL = Object.keys(TOPICS).filter(k => k !== 'serie'); // las series viven en «Patrones», sin métrica
 const DIFF = { auto: ['Adaptativa', null], f: ['Fácil', [1, 3]], m: ['Media', [4, 6]], d: ['Difícil', [7, 8]], x: ['Experto', [9, 10]] };
 const DIFF_NOTE = { auto: 'Cada tema sube de nivel cuando aciertas rápido y baja cuando fallas.', f: 'Niveles 1–3: números pequeños y operaciones directas.', m: 'Niveles 4–6: dos y tres cifras, problemas cortos.', d: 'Niveles 7–8: varios pasos, decimales y problemas aplicados.', x: 'Niveles 9–10: lo más exigente de cada tema.' };
 
@@ -566,13 +649,13 @@ const LESSONS = [
     ex: ['36 × 25', '36 × 100 = 3600', '3600 ÷ 4', '= 900'],
     careful: 'Con números impares sale ,5 al dividir entre 2: 47 × 5 = 470 ÷ 2 = 235.',
     gen: i => { const m = pick([5, 25, 50]), n = m === 25 ? rnd(2, 40) * (i < 4 ? 4 : 2) : rnd(12, 98); return { q: `${n} × ${m}`, a: n * m, tip: m === 25 ? '× 100 y ÷ 4.' : m === 50 ? '× 100 y ÷ 2.' : '× 10 y ÷ 2.' }; } },
-  { id: 'x11', topic: 'mult', title: 'Multiplicar por 11', desc: 'Abre el número y pon la suma en medio.',
+  { id: 'x11', trick: true, topic: 'mult', title: 'Multiplicar por 11', desc: 'Abre el número y pon la suma en medio.',
     lead: 'Para un número de dos cifras, el resultado × 11 es la primera cifra, la suma de ambas en el centro y la última cifra.',
     how: ['Separa las dos cifras: 3 _ 6.', 'Pon su suma en medio: 3 9 6.', 'Si la suma pasa de 9, lleva 1 a la izquierda.'],
     ex: ['78 × 11', '7 _ 8', '7 + 8 = 15: escribe 5 y lleva 1', '(7+1) 5 8 = 858'],
     careful: 'Con tres cifras (abc × 11): a, a+b, b+c, c, llevando de derecha a izquierda.',
     gen: i => { const n = i < 6 ? rnd(11, 99) : rnd(100, 999); return { q: `${n} × 11`, a: n * 11, tip: 'Primera cifra, suma de vecinas, última cifra.' }; } },
-  { id: 'x9', topic: 'mult', title: 'Multiplicar por 9, 99 y 999', desc: 'Multiplica por 10, 100, 1000 y resta.',
+  { id: 'x9', trick: true, topic: 'mult', title: 'Multiplicar por 9, 99 y 999', desc: 'Multiplica por 10, 100, 1000 y resta.',
     lead: '9 es 10 − 1. Así que n × 9 = n × 10 − n. Lo mismo con 99 (100 − 1) y 999 (1000 − 1).',
     how: ['Añade los ceros: n × 10, × 100 o × 1000.', 'Resta el número original.'],
     ex: ['47 × 99', '47 × 100 = 4700', '4700 − 47', '= 4653'],
@@ -584,19 +667,19 @@ const LESSONS = [
     ex: ['47 × 6', '40 × 6 = 240', '7 × 6 = 42', '240 + 42 = 282'],
     careful: 'A veces conviene restar: 49 × 6 = 50 × 6 − 6 = 294.',
     gen: i => { const a = i < 5 ? rnd(12, 99) : rnd(101, 499), b = rnd(3, 9); return { q: `${a} × ${b}`, a: a * b, tip: `${a - a % 10} × ${b} + ${a % 10} × ${b}.` }; } },
-  { id: 'sq5', topic: 'pot', title: 'Cuadrados que terminan en 5', desc: 'Un producto y un 25 al final.',
+  { id: 'sq5', trick: true, topic: 'pot', title: 'Cuadrados que terminan en 5', desc: 'Un producto y un 25 al final.',
     lead: 'Cualquier número que termina en 5 elevado al cuadrado termina en 25. Delante va el número sin el 5 multiplicado por su siguiente.',
     how: ['Quita el 5: de 65 queda 6.', 'Multiplica por el siguiente: 6 × 7 = 42.', 'Pega 25 al final: 4225.'],
     ex: ['85²', '8 × 9 = 72', 'Pega 25', '= 7225'],
     careful: 'Sirve también para 105², 115²…: 10 × 11 = 110 → 11025.',
     gen: i => { const k = rnd(1, i < 6 ? 9 : 14), n = k * 10 + 5; return { q: `${n}²`, a: n * n, tip: `${k} × ${k + 1} = ${k * (k + 1)} y 25.` }; } },
-  { id: 'sqab', topic: 'pot', title: 'Elevar al cuadrado cualquier número', desc: '(a + b)² = a² + 2ab + b².',
+  { id: 'sqab', trick: true, topic: 'pot', title: 'Elevar al cuadrado cualquier número', desc: '(a + b)² = a² + 2ab + b².',
     lead: 'Separa el número en una decena redonda y unas unidades. El cuadrado es: decena², más dos veces el producto, más unidades².',
     how: ['43 = 40 + 3.', '40² = 1600.', '2 × 40 × 3 = 240.', '3² = 9 → suma todo.'],
     ex: ['43²', '1600', '+ 240', '+ 9 = 1849'],
     careful: 'Para 48 es más fácil (50 − 2)²: 2500 − 200 + 4 = 2304.',
     gen: i => { const n = rnd(21, i < 6 ? 49 : 99); return { q: `${n}²`, a: n * n, tip: `${n - n % 10}² + 2·${n - n % 10}·${n % 10} + ${n % 10}².` }; } },
-  { id: 'dsq', topic: 'mult', title: 'Diferencia de cuadrados', desc: '48 × 52 = 50² − 2².',
+  { id: 'dsq', trick: true, topic: 'mult', title: 'Diferencia de cuadrados', desc: '48 × 52 = 50² − 2².',
     lead: 'Cuando dos números están a la misma distancia de uno redondo, su producto es el cuadrado del redondo menos el cuadrado de la distancia: (m − d)(m + d) = m² − d².',
     how: ['Busca el punto medio: entre 48 y 52 está 50.', 'Distancia: 2.', 'Resultado: 50² − 2² = 2500 − 4.'],
     ex: ['37 × 43', 'Medio 40, distancia 3', '1600 − 9', '= 1591'],
@@ -658,14 +741,497 @@ const LESSONS = [
     gen: i => TOPICS.fin.gen(clamp(i, 1, 10)) },
 ];
 
+LESSONS.push(
+  { id: 'sq130', trick: true, topic: 'pot', title: 'Cuadrados hasta 130', desc: 'Memoria y descomposición de cuadrados grandes.',
+    lead: 'Elevar al cuadrado números de dos y tres cifras combina las técnicas anteriores: termina en 5, (a + b)² o (a − b)² desde el redondo más cercano.',
+    how: ['Busca el número redondo más cercano.', 'Usa (a ± b)² = a² ± 2ab + b².', 'Si termina en 5, usa el atajo del 25.'],
+    ex: ['118²', '(120 − 2)²', '14400 − 480 + 4', '= 13924'], careful: 'Es un truco de exhibición: no mide razonamiento ni cuenta para ninguna métrica.',
+    gen: i => { const n = rnd(31, 130); return { q: `${n}²`, a: n * n, tip: `Desde ${Math.round(n / 10) * 10}: (a ± b)².` }; } },
+  { id: 'cubos', trick: true, topic: 'pot', title: 'Cubos y raíces cúbicas grandes', desc: 'Del 11 al 25, ida y vuelta.',
+    lead: 'La última cifra de un cubo identifica la de su raíz (1→1, 8→2, 7→3, 4→4, 5→5, 6→6, 3→7, 2→8, 9→9, 0→0). Las primeras cifras dicen la decena.',
+    how: ['Mira la última cifra del cubo para la unidad de la raíz.', 'Quita las tres últimas cifras y busca el cubo menor más cercano: esa es la decena.', 'Para elevar: n³ = n² × n.'],
+    ex: ['∛13824', 'Termina en 4 → la raíz termina en 4', '13 está entre 2³ = 8 y 3³ = 27 → decena 2', '= 24'], careful: 'Es un truco de exhibición: no mide razonamiento ni cuenta para ninguna métrica.',
+    gen: i => { const n = rnd(11, 25); return Math.random() < .5 ? { q: `∛${n ** 3}`, a: n, tip: 'Última cifra → unidad; lo que queda → decena.' } : { q: `${n}³`, a: n ** 3, tip: `${n}² × ${n} = ${n * n} × ${n}.` }; } },
+);
+const CALC_LESSONS = LESSONS.filter(l => !l.trick);
+const TRICKS = LESSONS.filter(l => l.trick);
+
+/* ================= Pista de razonamiento =================
+   Núcleo de la app. 16 reglas derivadas de tres criterios: (A) describen cómo funciona el mundo
+   —evidencia, causalidad, probabilidad, magnitudes—, (B) reaparecen en dominios sin relación entre sí,
+   (C) un universitario capaz las pasa por alto sin notarlo.
+   Cada situación existe en dos variantes: sin el dato clave (la conclusión no se sigue) y con él
+   (sí se sigue). El dato que la vuelve válida se muestra siempre al corregir. */
+const AREAS = { ev: 'Evidencia', cau: 'Causalidad', prob: 'Probabilidad', mag: 'Magnitudes' };
+const RULES = {
+  tb:   { area: 'ev',   name: 'Tasa base', d: 'Lo que vale una señal depende de lo común que sea aquello que busca.' },
+  ci:   { area: 'prob', name: 'Condicional invertido', d: 'P(A si B) no es P(B si A): «casi todos los X son Y» no dice que casi todos los Y sean X.' },
+  den:  { area: 'ev',   name: 'Denominador ausente', d: 'Un total sin su población de referencia no compara nada.' },
+  sel:  { area: 'ev',   name: 'Selección y supervivencia', d: 'Si la muestra se filtró por el resultado, el resultado no prueba nada.' },
+  peq:  { area: 'prob', name: 'Muestra pequeña', d: 'Con pocos casos, el azar produce extremos que parecen talento o causa.' },
+  reg:  { area: 'ev',   name: 'Regresión a la media', d: 'Tras un valor extremo, lo esperable es volver hacia lo normal, intervengas o no.' },
+  cf:   { area: 'cau',  name: 'Falta el contrafactual', d: '«Mejoró después» no dice qué habría pasado sin intervenir.' },
+  conf: { area: 'cau',  name: 'Confusión', d: 'Una tercera causa puede producir las dos cosas que van juntas.' },
+  rev:  { area: 'cau',  name: 'Causalidad inversa', d: 'Puede ser el efecto el que produce la supuesta causa.' },
+  col:  { area: 'cau',  name: 'Colisionador', d: 'Mirar solo casos que pasaron un filtro común crea correlaciones que no existen fuera.' },
+  conj: { area: 'prob', name: 'Conjunción', d: 'Si se necesitan varias cosas a la vez, sus probabilidades se multiplican y el total cae rápido.' },
+  ind:  { area: 'prob', name: 'Independencia supuesta', d: 'Multiplicar probabilidades solo vale si los riesgos no se mueven juntos.' },
+  rr:   { area: 'mag',  name: 'Riesgo relativo vs. absoluto', d: '«El doble» o «la mitad» no dice nada sin el valor de partida.' },
+  pct:  { area: 'mag',  name: 'Porcentajes no simétricos', d: 'Los cambios porcentuales se multiplican: bajar y subir lo mismo no te deja igual.' },
+  exp:  { area: 'mag',  name: 'Compuesto vs. lineal', d: 'Lo que crece en proporción a sí mismo se dispara frente a la intuición lineal.' },
+  simp: { area: 'mag',  name: 'Paradoja de Simpson', d: 'Un total puede ir al revés que cada uno de sus grupos si la mezcla es distinta.' },
+};
+const CTX = { neg: 'Negocios', sal: 'Salud', pol: 'Política', din: 'Dinero', rel: 'Relaciones' };
+
+// [regla, contexto, situación, conclusión, [por qué falla ×3], dato que la vuelve válida]
+const ITEMS = [
+  ['tb','neg','Un test de selección detecta al 90% de los candidatos que luego rinden mal y marca por error al 10% de los que rinden bien. Marcó a Luis.','Luis probablemente rendirá mal.',
+    ['No sabes cuántos candidatos rinden mal en general.','Si solo 1 de cada 20 rinde mal, de cada 100 marcados unos 68 rinden bien.','La precisión del test no basta: manda la proporción de base.'],
+    'En este puesto, históricamente la mitad de los contratados ha rendido mal.'],
+  ['tb','sal','Una prueba de cáncer detecta el 95% de los casos y da falso positivo en el 5% de los sanos. María dio positivo en un chequeo de rutina.','María muy probablemente tiene cáncer.',
+    ['En chequeos de rutina la enfermedad es rara.','Con 1 caso por cada 1.000 personas, de cada 100 positivos menos de 2 están enfermos.','Sin la prevalencia, el positivo dice muy poco.'],
+    'La prueba se le hizo por un bulto visible, y entre pacientes así 6 de cada 10 tienen cáncer.'],
+  ['tb','pol','Un algoritmo de aduanas identifica al 99% de los contrabandistas y señala al 2% de los viajeros honestos. Señaló a un viajero.','Ese viajero casi seguro lleva contrabando.',
+    ['La inmensa mayoría de los viajeros es honesta.','Si 1 de cada 10.000 lleva contrabando, más del 99% de los señalados son inocentes.','Un error pequeño sobre una población enorme fabrica muchos falsos positivos.'],
+    'El viajero venía en un vuelo donde, según inteligencia previa, 4 de cada 10 pasajeros llevaban carga ilegal.'],
+  ['tb','din','El antifraude del banco atrapa el 98% de los fraudes y bloquea por error el 1% de las compras normales. Bloqueó tu compra.','Lo más probable es que fuera un intento de fraude.',
+    ['El fraude es raro entre todas las compras.','Con 1 fraude por cada 1.000 compras, unos 9 de cada 10 bloqueos son compras legítimas.','La tasa de acierto del sistema no reemplaza a la tasa base.'],
+    'Ese día tu tarjeta estaba siendo atacada: 1 de cada 3 compras con ella era fraudulenta.'],
+  ['tb','rel','Una app de citas dice que su detector acierta con el 90% de los perfiles falsos y marca por error al 10% de los reales. Marcó el perfil de tu cita.','El perfil casi seguro es falso.',
+    ['No sabes cuántos perfiles falsos hay en la app.','Si son 2 de cada 100, de cada 100 marcados unos 85 son reales.','Sin la proporción de falsos, la marca no es concluyente.'],
+    'La app reconoce que 7 de cada 10 perfiles nuevos de tu ciudad eran bots.'],
+
+  ['ci','neg','El 80% de los clientes que cancelaron su suscripción había usado antes el chat de soporte.','Si un cliente usa el chat de soporte, probablemente cancelará.',
+    ['Eso es P(usó el chat si canceló), no P(cancela si usó el chat).','Si casi todos los clientes usan el chat, ese 80% no distingue nada.','Invertir el condicional cambia la pregunta.'],
+    'De todos los clientes que usaron el chat, 7 de cada 10 terminaron cancelando.'],
+  ['ci','sal','El 85% de las personas con migraña crónica tiene antecedentes familiares de migraña.','Si tienes antecedentes familiares, lo más probable es que desarrolles migraña crónica.',
+    ['Sabes P(antecedentes si hay migraña), no P(migraña si hay antecedentes).','Los antecedentes son comunes; la migraña crónica es rara.','Muchísimos con antecedentes nunca la desarrollan.'],
+    'Un seguimiento de 10 años mostró que 6 de cada 10 personas con antecedentes la desarrollaron.'],
+  ['ci','pol','El 70% de los detenidos por disturbios en la protesta militaba en un mismo partido.','La mayoría de los militantes de ese partido participa en disturbios.',
+    ['Sabes P(militante si fue detenido), no P(participa si es militante).','Si el partido tiene un millón de militantes y hubo 200 detenidos, la proporción es ínfima.','La frase invertida suena igual pero afirma otra cosa.'],
+    'Es un partido pequeño: 600 de sus 1.000 militantes fueron identificados en los disturbios.'],
+  ['ci','din','El 75% de las personas que se declararon en quiebra tenía deudas en la tarjeta de crédito.','Tener deuda en la tarjeta es señal de que probablemente quebrarás.',
+    ['Eso mide P(deuda si quebró), no P(quiebra si hay deuda).','Millones de personas tienen deuda en la tarjeta y nunca quiebran.','Falta la proporción de quiebras entre quienes tienen deuda.'],
+    'Entre quienes tenían deuda en la tarjeta, más de la mitad terminó en quiebra en ese estudio.'],
+  ['ci','rel','La mayoría de las parejas que se divorciaron discutía a menudo por dinero.','Si discutes a menudo por dinero con tu pareja, probablemente se divorciarán.',
+    ['Sabes P(discutían si se divorciaron), no P(divorcio si discuten).','Discutir por dinero es frecuente también entre parejas que duran.','Hace falta la tasa de divorcio entre quienes discuten.'],
+    'Un estudio que siguió a parejas que discutían a menudo por dinero encontró que 2 de cada 3 se divorciaron.'],
+
+  ['den','neg','La sucursal Centro recibió 120 quejas este mes; la sucursal Norte, 40.','La sucursal Centro atiende peor que la Norte.',
+    ['No sabes cuántos clientes atendió cada una.','Si Centro atendió 12.000 y Norte 1.000, Centro tiene 1% de quejas y Norte 4%.','Los totales sin denominador no comparan calidad.'],
+    'Ambas atendieron exactamente 5.000 clientes este mes.'],
+  ['den','sal','El 60% de las personas intoxicadas en la ciudad esta semana había comido en el restaurante X.','El restaurante X es el foco probable de la intoxicación.',
+    ['Falta qué proporción de toda la ciudad comió en X.','Si X es donde come el 60% de la ciudad, el dato no lo distingue de nada.','Hay que comparar con la proporción en la población.'],
+    'Solo el 5% de los habitantes había comido en X esa semana.'],
+  ['den','pol','Este año hubo 300 robos en la ciudad A y 150 en la ciudad B.','La ciudad A es más peligrosa que la B.',
+    ['No sabes cuánta gente vive en cada ciudad.','Si A tiene cuatro veces más habitantes, su tasa de robos es la mitad.','Comparar totales entre poblaciones distintas no dice nada.'],
+    'Ambas ciudades tienen 200.000 habitantes.'],
+  ['den','din','El fondo Alfa tuvo 50 clientes que perdieron dinero el año pasado; el fondo Beta, solo 5.','Beta es un fondo más seguro que Alfa.',
+    ['No sabes cuántos clientes tiene cada fondo.','Si Alfa tiene 5.000 clientes y Beta 10, Alfa hizo perder al 1% y Beta al 50%.','El número absoluto de perdedores no mide riesgo.'],
+    'Ambos fondos tienen exactamente 500 clientes con montos similares.'],
+  ['den','rel','De las parejas que conoces que se separaron, 8 se conocieron por apps y 2 en persona.','Las relaciones que empiezan por apps fracasan más.',
+    ['No sabes cuántas parejas de cada tipo conoces en total.','Si conoces 80 parejas de apps y 5 de en persona, las de apps fracasan mucho menos.','Contar solo los fracasos no compara tasas.'],
+    'Conoces 40 parejas de cada tipo: de apps se separaron 8 de 40; de en persona, 2 de 40.'],
+
+  ['sel','neg','De las 50 empresas más exitosas del país, el 80% tiene fundadores que dejaron la universidad.','Los fundadores que dejan la universidad tienen más probabilidades de éxito.',
+    ['Solo miraste a las que triunfaron.','Los miles que dejaron la universidad y fracasaron no aparecen en la lista.','La muestra fue elegida por el resultado.'],
+    'Un registro de todas las empresas fundadas en 10 años, exitosas o no, muestra que las de fundadores sin título triunfaron el doble de veces.'],
+  ['sel','sal','En una encuesta a pacientes que completaron el programa de rehabilitación de 12 semanas, el 90% dijo sentirse mucho mejor.','El programa hace sentir mejor a la gran mayoría de quienes lo empiezan.',
+    ['Solo se encuestó a quienes terminaron.','Los que abandonaron, quizá porque no mejoraban, no cuentan.','Si abandonó la mitad, el 90% es en realidad mucho menos.'],
+    'El 97% de quienes empezaron el programa lo completó.'],
+  ['sel','pol','En una encuesta abierta en la web oficial del gobierno, el 85% aprueba su gestión.','La mayoría de la población aprueba la gestión del gobierno.',
+    ['Responde quien visita la web del gobierno: casi siempre, sus simpatizantes.','La muestra se elige sola y está sesgada hacia el resultado.','Sin muestra aleatoria no se puede generalizar.'],
+    'La encuesta se repitió con 2.000 hogares elegidos al azar en todo el país y dio 83%.'],
+  ['sel','din','Los fondos de inversión que existen hoy rindieron en promedio 9% anual en los últimos 15 años.','Invertir en fondos rinde en promedio 9% anual.',
+    ['Los fondos que cerraron por malos resultados no están en el promedio.','Sobreviven los que rindieron bien: el promedio queda inflado.','La muestra está filtrada por el resultado.'],
+    'El cálculo incluye también todos los fondos que cerraron durante esos 15 años.'],
+  ['sel','rel','Las parejas con más de 30 años de casados que conoces dicen que nunca se acostaban enojados.','Los matrimonios que no se acuestan enojados duran más.',
+    ['Solo preguntaste a matrimonios que duraron.','No sabes cuántos que tampoco se acostaban enojados se separaron.','Sin los que no sobrevivieron, no hay comparación.'],
+    'Un estudio siguió desde la boda a 3.000 parejas, también las que se separaron: las que nunca se acostaban enojadas se separaron la mitad de veces.'],
+
+  ['peq','neg','La tienda del pueblo, que vende unos 20 productos al día, tuvo la tasa de devoluciones más baja de la cadena este trimestre.','Esa tienda tiene el mejor servicio de la cadena.',
+    ['Con pocas ventas, la tasa salta mucho por azar.','Las tiendas pequeñas suelen ocupar tanto el primer puesto como el último.','Un extremo en una muestra pequeña es evidencia débil.'],
+    'Ha sido la de menos devoluciones en cada uno de los últimos 12 trimestres, acumulando más de 20.000 ventas.'],
+  ['peq','sal','En un hospital rural nacieron 12 bebés este mes y el 75% fueron niñas.','Algo en ese hospital favorece que nazcan niñas.',
+    ['Con 12 nacimientos, 9 niñas ocurre por azar con frecuencia.','Los hospitales pequeños muestran proporciones extremas todo el tiempo.','No hay suficientes casos para descartar el azar.'],
+    'Lo mismo ocurre desde hace 10 años, con más de 5.000 nacimientos.'],
+  ['peq','pol','En un pueblo de 800 habitantes, la tasa de cáncer es el triple del promedio nacional.','En ese pueblo hay un factor ambiental que causa cáncer.',
+    ['En un pueblo tan pequeño, 2 o 3 casos más bastan para triplicar la tasa.','Entre miles de pueblos, algunos tendrán tasas altas solo por azar.','Un extremo local en una muestra mínima no indica causa.'],
+    'Lo mismo se repite en los 40 pueblos que comparten el mismo pozo de agua, con 300.000 habitantes en total, y no en los demás.'],
+  ['peq','din','Un gestor de inversiones nuevo superó al mercado en sus dos primeros años.','Es un gestor más hábil que el promedio.',
+    ['Dos años son muy pocos datos: muchos lo logran por suerte.','Entre miles de gestores, cientos ganan dos años seguidos por azar.','Hace falta un historial largo para separar habilidad de suerte.'],
+    'Ha superado al mercado en 18 de sus 20 años de carrera.'],
+  ['peq','rel','Tus tres últimas citas con personas de Valencia salieron mal.','La gente de Valencia no es compatible contigo.',
+    ['Tres casos son una muestra mínima.','Tres citas malas seguidas son normales con cualquier grupo.','No puedes separar el azar de un patrón con tan pocos casos.'],
+    'Has tenido 60 citas con personas de Valencia y 60 con gente de otras ciudades: con las de Valencia salió mal el 80%; con las demás, el 20%.'],
+
+  ['reg','neg','El mes pasado el equipo de ventas tuvo su peor resultado en años. El gerente los regañó y este mes las ventas subieron.','El regaño funcionó.',
+    ['Tras un mes extremadamente malo, lo esperable es volver hacia lo normal.','Las ventas probablemente habrían subido sin el regaño.','La mejora coincide con la intervención, pero no la prueba.'],
+    'Otros 20 equipos con un mes igual de malo que no fueron regañados no mejoraron nada.'],
+  ['reg','sal','Juan fue al médico en el peor día de su dolor de espalda. Le dieron un remedio y a la semana estaba mejor.','El remedio le quitó el dolor.',
+    ['La gente consulta en su peor momento, y desde ahí casi siempre se mejora.','El dolor habría bajado igual en muchos casos.','La mejora tras un pico no prueba el efecto del remedio.'],
+    'En un ensayo con pacientes en su peor momento, los que recibieron placebo no mejoraron y los que recibieron el remedio sí.'],
+  ['reg','pol','La ciudad tuvo un año récord de homicidios. El nuevo alcalde lanzó un plan y al año siguiente los homicidios bajaron 20%.','El plan del alcalde redujo los homicidios.',
+    ['Un año récord es un extremo: lo normal es que el siguiente sea menos malo.','Los planes se lanzan justo después de los picos.','La bajada habría ocurrido en buena parte sin el plan.'],
+    'Las ciudades vecinas, que también tuvieron un año récord y no aplicaron el plan, siguieron igual.'],
+  ['reg','din','Compraste las 5 acciones que más cayeron el año pasado y este año subieron más que el mercado.','Tienes un método para detectar acciones infravaloradas.',
+    ['Tras caídas extremas, muchas acciones rebotan hacia su nivel habitual.','Un año de rebote es lo esperable, no una habilidad.','Hace falta ver el método funcionar muchas veces.'],
+    'Has aplicado el mismo método 15 años seguidos y superó al mercado en 14.'],
+  ['reg','rel','Tu amiga tuvo la peor discusión de su relación. Empezaron terapia de pareja y la semana siguiente estaban mucho mejor.','La terapia arregló la relación en una semana.',
+    ['Tras la peor pelea, lo normal es que la siguiente semana sea más tranquila.','La calma habría vuelto probablemente sin terapia.','El cambio coincide con la terapia, pero no lo demuestra.'],
+    'Parejas en su peor momento que esperaban turno de terapia no mejoraron esa semana; las que la empezaron, sí.'],
+
+  ['cf','neg','Lanzamos una campaña publicitaria en diciembre y las ventas subieron 30%.','La campaña aumentó las ventas.',
+    ['En diciembre las ventas suben casi siempre.','Falta saber qué habría pasado sin campaña.','«Después de» no es «por causa de».'],
+    'En los 5 diciembres anteriores, sin campaña, las ventas nunca subieron más de 2%.'],
+  ['cf','sal','Desde que empezó a tomar el suplemento Z, Ana se resfrió una vez este invierno en lugar de tres.','El suplemento Z reduce los resfriados.',
+    ['No sabes cuántas veces se habría resfriado sin el suplemento.','Los inviernos varían mucho de un año a otro.','Un caso antes-después no tiene comparación.'],
+    'En un ensayo aleatorio con 2.000 personas, quienes tomaron Z tuvieron la mitad de resfriados que quienes tomaron placebo.'],
+  ['cf','pol','Tras aprobar la nueva ley de tránsito, las muertes en carretera bajaron 10% en un año.','La ley redujo las muertes en carretera.',
+    ['Las muertes podían venir bajando por otras razones: autos más seguros, menos tráfico.','Sin saber qué habría pasado sin la ley, no se le puede atribuir la bajada.','Falta un grupo de comparación.'],
+    'Las muertes llevaban 10 años subiendo, y en los países vecinos sin la ley siguieron subiendo ese año.'],
+  ['cf','din','Contraté un asesor financiero y mi cartera subió 15% este año.','El asesor hizo crecer mi cartera.',
+    ['Si el mercado subió 20%, el asesor te hizo perder frente a no hacer nada.','Falta comparar con lo que habría pasado sin asesor.','El resultado absoluto no mide la aportación.'],
+    'El mercado cayó 5% ese año y las carteras similares sin asesor perdieron dinero.'],
+  ['cf','rel','Desde que empezamos a hacer una «noche de cita» semanal, discutimos menos.','La noche de cita reduce las discusiones de pareja.',
+    ['Quizá ya discutían menos por otras razones: menos estrés, otro trabajo.','No sabes qué habría pasado sin la noche de cita.','Un antes-después de una sola pareja no generaliza.'],
+    'En un estudio, a la mitad de 500 parejas se les asignó al azar la noche de cita; esas discutieron mucho menos que las demás.'],
+
+  ['conf','neg','Las empresas que tienen mesa de ping-pong en la oficina son más rentables.','Poner una mesa de ping-pong aumentará la rentabilidad.',
+    ['Las empresas que ya ganan dinero pueden permitirse esos lujos.','Una tercera variable, como el sector o la caja, explica las dos cosas.','La correlación no dice qué pasa si intervienes.'],
+    'En un experimento, 200 oficinas sorteadas recibieron la mesa y su rentabilidad subió frente a las que no.'],
+  ['conf','sal','Las personas que beben café a diario viven más años.','Tomar café alarga la vida.',
+    ['Quienes toman café pueden diferir en ingresos, trabajo o salud previa.','Esa tercera variable puede explicar la longevidad.','Sin controlar esas diferencias, no hay efecto demostrado.'],
+    'En un ensayo, a las personas a quienes se asignó café al azar vivieron más que a las que no.'],
+  ['conf','pol','Los municipios con más bibliotecas tienen más participación electoral.','Abrir bibliotecas aumentará la participación electoral.',
+    ['Los municipios urbanos y con más estudios tienen más de ambas cosas.','La educación o los ingresos pueden causar las dos.','La asociación no indica qué pasaría al abrir una biblioteca.'],
+    'Un programa abrió bibliotecas en municipios elegidos por sorteo, y en ellos la participación subió frente al resto.'],
+  ['conf','din','Las personas que usan una app de presupuesto ahorran más.','Descargar la app te hará ahorrar más.',
+    ['Quien ya es disciplinado con el dinero es quien instala esa app.','La disciplina explica tanto la app como el ahorro.','Instalarla no te da la disciplina.'],
+    'En un experimento, a la mitad de los participantes se les instaló la app por sorteo y ahorraron más que el resto.'],
+  ['conf','rel','Las parejas que viajan juntas al extranjero se separan menos.','Viajar juntos fortalece la relación.',
+    ['Las parejas con más dinero y estabilidad viajan más y se separan menos.','El nivel económico puede explicar ambas cosas.','El viaje podría no aportar nada.'],
+    'Un estudio sorteó viajes entre parejas parecidas, y las que ganaron el viaje se separaron menos que las otras.'],
+
+  ['rev','neg','Las empresas que más gastan en publicidad son las que más venden.','Gastar más en publicidad hace vender más.',
+    ['Las que más venden tienen más dinero para publicidad.','La flecha puede ir de las ventas a la publicidad.','Sin saber qué ocurre primero, no se elige la dirección.'],
+    'Cuando varias empresas subieron su publicidad por sorteo en algunas regiones, sus ventas allí subieron después.'],
+  ['rev','sal','Las personas que hacen ejercicio a diario tienen menos dolor crónico.','El ejercicio previene el dolor crónico.',
+    ['Quien tiene dolor crónico hace menos ejercicio.','El dolor puede causar la falta de ejercicio, y no al revés.','La dirección de la flecha no está demostrada.'],
+    'Un ensayo asignó ejercicio al azar a personas sin dolor, y en 5 años desarrollaron menos dolor crónico que el resto.'],
+  ['rev','pol','Los barrios con más policías tienen más delitos.','Más policías generan más delitos.',
+    ['La policía se envía precisamente donde hay más delitos.','El delito causa la presencia policial.','La correlación va en la dirección contraria a la conclusión.'],
+    'La policía extra se asignó por sorteo, sin mirar los delitos, y después de asignarla los delitos subieron.'],
+  ['rev','din','Los países con más deuda pública crecen menos.','La deuda frena el crecimiento.',
+    ['Crecer poco reduce la recaudación y obliga a endeudarse.','El bajo crecimiento puede causar la deuda.','Sin saber qué vino primero, no hay conclusión causal.'],
+    'En esos países la deuda subió primero, por un desastre natural ajeno a la economía, y el crecimiento cayó después.'],
+  ['rev','rel','Las parejas que van a terapia tienen más problemas que las que no van.','La terapia de pareja empeora las relaciones.',
+    ['Se va a terapia porque ya hay problemas.','Los problemas causan la terapia, no al revés.','Comparar con parejas sin problemas no sirve.'],
+    'Comparadas con parejas que empezaron con los mismos problemas, las que hicieron terapia acabaron con más.'],
+
+  ['col','neg','Entre las startups que consiguieron inversión, las de idea más original tenían equipos más débiles.','Las ideas originales suelen venir de equipos débiles.',
+    ['El inversor financia si la idea es muy buena o si el equipo es muy fuerte.','Mirar solo a las financiadas crea esa relación inversa.','Entre todas las startups puede no haber relación alguna.'],
+    'Lo mismo se observó en todas las startups que pidieron inversión, financiadas o no.'],
+  ['col','sal','Entre los pacientes hospitalizados, los que tienen diabetes tienen menos neumonía.','Los diabéticos tienen menos neumonía.',
+    ['Se ingresa al hospital por una cosa o por la otra.','Entre ingresados, tener una hace menos probable que la otra explique el ingreso.','Fuera del hospital la relación puede no existir.'],
+    'Lo mismo aparece en una muestra aleatoria de toda la población, hospitalizada o no.'],
+  ['col','pol','Entre los políticos que llegaron al congreso, los más carismáticos tienen menos experiencia.','En política, el carisma y la experiencia tienden a excluirse.',
+    ['Se gana una elección con carisma o con experiencia.','Mirar solo a los ganadores fabrica la relación inversa.','Entre todos los candidatos puede no existir.'],
+    'Lo mismo ocurre entre todos los candidatos que se presentaron, ganaran o no.'],
+  ['col','din','Entre los préstamos que el banco aprobó, quienes tenían más ingresos tenían peor historial de crédito.','Ganar más se asocia con peor historial de crédito.',
+    ['El banco aprueba si hay ingresos altos o buen historial.','Entre aprobados, quien tiene mucho de uno puede tener poco del otro.','Entre todos los solicitantes, la relación puede no existir.'],
+    'Lo mismo aparece entre todos los solicitantes, aprobados o rechazados.'],
+  ['col','rel','Entre las personas con las que has salido, las más atractivas eran las más antipáticas.','Las personas atractivas tienden a ser antipáticas.',
+    ['Solo sales con alguien si es atractivo o si es simpático.','Ese filtro crea la relación inversa entre tus citas.','En la población general puede no existir.'],
+    'Lo mismo aparece en una encuesta a 5.000 personas elegidas al azar, sin ningún filtro tuyo.'],
+
+  ['conj','neg','Un proyecto tiene 8 etapas y cada una tiene 90% de probabilidad de terminar a tiempo.','Lo más probable es que el proyecto termine a tiempo.',
+    ['0,9 multiplicado 8 veces da 43%: menos de la mitad.','Cada etapa extra resta probabilidad aunque todas parezcan seguras.','Las probabilidades de cosas que deben ocurrir todas se multiplican.'],
+    'El plan tiene holgura: aunque se retrasen hasta 2 etapas, el proyecto llega a tiempo.'],
+  ['conj','sal','Para que el tratamiento funcione, el paciente debe tolerarlo (80%), cumplirlo los 6 meses (70%) y responder a él (70%).','Lo más probable es que el tratamiento le funcione.',
+    ['0,8 × 0,7 × 0,7 ≈ 39%.','Cada condición necesaria multiplica, no promedia.','La historia completa suena sólida, pero es menos probable que cada parte.'],
+    'Ya toleró el tratamiento y lleva los 6 meses cumplidos; solo falta saber si responde (70%).'],
+  ['conj','pol','Para que la reforma pase se necesita el apoyo de la bancada propia (90%), el del partido aliado (70%) y que el presidente no la vete (70%).','La reforma probablemente pasará.',
+    ['0,9 × 0,7 × 0,7 ≈ 44%.','Tres condiciones probables juntas dan algo improbable.','Hay que multiplicar, no mirar cada una por separado.'],
+    'El aliado y el presidente ya firmaron un acuerdo público de apoyo; solo falta la bancada (90%).'],
+  ['conj','din','Tu plan de jubilación supone que la inflación sigue baja (70%), que tus ingresos suben cada año (70%) y que no tendrás gastos médicos grandes (70%).','Lo más probable es que tu plan funcione tal cual.',
+    ['0,7 × 0,7 × 0,7 ≈ 34%.','Cada supuesto razonable resta probabilidad al conjunto.','Un plan que exige que todo salga bien suele fallar.'],
+    'El plan tiene margen: sigue funcionando aunque falle cualquiera de los tres supuestos.'],
+  ['conj','rel','Para mudarse juntos este año necesitan que ella consiga el traslado (60%), que él encuentre trabajo allá (60%) y encontrar piso a tiempo (80%).','Lo más probable es que se muden juntos este año.',
+    ['0,6 × 0,6 × 0,8 ≈ 29%.','Necesitan las tres cosas a la vez.','El conjunto es mucho menos probable que cada paso.'],
+    'El traslado y el trabajo ya están confirmados por escrito; solo falta el piso (80%).'],
+
+  ['ind','neg','La empresa tiene dos servidores y cada uno falla 1 día de cada 100.','Que fallen los dos el mismo día pasará solo 1 día de cada 10.000.',
+    ['Ese cálculo supone que sus fallas son independientes.','Si comparten edificio, electricidad o red, un solo corte los tumba juntos.','Con riesgos comunes, la falla doble es mucho más frecuente.'],
+    'Están en dos países distintos, con proveedores eléctricos y de red diferentes, y nunca han fallado el mismo día.'],
+  ['ind','sal','A un paciente le hicieron dos pruebas, cada una con 5% de falsos positivos, y ambas dieron positivo.','La probabilidad de que las dos sean falsos positivos es de 0,25%.',
+    ['Eso supone que los errores de una prueba no tienen que ver con los de la otra.','Si usan la misma muestra o el mismo método, el mismo error afecta a ambas.','Los errores correlacionados no se multiplican.'],
+    'Las dos pruebas usan métodos distintos y se hicieron con muestras tomadas en días diferentes.'],
+  ['ind','pol','Tres encuestadoras dan ganador al candidato A, y cada una acierta el 80% de las veces.','La probabilidad de que las tres se equivoquen a la vez es de 0,8%.',
+    ['Eso supone que sus errores son independientes.','Si comparten métodos o el mismo sesgo de quién responde, fallan juntas.','Los errores comunes no se multiplican.'],
+    'Sus errores históricos no se parecen: cuando una falló, las otras acertaron, y usan métodos totalmente distintos.'],
+  ['ind','din','Invertiste en 10 empresas distintas, cada una con 5% de probabilidad de quebrar este año.','Perderlo todo es prácticamente imposible.',
+    ['Eso supone que las quiebras son independientes.','Si son del mismo sector o país, una sola crisis las hunde juntas.','Diversificar en riesgos que se mueven juntos no protege.'],
+    'Las 10 empresas son de sectores y países distintos, y sus resultados nunca se han movido juntos.'],
+  ['ind','rel','Tienes dos amigos que te prestarían dinero en una emergencia; cada uno podría fallarte 1 de cada 5 veces.','Solo hay 4% de probabilidad de quedarte sin ayuda.',
+    ['Ese 4% supone que sus situaciones son independientes.','Si trabajan en la misma empresa o sector, una crisis los afecta a la vez.','Los riesgos que se mueven juntos no se multiplican.'],
+    'Trabajan en sectores distintos y sus situaciones económicas no tienen nada que ver.'],
+
+  ['rr','neg','El nuevo proveedor tiene el doble de tasa de piezas defectuosas que el actual.','Cambiar de proveedor sería un desastre para la calidad.',
+    ['Duplicar 1 de cada 100.000 es pasar a 2 de cada 100.000.','Sin la tasa absoluta, «el doble» puede ser irrelevante.','Hay que comparar en valores absolutos.'],
+    'La tasa actual ya es de 8 piezas defectuosas por cada 100, y pasaría a 16.'],
+  ['rr','sal','Un estudio dice que comer cierto embutido a diario aumenta 18% el riesgo de una enfermedad.','Comer ese embutido a diario implica un riesgo alto de tener la enfermedad.',
+    ['Un 18% más de un riesgo del 5% es pasar a 5,9%.','El aumento relativo no dice si el riesgo es alto.','Falta el riesgo de partida.'],
+    'El riesgo de base en tu grupo es del 40%, así que subiría a más del 47%.'],
+  ['rr','pol','El ministerio anuncia que su programa reduce a la mitad los accidentes laborales en minería.','El programa evitará muchísimos accidentes.',
+    ['Si había 4 accidentes al año, la mitad son 2.','«La mitad» no dice cuántos casos se evitan.','Hace falta el número absoluto.'],
+    'En el sector hay unos 20.000 accidentes al año, así que evitaría unos 10.000.'],
+  ['rr','din','La inversión B tiene el triple de probabilidad de pérdida total que la A.','B es muchísimo más arriesgada que A.',
+    ['El triple de 0,1% es 0,3%.','Sin el valor absoluto no sabes si la diferencia importa.','Un múltiplo grande de algo pequeño sigue siendo pequeño.'],
+    'La probabilidad de pérdida total de A es del 10%, y la de B, del 30%.'],
+  ['rr','rel','Un artículo dice que casarse antes de los 25 aumenta 50% el riesgo de divorcio.','Si te casas antes de los 25, lo más probable es que te divorcies.',
+    ['Si el riesgo de base es 20%, un 50% más es 30%: sigue siendo minoría.','El aumento relativo no dice si el resultado pasa a ser probable.','Falta el riesgo de partida.'],
+    'El riesgo de divorcio de base es del 40%, así que pasaría al 60%.'],
+
+  ['pct','neg','Las ventas cayeron 20% en enero y subieron 20% en febrero.','Las ventas volvieron al nivel de diciembre.',
+    ['0,8 × 1,2 = 0,96: quedan 4% por debajo.','El 20% de subida se calcula sobre una base ya menor.','Los porcentajes se encadenan multiplicando.'],
+    'En febrero subieron 25%, no 20%.'],
+  ['pct','sal','La dosis de un medicamento se redujo 30% y luego otro 30%.','La dosis bajó 60% en total.',
+    ['0,7 × 0,7 = 0,49: bajó 51%, no 60%.','La segunda reducción se aplica sobre la dosis ya reducida.','Los porcentajes sucesivos no se suman.'],
+    'Las dos reducciones se calcularon sobre la dosis original, no sobre la ya reducida.'],
+  ['pct','pol','El presupuesto de educación se recortó 50% el año pasado y este año el gobierno lo subió 50%.','El presupuesto de educación está como antes del recorte.',
+    ['0,5 × 1,5 = 0,75: sigue 25% por debajo.','Subir 50% sobre la mitad no recupera lo perdido.','Para volver al inicio había que subirlo 100%.'],
+    'Este año lo subió 100%, no 50%.'],
+  ['pct','din','Tu inversión perdió 40% y luego ganó 40%.','Quedaste igual que al principio.',
+    ['0,6 × 1,4 = 0,84: perdiste 16%.','Recuperar una pérdida exige un porcentaje mayor que el perdido.','Las ganancias y pérdidas porcentuales no son simétricas.'],
+    'Después de perder 40%, ganó 67%.'],
+  ['pct','rel','Este año pasan 20% menos tiempo juntos que el anterior, y se propusieron aumentarlo 20%.','Si lo logran, recuperarán el tiempo que tenían.',
+    ['0,8 × 1,2 = 0,96: seguirían 4% por debajo.','El aumento se calcula sobre una base ya menor.','Para recuperarlo hace falta subir 25%.'],
+    'Se propusieron aumentarlo 25%, no 20%.'],
+
+  ['exp','neg','La app tiene 10.000 usuarios y el mes pasado ganó 1.000 nuevos.','En dos años tendrá unos 34.000 usuarios.',
+    ['Eso supone que suma siempre 1.000 al mes.','Si crece 10% al mes sobre lo que ya tiene, en dos años serían unos 98.000.','Con los datos dados no se sabe si el crecimiento es fijo o proporcional.'],
+    'La app suma cada mes unos 1.000 usuarios nuevos, siempre los mismos, sin importar cuántos tenga.'],
+  ['exp','sal','Un brote pasó de 50 a 100 casos en los últimos 3 días.','En un mes habrá unos 1.000 casos.',
+    ['Eso supone que se suman unos 30 casos por día.','Si se duplica cada 3 días, en un mes serían unos 100.000.','La intuición lineal subestima lo que crece en proporción a sí mismo.'],
+    'El brote está contenido: desde hoy solo se suman unos 30 casos nuevos por día.'],
+  ['exp','pol','La deuda del país crece 7% al año.','La deuda tardará unos 14 años en duplicarse (100 ÷ 7).',
+    ['Si el 7% se aplica sobre la deuda acumulada, se duplica en unos 10 años (72 ÷ 7).','El crecimiento compuesto acelera la duplicación.','La cuenta lineal la retrasa casi 4 años.'],
+    'El 7% se calcula siempre sobre la deuda de hoy: cada año se suma la misma cantidad fija.'],
+  ['exp','din','Una tarjeta cobra 3% de interés mensual y no pagas nada en un año.','En un año la deuda habrá crecido 36%.',
+    ['Con interés sobre interés, 1,03 elevado a 12 da 1,43: crece 43%.','Cada mes se cobra sobre una deuda mayor.','La suma 3% × 12 subestima el costo.'],
+    'El interés se calcula siempre sobre la deuda inicial, nunca sobre la acumulada.'],
+  ['exp','rel','Hoy saben un chisme 3 personas, y cada una se lo cuenta a 2 personas nuevas cada día.','En una semana lo sabrán unas 45 personas.',
+    ['Si cada nuevo oyente también lo cuenta, el número se triplica cada día: miles en una semana.','El crecimiento se alimenta de sí mismo.','Sumar 6 por día es pensar en lineal.'],
+    'En realidad solo las 3 personas iniciales lo cuentan; nadie más lo repite.'],
+
+  ['simp','neg','El vendedor A cerró el 60% de sus tratos y el vendedor B, el 50%.','A es mejor vendedor que B.',
+    ['Si B atiende casi solo clientes grandes, que cierran menos, puede ganar dentro de cada tipo.','El total depende de la mezcla de clientes.','Hay que comparar dentro de grupos equivalentes.'],
+    'Ambos atendieron la misma mezcla de clientes grandes y pequeños, y A gana también dentro de cada tipo.'],
+  ['simp','sal','En el hospital A muere el 4% de los operados; en el B, el 2%.','El hospital B opera mejor que el A.',
+    ['Si A recibe los casos más graves, puede tener menos muertes en graves y en leves.','La mezcla de pacientes cambia el total.','El agregado puede invertir la comparación de cada grupo.'],
+    'Ambos reciben la misma proporción de casos graves, y B tiene menos muertes tanto en graves como en leves.'],
+  ['simp','pol','Una universidad admitió al 40% de las mujeres que postularon y al 50% de los hombres.','La universidad admite con menos frecuencia a las mujeres que a los hombres en igualdad de condiciones.',
+    ['Si las mujeres postulan más a carreras muy selectivas, cada carrera puede admitirlas más.','El total mezcla carreras con tasas muy distintas.','Hay que comparar dentro de cada carrera.'],
+    'Dentro de cada carrera, la tasa de admisión de mujeres también es menor que la de hombres.'],
+  ['simp','din','En una plataforma, quienes usan el robot asesor ganaron 6% de media y quienes invierten solos, 8%.','Invertir solo da mejores resultados que usar el robot.',
+    ['Si el robot lo usan sobre todo los perfiles conservadores, que ganan menos, el robot puede ganar dentro de cada perfil.','El total depende de quién usa cada opción.','Hay que comparar dentro del mismo perfil de riesgo.'],
+    'Ambos grupos tienen la misma mezcla de perfiles, y quienes invierten solos ganan más dentro de cada perfil.'],
+  ['simp','rel','En la ciudad A los matrimonios duran en promedio más que en la ciudad B.','En A los matrimonios duran más a cualquier edad de casamiento.',
+    ['Si en A la gente se casa más tarde, y esos matrimonios duran más, B puede ganar en cada grupo de edad.','El promedio total mezcla grupos distintos.','Hay que comparar dentro de cada edad.'],
+    'Comparando por edad al casarse, A también tiene matrimonios más largos en cada grupo.'],
+].map(([r, ctx, s, c, why, fix]) => ({ r, ctx, s, c, why, fix, key: `${r}|${ctx}` }));
+
+const SESSION_ITEMS = 8;   // situaciones por sesión
+const WARM_SECONDS = 90;   // tope del calentamiento
+const WARM_TOPICS = ['pct', 'frac', 'dec', 'ecu', 'tres', 'est', 'div', 'mult'];
+const CONFS = [50, 65, 80, 95];
+
+/* --- Selección: variación de superficie forzada ---
+   Registro (regla × contexto). Primero las combinaciones nunca vistas; una regla no se repite
+   en una sesión ni dos contextos iguales seguidos; las reglas flojas pesan más. */
+const ruleLog = r => S.razon.log.filter(e => e.r === r);
+function weakness(r) {
+  const last = ruleLog(r).slice(-6);
+  return last.length ? 1 - last.filter(e => e.ok2).length / last.length : .6;
+}
+function ruleOptions(r) {
+  const area = RULES[r].area, ids = Object.keys(RULES).filter(x => x !== r);
+  const same = ids.filter(x => RULES[x].area === area).sort(() => Math.random() - .5).slice(0, 2);
+  const other = ids.filter(x => RULES[x].area !== area).sort(() => Math.random() - .5).slice(0, 4 - same.length);
+  return [r, ...same, ...other].sort(() => Math.random() - .5);
+}
+function pickSession(n) {
+  const out = [], usedR = new Set(); let prevCtx = null;
+  for (let i = 0; i < n; i++) {
+    let best = null, bs = -Infinity;
+    for (const it of ITEMS) {
+      if (usedR.has(it.r) || it.ctx === prevCtx) continue;
+      const seen = S.razon.seen[it.key] || 0;
+      const sc = (seen ? -4 * seen : 10) + weakness(it.r) * 4 + Math.random() * 1.5;
+      if (sc > bs) { bs = sc; best = it; }
+    }
+    usedR.add(best.r); prevCtx = best.ctx;
+    const last = S.razon.lastVar[best.key];
+    out.push({ ...best, valid: last === undefined ? Math.random() < .3 : !last, nuevo: !S.razon.seen[best.key], opts: ruleOptions(best.r) });
+  }
+  return out;
+}
+
+/* --- Sesión de razonamiento --- */
+let R = null;
+function startReasonSession(withWarm) {
+  if (withWarm) start('warm'); else beginReason(null);
+}
+function beginReason(warm) {
+  R = { items: pickSession(SESSION_ITEMS), i: 0, res: [], warm, t0: performance.now(), start: performance.now() };
+  document.body.style.overflow = 'hidden';
+  show($('#reason'));
+  renderItem();
+}
+function renderItem() {
+  const it = R.items[R.i];
+  R.cur = { a1: null, a2: null, conf: null }; R.t0 = performance.now();
+  $('#rsProg').textContent = `${R.i + 1}/${R.items.length}`;
+  $('#rsBar').style.width = `${R.i / R.items.length * 100}%`;
+  $('#rsCtx').textContent = CTX[it.ctx] + (it.nuevo ? ' · combinación nueva' : '');
+  const body = $('#rsBody');
+  body.innerHTML = `<div class="rcard"><p class="rs">${esc(it.s)}${it.valid ? ' ' + esc(it.fix) : ''}</p>
+      <p class="rc"><span>Conclusión</span>«${esc(it.c)}»</p></div>
+    <div class="rstep" id="st1"><h3><b>1</b>¿La conclusión se sigue de lo que se dice?</h3>
+      <div class="rbtns two"><button class="ropt press" data-a1="1">Se sostiene</button><button class="ropt press" data-a1="0">No se sostiene</button></div></div>
+    <div class="rstep" id="st2" hidden><h3><b>2</b>¿Qué regla está en juego?</h3>
+      <div class="rbtns">${it.opts.map(r => `<button class="ropt press" data-a2="${r}">${RULES[r].name}</button>`).join('')}</div></div>
+    <div class="rstep" id="st3" hidden><h3><b>3</b>¿Qué tan seguro estás de tu respuesta 1?</h3>
+      <div class="rbtns four">${CONFS.map(c => `<button class="ropt press num" data-conf="${c}">${c}%</button>`).join('')}</div></div>
+    <div id="rfb" hidden></div>`;
+  body.classList.remove('enter'); void body.offsetWidth; body.classList.add('enter');
+  $('#reason').scrollTop = 0;
+}
+function reveal(id) { const el = $(id); el.hidden = false; el.classList.add('enter'); setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60); }
+function lockChoice(btn, attr) {
+  btn.closest('.rbtns').querySelectorAll('button').forEach(b => { b.disabled = true; b.classList.toggle('chosen', b === btn); });
+}
+function onReasonClick(e) {
+  const b = e.target.closest('button'); if (!b || !R || b.disabled) return;
+  const c = R.cur;
+  if (b.dataset.a1 !== undefined && c.a1 === null) { c.a1 = b.dataset.a1 === '1'; lockChoice(b); reveal('#st2'); }
+  else if (b.dataset.a2 && c.a2 === null) { c.a2 = b.dataset.a2; lockChoice(b); reveal('#st3'); }
+  else if (b.dataset.conf && c.conf === null) { c.conf = +b.dataset.conf; lockChoice(b); grade(); }
+  else if (b.id === 'rsNext') nextItem();
+}
+function grade() {
+  const it = R.items[R.i], c = R.cur;
+  const ok1 = c.a1 === it.valid, ok2 = c.a2 === it.r;
+  const p = c.conf / 100, brier = (p - (ok1 ? 1 : 0)) ** 2;
+  const pts = (ok1 ? 25 : 0) + (ok2 ? 75 : 0), ms = performance.now() - R.t0;
+  const e = { d: Date.now(), r: it.r, ctx: it.ctx, valid: it.valid, ok1, ok2, conf: c.conf, nuevo: it.nuevo, ms: Math.round(ms) };
+  S.razon.log.push(e); if (S.razon.log.length > 3000) S.razon.log = S.razon.log.slice(-3000);
+  S.razon.seen[it.key] = (S.razon.seen[it.key] || 0) + 1; S.razon.lastVar[it.key] = it.valid;
+  R.res.push({ ...e, pts, brier });
+  save();
+  const rule = RULES[it.r];
+  const sure = !ok1 && c.conf >= 80 ? '<p class="warnline">Seguro y equivocado: es lo que más castiga la calibración.</p>' : '';
+  const why = it.why.map(w => `<li>${esc(w)}</li>`).join('');
+  $('#rfb').innerHTML = `
+    <div class="verdict">
+      <div class="${ok1 ? 'ok' : 'no'}"><span class="ic">${ok1 ? '✓' : '✗'}</span><span class="vt">Conclusión: ${it.valid ? 'se sostenía' : 'no se sostenía'}</span><em class="num">${ok1 ? '+25' : '0'}</em></div>
+      <div class="${ok2 ? 'ok' : 'no'}"><span class="ic">${ok2 ? '✓' : '✗'}</span><span class="vt">Regla: ${rule.name}${ok2 ? '' : ` <small>· elegiste ${RULES[c.a2].name}</small>`}</span><em class="num">${ok2 ? '+75' : '0'}</em></div>
+      <div class="cal"><span class="ic">◎</span><span class="vt">Confianza ${c.conf}% · Brier <b class="num">${d2(brier)}</b> <small>· 0 es perfecto</small></span><em></em></div>
+    </div>${sure}
+    <div class="lesson-fb">
+      <h4>${rule.name} <small>${AREAS[rule.area]}</small></h4>
+      <p class="rd">${rule.d}</p>
+      ${it.valid
+        ? `<h5>Por qué aquí sí se sostiene</h5><p class="fix">El enunciado incluía el dato que cierra el hueco: <b>${esc(it.fix)}</b></p><h5>Sin ese dato, fallaría así</h5><ol>${why}</ol>`
+        : `<h5>Por qué falla aquí</h5><ol>${why}</ol><h5>Qué dato la habría vuelto válida</h5><p class="fix"><b>${esc(it.fix)}</b></p>`}
+    </div>
+    <button class="btn primary press block" id="rsNext">${R.i + 1 < R.items.length ? 'Siguiente situación' : 'Ver resultado'}</button>`;
+  reveal('#rfb');
+}
+const d2 = x => (Math.round(x * 100) / 100).toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function nextItem() {
+  if (R.i + 1 < R.items.length) { R.i++; renderItem(); } else finishReason();
+}
+function finishReason() {
+  if (!R) return;
+  const r = R; R = null;
+  hide($('#reason'));
+  if (!r.res.length) { document.body.style.overflow = ''; if (pendingReload) return location.reload(); renderAll(); return; }
+  const n = r.res.length, ok1 = r.res.filter(x => x.ok1).length, ok2 = r.res.filter(x => x.ok2).length;
+  const pts = r.res.reduce((s, x) => s + x.pts, 0) / n, brier = r.res.reduce((s, x) => s + x.brier, 0) / n;
+  const nuevos = r.res.filter(x => x.nuevo), ms = performance.now() - r.start, wms = r.warm ? r.warm.ms : 0;
+  S.razon.sessions.unshift({ d: Date.now(), n, ok1, ok2, pts: Math.round(pts), brier: Math.round(brier * 1000) / 1000, nuevos: nuevos.length, nuevosOk2: nuevos.filter(x => x.ok2).length, ms: Math.round(ms), warmMs: Math.round(wms) });
+  S.razon.sessions = S.razon.sessions.slice(0, 100);
+  save();
+  const share = Math.round(ms / (ms + wms) * 100);
+  $('#rrBody').innerHTML = `
+    <h1><small>Sesión de razonamiento</small>Resultado</h1>
+    <div><div class="big num">${Math.round(pts)}</div><div style="color:var(--muted)">puntos de 100 por situación · la regla vale 75, la conclusión 25</div></div>
+    <div><h2>Razonamiento</h2><div class="kpis">
+      <div class="kpi"><b class="num">${ok2}/${n}</b><span>reglas nombradas</span></div>
+      <div class="kpi"><b class="num">${ok1}/${n}</b><span>conclusiones</span></div>
+      <div class="kpi"><b class="num">${d2(brier)}</b><span>Brier (0 = perfecto)</span></div></div>
+      <p class="note">Combinaciones nuevas: ${nuevos.length} de ${n}, con la regla acertada en ${nuevos.filter(x => x.ok2).length}. Razonamiento: ${share}% del tiempo de la sesión.</p></div>
+    ${r.warm ? `<div><h2>Automaticidad · aparte</h2><p class="note" style="margin-top:0">Calentamiento: ${r.warm.ok} de ${r.warm.n} en ${Math.round(wms / 1000)} s${r.warm.n ? ` · ${d1(r.warm.qms / r.warm.n / 1000)} s por respuesta` : ''}. Libera memoria de trabajo para el razonamiento; no cuenta como razonamiento.</p></div>` : ''}
+    <div><h2>Repaso</h2>${r.res.map((x, i) => `<div class="mist"><span class="q">${RULES[x.r].name} · ${CTX[x.ctx]}</span><span class="r ${x.ok2 ? '' : 'bad'}">${x.pts}</span>
+      <span class="s">${x.ok1 ? 'Conclusión ✓' : 'Conclusión ✗'} · ${x.ok2 ? 'Regla ✓' : 'Regla ✗'} · confianza ${x.conf}%</span></div>`).join('')}</div>
+    <div class="btns"><button class="btn press" id="rrHome">Volver</button><button class="btn primary press" id="rrAgain">Otra sesión</button></div>`;
+  const body = $('#rrBody'); body.classList.remove('enter'); void body.offsetWidth; body.classList.add('enter');
+  show($('#rres')); $('#rres').scrollTop = 0;
+  $('#rrHome').onclick = () => pendingReload ? location.reload() : hide($('#rres'), () => { document.body.style.overflow = ''; renderAll(); });
+  $('#rrAgain').onclick = () => hide($('#rres'), () => startReasonSession(true));
+}
+
+/* --- Métricas de razonamiento (nunca mezcladas con cálculo ni calentamiento) --- */
+function razonStats() {
+  const L = S.razon.log, n = L.length;
+  const ok1 = L.filter(e => e.ok1).length, ok2 = L.filter(e => e.ok2).length;
+  const brier = n ? L.reduce((s, e) => s + (e.conf / 100 - (e.ok1 ? 1 : 0)) ** 2, 0) / n : null;
+  const nuevos = L.filter(e => e.nuevo);
+  const cov = ITEMS.filter(it => S.razon.seen[it.key]).length;
+  const buckets = CONFS.map(c => { const b = L.filter(e => e.conf === c); return { c, n: b.length, acc: b.length ? b.filter(e => e.ok1).length / b.length : null }; });
+  return { n, ok1, ok2, brier, nuevos: nuevos.length, nuevosOk2: nuevos.filter(e => e.ok2).length, cov, buckets };
+}
+function calibrationSvg(buckets) {
+  const W = 320, H = 200, l = 34, r = 10, t = 10, b = 26;
+  const X = v => l + (v - 50) / 50 * (W - l - r), Y = v => t + (1 - (v - 0) / 100) * (H - t - b);
+  let s = '';
+  for (const g of [0, 25, 50, 75, 100]) s += `<line x1="${l}" x2="${W - r}" y1="${Y(g)}" y2="${Y(g)}" stroke="var(--line)"/><text x="${l - 6}" y="${Y(g) + 3}" text-anchor="end">${g}%</text>`;
+  for (const c of CONFS) s += `<text x="${X(c)}" y="${H - 8}" text-anchor="middle">${c}%</text>`;
+  s += `<line x1="${X(50)}" y1="${Y(50)}" x2="${X(100)}" y2="${Y(100)}" stroke="var(--muted)" stroke-dasharray="4 4" stroke-opacity=".7"/>`;
+  const pts = buckets.filter(x => x.n);
+  if (pts.length > 1) s += `<polyline fill="none" stroke="var(--accent)" stroke-width="2" points="${pts.map(x => `${X(x.c)},${Y(x.acc * 100)}`).join(' ')}"/>`;
+  for (const x of pts) s += `<circle cx="${X(x.c)}" cy="${Y(x.acc * 100)}" r="${Math.min(9, 3.5 + Math.sqrt(x.n))}" fill="var(--accent)"><title>Dijiste ${x.c}%: acertaste ${Math.round(x.acc * 100)}% (${x.n})</title></circle>`;
+  return s;
+}
+
+
 /* ================= Estado guardado ================= */
 const KEY = 'cuanti.v1';
-const blank = () => ({ topics: {}, days: {}, sessions: [], best: {}, lessons: {}, goal: 40, fmt: 'sprint', diff: 'auto' });
+const blank = () => ({ v: 2, topics: {}, days: {}, sessions: [], best: {}, lessons: {}, goal: 40, fmt: 'sprint', diff: 'auto',
+  razon: { seen: {}, lastVar: {}, log: [], sessions: [] }, warm: { n: 0, ok: 0, ms: 0, sessions: [] }, archive: { topics: {}, best: {}, notes: [] } });
+/* Migración v1 → v2: nada se borra. Lo de la pista de cálculo sigue donde estaba; lo que ya no encaja
+   (series, la marca del Desafío total que incluía series) pasa al archivo, visible en Más → Tus datos.
+   Antes de migrar se guarda una copia íntegra en «cuanti.backup.v1». */
+function migrate(old) {
+  const st = Object.assign(blank(), old);
+  if ((old.v || 1) >= 2) return st;
+  try { localStorage.setItem('cuanti.backup.v1', JSON.stringify(old)); } catch (e) {}
+  const a = st.archive, when = new Date().toLocaleDateString('es');
+  if (st.topics.serie) { a.topics.serie = st.topics.serie; delete st.topics.serie; a.notes.push(`${when}: las estadísticas de Series pasaron a Patrones (sin métrica).`); }
+  if (st.best.serie) { a.best['Series · Sprint 60 s'] = st.best.serie; delete st.best.serie; }
+  if (st.best.all) { a.best['Desafío total · versión que incluía series'] = st.best.all; delete st.best.all; a.notes.push(`${when}: la marca del Desafío total se archivó porque ahora no incluye series.`); }
+  a.notes.push(`${when}: migración a la versión 2. Copia íntegra de tus datos anteriores guardada.`);
+  st.v = 2;
+  return st;
+}
 let S = blank();
-try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(blank(), JSON.parse(raw)); } catch (e) {}
+try { const raw = localStorage.getItem(KEY); if (raw) { S = migrate(JSON.parse(raw)); localStorage.setItem(KEY, JSON.stringify(S)); } } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 const T = k => (S.topics[k] ||= { lvl: 1, n: 0, ok: 0, ms: 0 });
-const nameOf = k => k === 'mix' ? 'Mixto esencial' : k === 'all' ? 'Desafío total' : k.startsWith('L:') ? (LESSONS.find(l => l.id === k.slice(2))?.title || 'Lección') : TOPICS[k]?.name || k;
+const nameOf = k => k === 'mix' ? 'Mixto esencial' : k === 'all' ? 'Desafío total' : k === 'warm' ? 'Calentamiento' : k === 'serie' ? 'Series (archivado: ahora en Patrones)'
+  : k.startsWith('P:') ? 'Patrones' : /^[LK]:/.test(k) ? (LESSONS.find(l => l.id === k.slice(2))?.title || 'Lección') : TOPICS[k]?.name || k;
 
 /* ================= Selectores ================= */
 function setSeg(sel, val) {
@@ -687,7 +1253,7 @@ function streak() {
 const lvlLabel = k => S.diff === 'auto' ? `Nv ${Math.floor(T(k).lvl)}` : DIFF[S.diff][0];
 function renderHome() {
   const h = new Date().getHours();
-  $('#hello').textContent = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  $('#hello').textContent = 'Pista de cálculo';
   const today = S.days[dayKey()] || { n: 0, ok: 0 };
   const pct = clamp(today.ok / S.goal, 0, 1);
   requestAnimationFrame(() => $('#ringArc').setAttribute('stroke-dasharray', `${pct * 100} 100`));
@@ -702,7 +1268,7 @@ function renderHome() {
   const lab = ks => S.diff === 'auto' ? `nivel ${avg(ks)}` : DIFF[S.diff][0].toLowerCase();
   let html = `<h2>Sesiones rápidas</h2><div class="duo">
     <button class="hero press" data-topic="mix"><span class="nm">Mixto esencial</span><span class="lv">+ − × ÷ % · ${lab(MIX)}</span></button>
-    <button class="hero alt press" data-topic="all"><span class="nm">Desafío total</span><span class="lv">Los ${ALL.length} temas · ${lab(ALL)}</span></button></div>`;
+    <button class="hero alt press" data-topic="all"><span class="nm">Desafío total</span><span class="lv">Los ${ALL.length} temas de cálculo · ${lab(ALL)}</span></button></div>`;
   for (const [cat, keys] of CATS) {
     html += `<h2>${cat}</h2><div class="topics">`;
     for (const k of keys) {
@@ -717,7 +1283,8 @@ function renderHome() {
 
 /* ================= Juego ================= */
 let G = null;
-const FMT = { sprint: 'Sprint 60 s', ten: '10 preguntas', free: 'Libre', lesson: 'Práctica guiada' };
+const FMT = { sprint: 'Sprint 60 s', ten: '10 preguntas', free: 'Libre', lesson: 'Práctica guiada', warm: 'Calentamiento', open: 'Sin métrica' };
+const PAT_RANGE = { f: [1, 3], m: [4, 6], d: [7, 8], x: [9, 10] };
 
 function show(el) { el.classList.remove('out'); el.hidden = false; }
 function hide(el, then) {
@@ -727,22 +1294,24 @@ function hide(el, then) {
 }
 
 function start(topic) {
-  const lesson = topic.startsWith('L:') ? LESSONS.find(l => l.id === topic.slice(2)) : null;
-  const fmtk = lesson ? 'lesson' : S.fmt;
-  G = { topic, lesson, fmt: fmtk, n: 0, ok: 0, ms: 0, mistakes: [], q: null, input: '', t0: 0, start: performance.now(), lock: false, timer: null, lvls: [] };
+  const lesson = /^[LK]:/.test(topic) ? LESSONS.find(l => l.id === topic.slice(2)) : null;
+  const kind = topic === 'warm' ? 'warm' : (topic.startsWith('K:') || topic.startsWith('P:')) ? 'open' : 'calc';
+  const fmtk = kind === 'warm' ? 'warm' : kind === 'open' ? 'open' : lesson ? 'lesson' : S.fmt;
+  G = { topic, lesson, kind, fmt: fmtk, n: 0, ok: 0, ms: 0, mistakes: [], q: null, input: '', t0: 0, start: performance.now(), lock: false, timer: null, lvls: [] };
   hide($('#result')); show($('#play'));
   document.body.style.overflow = 'hidden';
-  $('#pSub').textContent = fmtk === 'sprint' ? 'segundos' : fmtk === 'free' ? 'respondidas' : 'pregunta';
-  if (fmtk === 'sprint') G.timer = setInterval(tick, 200);
+  $('#pSub').textContent = fmtk === 'sprint' || fmtk === 'warm' ? 'segundos' : fmtk === 'free' ? 'respondidas' : 'pregunta';
+  if (fmtk === 'sprint' || fmtk === 'warm') G.timer = setInterval(tick, 200);
   tick(); next(true);
 }
-const total = () => G.fmt === 'lesson' ? 10 : G.fmt === 'ten' ? 10 : 0;
+const total = () => ['lesson', 'ten', 'open'].includes(G.fmt) ? 10 : 0;
+const timed = () => G.fmt === 'sprint' ? 60 : G.fmt === 'warm' ? WARM_SECONDS : 0;
 function tick() {
   if (!G) return;
-  if (G.fmt === 'sprint') {
-    const left = Math.max(0, 60 - (performance.now() - G.start) / 1000);
+  if (timed()) {
+    const T0 = timed(), left = Math.max(0, T0 - (performance.now() - G.start) / 1000);
     $('#pMain').textContent = Math.ceil(left);
-    $('#pBar').style.width = `${(1 - left / 60) * 100}%`;
+    $('#pBar').style.width = `${(1 - left / T0) * 100}%`;
     if (left <= 0 && !G.lock) finish();
   } else if (total()) {
     $('#pMain').textContent = `${Math.min(G.n + 1, total())}/${total()}`;
@@ -751,6 +1320,11 @@ function tick() {
   $('#pScore').textContent = G.ok;
 }
 function makeQ() {
+  if (G.kind === 'warm') { // lee el nivel de cálculo pero nunca lo escribe
+    const k = pick(WARM_TOPICS), L = clamp(Math.floor(S.topics[k]?.lvl || 2), 1, 10);
+    const q = TOPICS[k].gen(L); q.k = k; q.L = L; q.tag = `Calentamiento · ${TOPICS[k].name}`; return q;
+  }
+  if (G.topic.startsWith('P:')) { const r = PAT_RANGE[G.topic.slice(2)] || [1, 10], L = rnd(r[0], r[1]); const q = TOPICS.serie.gen(L); q.k = 'serie'; q.L = L; q.tag = `Patrones · nivel ${L}`; return q; }
   if (G.lesson) { const q = G.lesson.gen(G.n + 1); q.k = G.lesson.topic; q.L = clamp(G.n + 1, 1, 10); q.tag = G.lesson.title; return q; }
   const k = G.topic === 'mix' ? pick(MIX) : G.topic === 'all' ? pick(ALL) : G.topic;
   const r = DIFF[S.diff][1];
@@ -798,14 +1372,16 @@ function submit(skip) {
   if (!skip && isNaN(v)) { a.classList.remove('bad'); void a.offsetWidth; a.classList.add('bad'); return; }
   G.lock = true;
   const q = G.q, dt = performance.now() - G.t0, ok = !skip && isRight(q, v);
-  const st = T(q.k); st.n++; st.ms += dt;
-  if (ok) st.ok++;
-  // Nivel adaptativo: solo en modo Auto y fuera de lecciones.
-  if (S.diff === 'auto' && !G.lesson) {
-    const target = (q.long ? 12000 : 5000) + q.L * 600;
-    st.lvl = clamp(st.lvl + (ok ? (dt < target ? .34 : .15) : -.5), 1, 10.99);
-  }
-  const day = (S.days[dayKey()] ||= { n: 0, ok: 0 }); day.n++; if (ok) day.ok++;
+  if (G.kind === 'calc') { // solo la pista de cálculo toca sus métricas
+    const st = T(q.k); st.n++; st.ms += dt;
+    if (ok) st.ok++;
+    // Nivel adaptativo: solo en modo Auto y fuera de lecciones.
+    if (S.diff === 'auto' && !G.lesson) {
+      const target = (q.long ? 12000 : 5000) + q.L * 600;
+      st.lvl = clamp(st.lvl + (ok ? (dt < target ? .34 : .15) : -.5), 1, 10.99);
+    }
+    const day = (S.days[dayKey()] ||= { n: 0, ok: 0 }); day.n++; if (ok) day.ok++;
+  } else if (G.kind === 'warm') { S.warm.n++; S.warm.ms += dt; if (ok) S.warm.ok++; }
   G.n++; G.ms += dt; G.lvls.push(q.L); if (ok) G.ok++;
   save();
   if (ok) {
@@ -824,15 +1400,23 @@ function submit(skip) {
 function advance() {
   if (!G) return;
   if (total() && G.n >= total()) return finish();
-  if (G.fmt === 'sprint' && performance.now() - G.start >= 60000) return finish();
+  if (timed() && performance.now() - G.start >= timed() * 1000) return finish();
   next();
 }
 function finish() {
   if (!G) return;
   clearInterval(G.timer);
   const g = G; G = null;
-  if (!g.n) { if (pendingReload) return location.reload(); hide($('#play'), () => { document.body.style.overflow = ''; renderAll(); }); return; }
+  if (g.kind === 'warm') { // métrica de automaticidad, aparte; luego empieza el razonamiento
+    const ms = performance.now() - g.start;
+    S.warm.sessions.unshift({ d: Date.now(), n: g.n, ok: g.ok, ms: Math.round(ms), qms: Math.round(g.ms) }); S.warm.sessions = S.warm.sessions.slice(0, 100);
+    save();
+    $('#play').hidden = true;
+    return beginReason({ n: g.n, ok: g.ok, ms, qms: g.ms });
+  }
+  if (!g.n) { if (pendingReload) return location.reload(); hide($('#play'), () => { document.body.style.overflow = ''; renderAll(); if (g.lesson) openLesson(g.lesson.id); }); return; }
   const avgL = g.lvls.reduce((a, b) => a + b, 0) / g.lvls.length;
+  if (g.kind === 'open') return showOpenResult(g, avgL);
   S.sessions.unshift({ d: Date.now(), topic: g.topic, fmt: g.fmt, n: g.n, ok: g.ok, ms: Math.round(g.ms) });
   S.sessions = S.sessions.slice(0, 60);
   let badge = '';
@@ -860,15 +1444,32 @@ function finish() {
   $('#play').hidden = true;
 }
 
+function showOpenResult(g, avgL) {
+  $('#rTitle').textContent = `Sin métrica · ${nameOf(g.topic)}`;
+  $('#rBig').textContent = g.ok;
+  $('#rSub').textContent = `${g.ok === 1 ? 'acierto' : 'aciertos'} de ${g.n} · no cuenta para ninguna pista`;
+  $('#rBadge').hidden = true;
+  $('#rAcc').textContent = `${Math.round(g.ok / g.n * 100)}%`;
+  $('#rTime').textContent = `${d1(g.ms / g.n / 1000)} s`;
+  $('#rLvl').textContent = d1(avgL);
+  $('#rMistWrap').hidden = !g.mistakes.length;
+  $('#rMist').innerHTML = g.mistakes.slice(0, 20).map(m => `<div class="mist"><span class="q">${esc(m.q)}</span><span class="r">${fmt(m.a)}</span><span class="s">${esc(m.tip || '')}</span></div>`).join('');
+  $('#rAgain').onclick = () => start(g.topic);
+  $('#rHome').onclick = () => pendingReload ? location.reload() : hide($('#result'), () => { document.body.style.overflow = ''; renderAll(); if (g.lesson) openLesson(g.lesson.id); });
+  const m = $('#resultMain'); m.classList.remove('enter'); void m.offsetWidth; m.classList.add('enter');
+  show($('#result')); $('#result').scrollTop = 0; $('#play').hidden = true;
+}
+
 /* ================= Lecciones ================= */
 let curLesson = null;
 function renderLessons() {
   curLesson = null;
-  const done = LESSONS.filter(l => (S.lessons[l.id] || 0) >= 8).length;
+  const L = CALC_LESSONS;
+  const done = L.filter(l => (S.lessons[l.id] || 0) >= 8).length;
   const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>';
-  $('#tab-learn').innerHTML = `<h1><small>Aprende la técnica, luego practícala</small>Lecciones</h1>
-    <div class="lprog"><span class="num">${done}/${LESSONS.length}</span><span class="bar"><span style="width:${done / LESSONS.length * 100}%"></span></span><span>completadas</span></div>
-    <h2>Técnicas</h2><div class="lgroup">${LESSONS.map((l, i) => {
+  $('#tab-learn').innerHTML = `<h1><small>Pista de cálculo · aprende la técnica, luego practícala</small>Lecciones</h1>
+    <div class="lprog"><span class="num">${done}/${L.length}</span><span class="bar"><span style="width:${done / L.length * 100}%"></span></span><span>completadas</span></div>
+    <h2>Técnicas</h2><div class="lgroup">${L.map((l, i) => {
       const ok = (S.lessons[l.id] || 0) >= 8;
       return `<button class="litem press${ok ? ' done' : ''}" data-lesson="${l.id}"><span class="n num">${ok ? '✓' : i + 1}</span><span><span class="t">${l.title}</span><span class="d">${l.desc}</span></span>${chev}</button>`;
     }).join('')}</div>`;
@@ -876,13 +1477,17 @@ function renderLessons() {
 }
 function openLesson(id) {
   const l = LESSONS.find(x => x.id === id); if (!l) return;
+  const list = l.trick ? TRICKS : CALC_LESSONS;
+  const tab = l.trick ? 'more' : 'learn';
+  if ($(`#tab-${tab}`).hidden) goTab(tab);
+  if (l.trick) renderLessons(); else renderMore('menu'); // evita ids duplicados en la otra pestaña
   curLesson = l;
-  const best = S.lessons[l.id] || 0, i = LESSONS.indexOf(l);
-  const nextL = LESSONS[i + 1];
-  const el = $('#tab-learn');
-  el.innerHTML = `<button class="back" id="lBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>Lecciones</button>
+  const best = S.lessons[l.id] || 0, i = list.indexOf(l);
+  const nextL = list[i + 1];
+  const el = $(`#tab-${tab}`);
+  el.innerHTML = `<button class="back" id="lBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>${l.trick ? 'Trucos' : 'Lecciones'}</button>
     <div class="lesson">
-      <h1><small>Lección ${i + 1} · ${TOPICS[l.topic].name}</small>${l.title}</h1>
+      <h1><small>${l.trick ? 'Truco · sin nivel ni métrica' : `Lección ${i + 1} · ${TOPICS[l.topic].name}`}</small>${l.title}</h1>
       <h2>La idea</h2><p class="lead">${l.lead}</p>
       <h2>Cómo se hace</h2><ol>${l.how.map(s => `<li>${s}</li>`).join('')}</ol>
       <h2>Ejemplo resuelto</h2>
@@ -892,15 +1497,15 @@ function openLesson(id) {
       <div class="try"><div class="tq" id="tryQ"></div>
         <form id="tryF" autocomplete="off"><input id="tryI" inputmode="decimal" placeholder="?" aria-label="Tu respuesta"><button class="btn primary press" style="padding:10px 16px">Comprobar</button></form>
         <div class="tr" id="tryR"></div></div>
-      <button class="btn primary press block" id="lPractice">Práctica guiada · 10 ejercicios</button>
-      <p class="note" style="text-align:center">${best ? `Tu mejor resultado: ${best}/10.` : ''} Con 8 o más la lección queda completada.</p>
+      <button class="btn primary press block" id="lPractice">${l.trick ? 'Practicar · 10 ejercicios sin métrica' : 'Práctica guiada · 10 ejercicios'}</button>
+      <p class="note" style="text-align:center">${l.trick ? 'Truco de exhibición: entretiene y agiliza, pero no cuenta para ninguna pista.' : `${best ? `Tu mejor resultado: ${best}/10.` : ''} Con 8 o más la lección queda completada.`}</p>
       ${nextL ? `<button class="btn press block" id="lNext">Siguiente: ${nextL.title}</button>` : ''}
     </div>`;
   el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter');
   window.scrollTo(0, 0);
   newTry();
-  $('#lBack').onclick = () => { renderLessons(); window.scrollTo(0, 0); };
-  $('#lPractice').onclick = () => start('L:' + l.id);
+  $('#lBack').onclick = () => { curLesson = null; l.trick ? renderMore('trucos') : renderLessons(); window.scrollTo(0, 0); };
+  $('#lPractice').onclick = () => start((l.trick ? 'K:' : 'L:') + l.id);
   if (nextL) $('#lNext').onclick = () => openLesson(nextL.id);
   $('#tryF').onsubmit = e => {
     e.preventDefault();
@@ -959,22 +1564,123 @@ function renderStats() {
   }).join('') : '<div class="empty">Aún no hay sesiones.</div>';
   refreshSegs();
 }
+function renderRazonStats() {
+  const st = razonStats(), w = S.warm;
+  const pct = (a, b) => b ? `${Math.round(a / b * 100)}%` : '—';
+  const rows = Object.entries(RULES).map(([id, r]) => { const lg = ruleLog(id), ok = lg.filter(e => e.ok2).length;
+    return { id, r, n: lg.length, acc: lg.length ? ok / lg.length : null }; });
+  const b95 = st.buckets.find(b => b.c === 95);
+  $('#razonStats').innerHTML = `
+    <h2>Razonamiento · pista principal</h2>
+    <div class="kpis">
+      <div class="kpi"><b class="num">${pct(st.ok2, st.n)}</b><span>reglas nombradas</span></div>
+      <div class="kpi"><b class="num">${st.brier === null ? '—' : d2(st.brier)}</b><span>Brier (0 = perfecto)</span></div>
+      <div class="kpi"><b class="num">${pct(st.nuevosOk2, st.nuevos)}</b><span>regla en contexto nuevo</span></div>
+    </div>
+    <p class="note">${st.n} situaciones · conclusión acertada ${pct(st.ok1, st.n)} · ${st.cov} de ${ITEMS.length} combinaciones regla × contexto vistas.</p>
+    <h2>Calibración: confianza declarada vs. acierto real</h2>
+    <svg class="cal-chart" viewBox="0 0 320 200" preserveAspectRatio="none" role="img" aria-label="Curva de calibración">${calibrationSvg(st.buckets)}</svg>
+    <p class="note">${st.n ? `La diagonal es la calibración perfecta. ${b95 && b95.n ? `Cuando dices 95%, aciertas el ${Math.round(b95.acc * 100)}%.` : ''} Un Brier de 0,25 equivale a decir siempre 50%.` : 'Aparecerá tras tu primera sesión de razonamiento.'}</p>
+    <h2>Dominio por regla · capa 2</h2>
+    <div class="rows">${rows.map(x => `<div class="row"><span class="a">${x.r.name}</span><span class="b num">${x.n ? `${Math.round(x.acc * 100)}% · ${x.n}` : 'Sin ver'}</span>
+      <span class="c"><span style="min-width:6.5em">${AREAS[x.r.area]}</span><span class="bar"><span style="width:${(x.acc || 0) * 100}%"></span></span></span></div>`).join('')}</div>
+    <h2>Automaticidad · aparte</h2>
+    <p class="note" style="margin-top:0">Calentamiento: libera memoria de trabajo para el razonamiento. No es razonamiento ni se suma a sus métricas.</p>
+    <div class="kpis">
+      <div class="kpi"><b class="num">${w.n}</b><span>respuestas</span></div>
+      <div class="kpi"><b class="num">${pct(w.ok, w.n)}</b><span>precisión</span></div>
+      <div class="kpi"><b class="num">${w.n ? `${d1(w.ms / w.n / 1000)} s` : '—'}</b><span>por respuesta</span></div>
+    </div>`;
+}
+function renderReason() {
+  const st = razonStats(), pct = (a, b) => b ? `${Math.round(a / b * 100)}%` : '—';
+  const byArea = Object.keys(AREAS).map(a => `<h3 class="areah qtag">${AREAS[a]}</h3>` + Object.entries(RULES).filter(([, r]) => r.area === a).map(([id, r]) => {
+    const lg = ruleLog(id); const ok = lg.filter(e => e.ok2).length;
+    return `<details class="rule"><summary><span class="t">${r.name}</span><span class="m num">${lg.length ? `${ok}/${lg.length}` : 'nueva'}</span></summary><p>${r.d}</p></details>`; }).join('')).join('');
+  const el = $('#tab-reason');
+  el.innerHTML = `<h1><small>Pista principal</small>Razonar</h1>
+    <p class="lead2">Situaciones reales con una conclusión. Decide si se sostiene, nombra la regla en juego y declara tu confianza.</p>
+    <button class="startcard press" id="rStart"><b>Empezar sesión</b><span>Calentamiento de ${WARM_SECONDS} s como máximo + ${SESSION_ITEMS} situaciones</span></button>
+    <button class="linkbtn" id="rStartNoWarm">Empezar sin calentamiento</button>
+    <h2>Tu razonamiento</h2>
+    <div class="kpis">
+      <div class="kpi"><b class="num">${pct(st.ok2, st.n)}</b><span>reglas nombradas</span></div>
+      <div class="kpi"><b class="num">${st.brier === null ? '—' : d2(st.brier)}</b><span>Brier</span></div>
+      <div class="kpi"><b class="num">${st.cov}/${ITEMS.length}</b><span>combinaciones vistas</span></div>
+    </div>
+    <h2>Cómo se puntúa</h2>
+    <ul class="bullets">
+      <li><b>Regla, 75 puntos.</b> Acertar si la conclusión se sostiene vale solo 25: la intuición sin la regla no transfiere.</li>
+      <li><b>Confianza.</b> Se puntúa con Brier: estar seguro y equivocado duele más que dudar y acertar.</li>
+      <li><b>Contextos.</b> Cada regla aparece en negocios, salud, política, dinero y relaciones; primero las combinaciones que no has visto.</li>
+    </ul>
+    <h2>Las 16 reglas</h2>${byArea}`;
+  el.querySelector('#rStart').onclick = () => startReasonSession(true);
+  el.querySelector('#rStartNoWarm').onclick = () => startReasonSession(false);
+}
+let moreView = 'menu';
+function renderMore(view = moreView) {
+  moreView = view;
+  const el = $('#tab-more');
+  const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>';
+  const back = `<button class="back" data-more="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>Más</button>`;
+  if (view === 'menu') {
+    el.innerHTML = `<h1><small>Fuera del camino principal</small>Más</h1>
+      <h2>Secciones</h2><div class="lgroup">
+        <button class="litem press" data-more="trucos"><span class="n">×</span><span><span class="t">Trucos</span><span class="d">Cálculo de exhibición. Sin nivel ni métrica.</span></span>${chev}</button>
+        <button class="litem press" data-more="patrones"><span class="n">…</span><span><span class="t">Patrones</span><span class="d">Series numéricas de examen. Sin métrica.</span></span>${chev}</button>
+        <button class="litem press" data-more="datos"><span class="n">↓</span><span><span class="t">Tus datos y archivo</span><span class="d">Copia completa y lo archivado en la migración.</span></span>${chev}</button>
+      </div>`;
+  } else if (view === 'trucos') {
+    el.innerHTML = `${back}<h1><small>Sin nivel adaptativo · no cuenta para ninguna pista</small>Trucos</h1>
+      <p class="lead2">Atajos vistosos de cálculo mental. Divierten y agilizan, pero no transfieren al razonamiento.</p>
+      <h2>Trucos</h2><div class="lgroup">${TRICKS.map((l, i) => `<button class="litem press${(S.lessons[l.id] || 0) >= 8 ? ' done' : ''}" data-lesson="${l.id}"><span class="n num">${(S.lessons[l.id] || 0) >= 8 ? '✓' : i + 1}</span><span><span class="t">${l.title}</span><span class="d">${l.desc}</span></span>${chev}</button>`).join('')}</div>`;
+  } else if (view === 'patrones') {
+    el.innerHTML = `${back}<h1><small>Sin métrica</small>Patrones</h1>
+      <p class="tag-honest">Reconocimiento de patrones de examen: entrena para pruebas que los incluyen, no transfiere fuera de eso.</p>
+      <h2>Elige dificultad · 10 series</h2>
+      <div class="lvbtns">${Object.entries({ f: 'Fácil', m: 'Media', d: 'Difícil', x: 'Experto' }).map(([k, v]) => `<button class="btn press" data-pat="${k}">${v}</button>`).join('')}</div>
+      ${S.archive.topics.serie ? `<p class="note">Tu historial anterior de Series (${S.archive.topics.serie.n} respuestas) está guardado en Tus datos y archivo.</p>` : ''}`;
+  } else if (view === 'datos') {
+    const a = S.archive, bk = (() => { try { return !!localStorage.getItem('cuanti.backup.v1'); } catch (e) { return false; } })();
+    const ser = a.topics.serie;
+    el.innerHTML = `${back}<h1><small>Nada se borró</small>Tus datos y archivo</h1>
+      <h2>Archivado en la migración</h2>
+      <div class="rows">
+        ${ser ? `<div class="row"><span class="a">Series (antes en Practicar)</span><span class="b num">${ser.n} resp. · ${ser.n ? Math.round(ser.ok / ser.n * 100) : 0}% · Nv ${Math.floor(ser.lvl)}</span></div>` : ''}
+        ${Object.entries(a.best).map(([k, v]) => `<div class="row"><span class="a">${esc(k)}</span><span class="b num">${v} aciertos</span></div>`).join('')}
+        ${!ser && !Object.keys(a.best).length ? '<div class="empty">No había nada que archivar.</div>' : ''}
+      </div>
+      ${a.notes.length ? `<ul class="bullets" style="margin-top:12px">${a.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+      <p class="note">${bk ? 'Hay una copia íntegra de tus datos anteriores a la versión 2 guardada en este dispositivo.' : ''}</p>
+      <h2>Copia completa</h2>
+      <div class="datos"><textarea readonly id="dump"></textarea></div>
+      <button class="btn press block" id="copyDump">Copiar datos</button>`;
+    $('#dump').value = JSON.stringify(S);
+    $('#copyDump').onclick = async () => { const t = $('#dump'); t.select(); try { await navigator.clipboard.writeText(t.value); } catch (e) { document.execCommand('copy'); } $('#copyDump').textContent = 'Copiado'; };
+  }
+  el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter');
+}
 function renderAll() {
-  renderHome(); renderStats();
-  if (!$('#tab-learn').hidden) curLesson ? null : renderLessons();
+  renderReason(); renderHome(); renderStats(); renderRazonStats();
+  if (!$('#tab-learn').hidden && !curLesson) renderLessons();
+  if (!$('#tab-more').hidden && !curLesson) renderMore();
 }
 
 /* ================= Navegación y eventos ================= */
 function goTab(tab) {
   $$('nav.tabs button').forEach(x => x.dataset.tab === tab ? x.setAttribute('aria-current', 'page') : x.removeAttribute('aria-current'));
-  for (const t of ['home', 'learn', 'stats']) {
+  curLesson = null;
+  for (const t of ['reason', 'home', 'learn', 'stats', 'more']) {
     const el = $(`#tab-${t}`);
     el.hidden = t !== tab;
     if (t === tab) { el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
   }
-  if (tab === 'stats') renderStats();
+  if (tab === 'stats') { renderStats(); renderRazonStats(); }
   if (tab === 'learn') renderLessons();
   if (tab === 'home') renderHome();
+  if (tab === 'reason') renderReason();
+  if (tab === 'more') renderMore('menu');
   window.scrollTo(0, 0);
 }
 document.querySelector('nav.tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) goTab(b.dataset.tab); });
@@ -983,6 +1689,14 @@ $('#fmtSeg').addEventListener('click', e => { const b = e.target.closest('button
 $('#goalSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.goal = +b.dataset.v; save(); renderStats(); renderHome(); });
 $('#topicsWrap').addEventListener('click', e => { const b = e.target.closest('[data-topic]'); if (b) start(b.dataset.topic); });
 $('#tab-learn').addEventListener('click', e => { const b = e.target.closest('[data-lesson]'); if (b) openLesson(b.dataset.lesson); });
+$('#tab-more').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.more) { curLesson = null; renderMore(b.dataset.more); window.scrollTo(0, 0); }
+  else if (b.dataset.lesson) openLesson(b.dataset.lesson);
+  else if (b.dataset.pat) start('P:' + b.dataset.pat);
+});
+$('#rsBody').addEventListener('click', onReasonClick);
+$('#rsQuit').addEventListener('click', () => finishReason());
 $('#pad').addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (!b) return; e.preventDefault(); key(b.dataset.k); });
 $('#quit').addEventListener('click', () => finish());
 $('#resetBtn').addEventListener('click', () => { if (confirm('¿Borrar niveles, rachas, lecciones y sesiones? No se puede deshacer.')) { S = blank(); save(); renderAll(); } });
@@ -997,13 +1711,16 @@ document.addEventListener('keydown', e => {
 // Botón «atrás» de Android (lo llama el APK): cierra lo que esté abierto antes de salir.
 window.cuantiBack = () => {
   if (G) { finish(); return true; }
+  if (R) { finishReason(); return true; }
   if (!$('#result').hidden) { $('#rHome').click(); return true; }
-  if (!$('#tab-learn').hidden && curLesson) { renderLessons(); window.scrollTo(0, 0); return true; }
-  if ($('#tab-home').hidden) { goTab('home'); return true; }
+  if (!$('#rres').hidden) { $('#rrHome').click(); return true; }
+  if (curLesson && (!$('#tab-learn').hidden || !$('#tab-more').hidden)) { $('#lBack').click(); return true; }
+  if (!$('#tab-more').hidden && moreView !== 'menu') { renderMore('menu'); return true; }
+  if ($('#tab-reason').hidden) { goTab('reason'); return true; }
   return false;
 };
 renderAll();
-$('#tab-home').classList.add('enter');
+$('#tab-reason').classList.add('enter');
 $('#verNote').textContent = `Cuanti ${APP_VERSION} · se actualiza sola`;
 
 /* ================= Actualización automática =================
@@ -1011,7 +1728,7 @@ $('#verNote').textContent = `Cuanti ${APP_VERSION} · se actualiza sola`;
    (nunca en mitad de una sesión: espera a que termine). El progreso no se toca. */
 const IN_APK = /CuantiApp/.test(navigator.userAgent);
 let pendingReload = false;
-function reloadSoon() { if (G || !$('#result').hidden) { pendingReload = true; return; } location.reload(); }
+function reloadSoon() { if (G || R || !$('#result').hidden || !$('#rres').hidden) { pendingReload = true; return; } location.reload(); }
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine) return;
   try {

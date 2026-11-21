@@ -1,21 +1,34 @@
 # Cuanti
 
-Entrenador de cálculo mental para desarrollar la capacidad cuantitativa. Un solo archivo
-(`index.html`), sin dependencias, funciona sin conexión y guarda el progreso en el teléfono.
+Entrenador de razonamiento cuantitativo. Un solo archivo (`index.html`), sin dependencias,
+funciona sin conexión y guarda el progreso en el teléfono.
 
-- **Practicar**: 16 temas en 4 categorías (Aritmética · Números · Proporciones y dinero ·
-  Álgebra y datos), más «Mixto esencial» y «Desafío total». Los ejercicios se generan al
-  azar, así que nunca se acaban.
-- **Dificultad**: Adaptativa (cada tema sube cuando aciertas rápido y baja cuando fallas),
-  Fácil (niveles 1–3), Media (4–6), Difícil (7–8) y Experto (9–10).
-- **Formatos**: Sprint de 60 s, 10 preguntas o Libre. Teclado numérico en pantalla y
-  teclado físico (Enter envía, Espacio salta, Esc sale).
-- **Lecciones**: 18 técnicas (× 11, cuadrados que terminan en 5, porcentajes por partes,
-  regla de tres, ecuaciones, probabilidad, interés compuesto…). Cada una tiene idea,
-  pasos, ejemplo resuelto, «Pruébalo» y una práctica guiada de 10 ejercicios; con 8 o más
-  queda completada.
-- **Progreso**: meta diaria, racha, aciertos de 14 días, nivel y precisión por tema,
-  mejores marcas y sesiones recientes.
+**Pista principal: Razonar.** Situaciones reales con una conclusión. En cada una se responde en
+dos capas (¿se sostiene? y ¿qué regla está en juego?) y se declara la confianza (50/65/80/95%).
+La regla vale 75 puntos y la conclusión 25. La confianza se puntúa con Brier y alimenta una
+curva propia de calibración. Cada corrección nombra la regla, explica en tres líneas por qué
+falla y da el dato concreto que habría vuelto válida la conclusión.
+
+- 16 reglas en 4 áreas (evidencia, causalidad, probabilidad, magnitudes), elegidas porque
+  describen cómo funciona el mundo, reaparecen en dominios sin relación y un universitario
+  capaz las pasa por alto.
+- 80 situaciones: cada regla en negocios, salud, política, dinero y relaciones, con una
+  variante válida y otra no válida.
+- Variación de superficie forzada: se registra cada combinación regla × contexto y se
+  priorizan las nunca vistas. Métrica aparte: acierto de la regla en contexto nuevo.
+- Sesión: calentamiento de 90 s como máximo + 8 situaciones. El calentamiento tiene su propia
+  métrica («automaticidad»), que nunca se mezcla con la de razonamiento.
+
+**Pista de cálculo.** Todo lo que la app tenía: 15 temas, cinco dificultades, Sprint 60 s,
+10 preguntas, Libre, Mixto esencial y Desafío total (solo de cálculo), meta diaria, racha,
+mejores marcas y 13 lecciones. Sus métricas no tocan las de razonamiento.
+
+**Más.** Trucos (× 11, × 99, cuadrados que terminan en 5, cuadrados hasta 130, cubos…) y
+Patrones (series de examen), sin nivel adaptativo y sin métrica; y «Tus datos y archivo».
+
+La versión 2 migra los datos anteriores sin borrar nada: guarda una copia íntegra
+(`cuanti.backup.v1`) y archiva lo que ya no encaja (estadísticas de Series, la marca del
+Desafío total que incluía series).
 
 Web: https://gads4532.github.io/Finanzas-personales/calculo/ (se instala desde Chrome).
 
