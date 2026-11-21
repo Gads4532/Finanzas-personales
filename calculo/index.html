@@ -274,6 +274,7 @@
       <button data-v="20">20</button><button data-v="40">40</button><button data-v="80">80</button><button data-v="150">150</button>
     </div>
     <button class="ghost" id="resetBtn">Borrar todo el progreso</button>
+    <p class="note" style="text-align:center" id="verNote"></p>
   </section>
 </main>
 
@@ -329,6 +330,7 @@
 
 <script>
 'use strict';
+const APP_VERSION = '1.1.0'; // súbela en cada cambio: así los teléfonos detectan la versión nueva
 /* ================= Utilidades ================= */
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
@@ -829,7 +831,7 @@ function finish() {
   if (!G) return;
   clearInterval(G.timer);
   const g = G; G = null;
-  if (!g.n) { hide($('#play'), () => { document.body.style.overflow = ''; renderAll(); }); return; }
+  if (!g.n) { if (pendingReload) return location.reload(); hide($('#play'), () => { document.body.style.overflow = ''; renderAll(); }); return; }
   const avgL = g.lvls.reduce((a, b) => a + b, 0) / g.lvls.length;
   S.sessions.unshift({ d: Date.now(), topic: g.topic, fmt: g.fmt, n: g.n, ok: g.ok, ms: Math.round(g.ms) });
   S.sessions = S.sessions.slice(0, 60);
@@ -852,7 +854,7 @@ function finish() {
   $('#rMist').innerHTML = g.mistakes.slice(0, 20).map(m => `<div class="mist"><span class="q">${esc(m.q)}</span><span class="r">${fmt(m.a)}</span>
     <span class="s">${m.you !== '—' ? `Tu respuesta: <span class="y">${esc(m.you)}</span> · ` : ''}${esc(m.tip || '')}</span></div>`).join('');
   $('#rAgain').onclick = () => start(g.topic);
-  $('#rHome').onclick = () => hide($('#result'), () => { document.body.style.overflow = ''; renderAll(); if (g.lesson) openLesson(g.lesson.id); });
+  $('#rHome').onclick = () => pendingReload ? location.reload() : hide($('#result'), () => { document.body.style.overflow = ''; renderAll(); if (g.lesson) openLesson(g.lesson.id); });
   const m = $('#resultMain'); m.classList.remove('enter'); void m.offsetWidth; m.classList.add('enter');
   show($('#result')); $('#result').scrollTop = 0;
   $('#play').hidden = true;
@@ -1002,7 +1004,36 @@ window.cuantiBack = () => {
 };
 renderAll();
 $('#tab-home').classList.add('enter');
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+$('#verNote').textContent = `Cuanti ${APP_VERSION} · se actualiza sola`;
+
+/* ================= Actualización automática =================
+   Al abrir y al volver a la app se busca la versión publicada. Si es otra, se recarga sola
+   (nunca en mitad de una sesión: espera a que termine). El progreso no se toca. */
+const IN_APK = /CuantiApp/.test(navigator.userAgent);
+let pendingReload = false;
+function reloadSoon() { if (G || !$('#result').hidden) { pendingReload = true; return; } location.reload(); }
+async function checkUpdate() {
+  if (location.protocol !== 'https:' || !navigator.onLine) return;
+  try {
+    const res = await fetch(`index.html?v=${Date.now()}`, { cache: 'no-store' });
+    const m = (await res.text()).match(/const APP_VERSION = '([^']+)'/);
+    if (!m || m[1] === APP_VERSION) return;
+    let tried = null; try { tried = sessionStorage.getItem('cuanti.reload'); } catch (e) {}
+    if (tried === m[1]) return; // ya se intentó con esta versión: evita bucles si la red sirve una copia vieja
+    try { sessionStorage.setItem('cuanti.reload', m[1]); } catch (e) {}
+    reloadSoon();
+  } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(); });
+setTimeout(checkUpdate, 1500);
+// En el APK la app Android sirve los archivos (red primero, copia guardada sin red); en la web lo hace el service worker.
+if (!IN_APK && 'serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => {
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') r.update().catch(() => {}); });
+  }).catch(() => {});
+  let had = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (had) reloadSoon(); had = true; });
+}
 </script>
 </body>
 </html>

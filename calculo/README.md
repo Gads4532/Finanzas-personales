@@ -19,10 +19,24 @@ Entrenador de cálculo mental para desarrollar la capacidad cuantitativa. Un sol
 
 Web: https://gads4532.github.io/Finanzas-personales/calculo/ (se instala desde Chrome).
 
+## Actualización automática
+
+Cada cambio que llega a `main` se publica en Pages y **los teléfonos lo reciben solos**,
+sin reinstalar nada:
+
+- **Web instalada**: al abrir o volver a la app busca la versión publicada; si cambió, se
+  recarga sola (si hay una sesión en curso, espera a que termine). El progreso no se toca.
+- **APK**: abre la versión publicada en Pages y guarda una copia de cada archivo. Sin
+  internet usa la última copia descargada; en el primer arranque sin red, la que trae el
+  APK. Siempre se sirve desde la misma dirección, así que el progreso es uno solo.
+
+Regla: **sube `APP_VERSION`** en `index.html` (y `CACHE` en `sw.js`) en cada cambio; así
+es como los teléfonos notan que hay versión nueva. Reinstalar el APK solo hace falta si
+cambia algo de Android (`android/`: icono, nombre, permisos).
+
 ## APK
 
-`android/` es una app Android mínima (WebView) que lleva `index.html` **dentro** del APK:
-abre sin internet y no depende de la web. El workflow `.github/workflows/cuanti-apk.yml`
+`android/` es una app Android mínima (WebView). El workflow `.github/workflows/cuanti-apk.yml`
 la compila en cada cambio de `calculo/`:
 
 1. GitHub → **Actions** → «APK de Cuanti» → la última ejecución → **Artifacts** →
