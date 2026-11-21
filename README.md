@@ -25,3 +25,7 @@ Desarrollada con Claude con la misma estructura que
 [Gads4532/Skills](https://github.com/Gads4532/Skills/tree/main/apps/finanzas).
 Instalable desde https://gads4532.github.io/Finanzas-personales/ (repo público
 [Gads4532/finanzas-personales](https://github.com/Gads4532/Finanzas-personales)).
+
+**Cuanti** (`calculo/`): entrenador de cálculo mental con lecciones, en el mismo repo.
+Web en https://gads4532.github.io/Finanzas-personales/calculo/ y APK compilado por
+GitHub Actions; detalles en [calculo/README.md](calculo/README.md).
