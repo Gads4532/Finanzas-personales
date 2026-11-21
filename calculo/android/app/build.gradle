@@ -1,0 +1,42 @@
+// Cuanti para Android: una WebView que abre la app incluida dentro del APK (funciona sin internet).
+// La web se copia de ../../ (carpeta calculo/) en cada compilación: no hay que duplicar nada.
+plugins { id 'com.android.application' }
+
+def webDir = layout.buildDirectory.dir('web')
+tasks.register('copyWeb', Copy) {
+    from(rootProject.file('..')) { include 'index.html', 'icon.svg', 'manifest.webmanifest' }
+    into webDir
+}
+
+android {
+    namespace 'io.github.gads4532.cuanti'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'io.github.gads4532.cuanti'   // fijo para siempre: cambiarlo = otra app
+        minSdk 24
+        targetSdk 34
+        versionCode 1                               // súbelo en cada APK que repartas
+        versionName '1.0.0'
+    }
+    // Firma estable solo si el workflow recibe la clave por secretos (ver calculo/README.md).
+    def ks = System.getenv('CUANTI_KEYSTORE')
+    signingConfigs {
+        if (ks) {
+            release {
+                storeFile file(ks)
+                storePassword System.getenv('CUANTI_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('CUANTI_KEY_ALIAS')
+                keyPassword System.getenv('CUANTI_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (ks) signingConfig signingConfigs.release
+        }
+    }
+    sourceSets { main { assets.srcDirs += webDir } }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+tasks.named('preBuild') { dependsOn 'copyWeb' }

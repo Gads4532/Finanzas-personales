@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cuanti</title>
+<meta name="description" content="Cuanti: entrenador de cálculo mental con lecciones para desarrollar la capacidad cuantitativa.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0e0e" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-512.png">
+<style>
+  :root {
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --bg: #ffffff; --text: #111111; --muted: #8a8a8a; --line: #ededed; --empty: #e8e8e8;
+    --green: #1f9d55; --red: #d64545; --warn: #b7791f;
+    --accent: #2f6fdb; --accent-ink: #ffffff;
+    --soft: color-mix(in srgb, var(--text) 4.5%, transparent);
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    --spring: linear(0, 0.057, 0.203, 0.399, 0.612, 0.813, 0.985, 1.115, 1.201, 1.243, 1.248, 1.224, 1.183, 1.131, 1.078, 1.03, 0.991, 0.962, 0.945, 0.938, 0.94, 0.947, 0.959, 0.972, 0.985, 0.996, 1.005, 1.011, 1.015, 1.016, 1.015, 1.012, 1.009, 1.006, 1.003, 1, 0.998, 0.997, 0.996, 0.996, 0.997, 0.997, 0.998, 0.999, 1, 1, 1.001, 1.001, 1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e0e0e; --text: #f2f2f2; --muted: #7a7a7a; --line: #1f1f1f; --empty: #2a2a2a;
+      --green: #3fbf75; --red: #ef6a6a; --warn: #d9a441; --accent: #5b8ff0; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e0e0e; --text: #f2f2f2; --muted: #7a7a7a; --line: #1f1f1f; --empty: #2a2a2a;
+    --green: #3fbf75; --red: #ef6a6a; --warn: #d9a441; --accent: #5b8ff0; color-scheme: dark;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  html { background: var(--bg); color-scheme: light dark; min-height: 100%; overscroll-behavior-y: none; }
+  html, body { overflow-x: hidden; max-width: 100%; }
+  body { margin: 0; min-height: 100dvh; background: var(--bg); color: var(--text); font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+  main { max-width: 520px; margin: 0 auto; padding-block: 40px calc(96px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  h1 { font-size: 2rem; font-weight: 600; letter-spacing: -.02em; margin: 0; line-height: 1.15; }
+  h1 small { display: block; font-size: .95rem; font-weight: 500; color: var(--muted); letter-spacing: 0; margin-bottom: 2px; }
+  h2 { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 32px 0 10px; }
+  .num { font-variant-numeric: tabular-nums; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Movimiento: entradas cortas y suaves */
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+  @keyframes slideOut { to { opacity: 0; transform: translateX(-18px); } }
+  .enter { animation: rise .32s var(--ease) both; }
+  .enter > * { animation: rise .38s var(--ease) both; }
+  .enter > *:nth-child(2) { animation-delay: .03s; } .enter > *:nth-child(3) { animation-delay: .06s; }
+  .enter > *:nth-child(4) { animation-delay: .09s; } .enter > *:nth-child(5) { animation-delay: .12s; }
+  .enter > *:nth-child(n+6) { animation-delay: .15s; }
+  .press { transition: transform .18s var(--ease), background-color .2s, opacity .2s; }
+  .press:active { transform: scale(.97); }
+
+  /* Tarjeta del día */
+  .today { margin-top: 24px; display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; padding: 18px; border-radius: 20px; background: var(--soft); }
+  .ring { width: 72px; height: 72px; position: relative; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring circle { transition: stroke-dasharray .9s var(--ease); }
+  .ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.05rem; font-weight: 600; }
+  .today .t1 { font-weight: 600; }
+  .today .t2 { color: var(--muted); font-size: .9rem; }
+  .streak { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; font-size: .82rem; font-weight: 600; }
+  .streak i { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
+
+  /* Selectores segmentados con indicador deslizante */
+  .seg { position: relative; display: flex; padding: 4px; border-radius: 13px; background: var(--soft); }
+  .seg .knob { position: absolute; top: 4px; bottom: 4px; left: 0; border-radius: 10px; background: var(--bg);
+    box-shadow: 0 1px 3px rgb(0 0 0 / .1); transition: transform .35s var(--ease), width .35s var(--ease); }
+  .seg button { position: relative; z-index: 1; flex: 1; padding: 8px 4px; border-radius: 10px; font-size: .86rem; font-weight: 500; color: var(--muted); transition: color .25s; white-space: nowrap; }
+  .seg button[aria-pressed="true"] { color: var(--text); }
+  .note { color: var(--muted); font-size: .8rem; margin-top: 8px; min-height: 1.2em; }
+
+  .topics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .topic { text-align: left; padding: 14px; border-radius: 16px; border: 1px solid var(--line); display: grid; gap: 1px; min-width: 0; }
+  .topic:hover { background: var(--soft); }
+  .topic .sym { font-size: 1.15rem; font-weight: 600; line-height: 1.3; color: var(--accent); }
+  .topic .nm { font-weight: 600; font-size: .93rem; }
+  .topic .lv { color: var(--muted); font-size: .78rem; display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .bar { height: 3px; border-radius: 3px; background: var(--empty); overflow: hidden; flex: 1; }
+  .bar > span { display: block; height: 100%; background: var(--accent); border-radius: 3px; transform-origin: left; animation: grow .8s var(--ease) both; }
+  @keyframes grow { from { transform: scaleX(0); } }
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hero { text-align: left; padding: 16px; border-radius: 16px; background: var(--text); color: var(--bg); display: grid; gap: 2px; }
+  .hero.alt { background: var(--soft); color: var(--text); }
+  .hero .nm { font-weight: 600; }
+  .hero .lv { font-size: .78rem; opacity: .65; }
+
+  /* Barra inferior */
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line);
+    display: flex; justify-content: center; gap: 4px; padding: 6px 16px calc(6px + env(safe-area-inset-bottom, 0px)); }
+  nav.tabs button { flex: 0 1 130px; padding: 6px; font-size: .75rem; font-weight: 500; color: var(--muted); display: grid; justify-items: center; gap: 2px; transition: color .25s; }
+  nav.tabs button svg { width: 22px; height: 22px; transition: transform .3s var(--spring); }
+  nav.tabs button[aria-current="page"] { color: var(--text); }
+  nav.tabs button[aria-current="page"] svg { transform: translateY(-1px) scale(1.06); }
+
+  /* Lecciones */
+  .lgroup { display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .litem { display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--line); text-align: left; }
+  .litem .n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: .78rem; font-weight: 600; background: var(--soft); color: var(--muted); }
+  .litem.done .n { background: var(--accent); color: var(--accent-ink); }
+  .litem .t { font-weight: 500; }
+  .litem .d { display: block; color: var(--muted); font-size: .82rem; line-height: 1.35; }
+  .litem .chev { color: var(--muted); width: 16px; height: 16px; transition: transform .2s var(--ease); }
+  .litem:hover .chev { transform: translateX(3px); }
+  .lprog { display: flex; align-items: center; gap: 10px; margin-top: 16px; color: var(--muted); font-size: .85rem; }
+
+  .back { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: .9rem; margin-bottom: 18px; }
+  .back svg { width: 16px; height: 16px; }
+  .lesson p { margin: 0 0 12px; }
+  .lesson .lead { font-size: 1.08rem; }
+  .lesson ol { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+  .lesson ol li::marker { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .lesson code { font: 600 .95em var(--font); font-variant-numeric: tabular-nums; }
+  .worked { border-left: 2px solid var(--accent); padding: 2px 0 2px 14px; }
+  .worked .wq { font-size: 1.4rem; font-weight: 600; font-variant-numeric: tabular-nums; margin-bottom: 6px; }
+  .worked .ws { display: grid; gap: 4px; font-variant-numeric: tabular-nums; }
+  .worked .ws div { opacity: 0; animation: rise .4s var(--ease) forwards; }
+  .worked .ws div:last-child { font-weight: 600; }
+  .careful { color: var(--muted); font-size: .9rem; background: var(--soft); border-radius: 12px; padding: 12px 14px; }
+  .try { border: 1px solid var(--line); border-radius: 18px; padding: 18px; text-align: center; }
+  .try .tq { font-size: 1.6rem; font-weight: 600; font-variant-numeric: tabular-nums; margin-bottom: 12px; overflow-wrap: anywhere; }
+  .try .tq.long { font-size: 1.05rem; font-weight: 500; line-height: 1.4; }
+  .try form { display: flex; gap: 8px; justify-content: center; }
+  .try input { width: 140px; font: 600 1.2rem var(--font); text-align: center; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font-variant-numeric: tabular-nums; transition: border-color .2s; }
+  .try input.ok { border-color: var(--green); } .try input.bad { border-color: var(--red); animation: shake .3s; }
+  .try .tr { min-height: 2.8em; margin-top: 10px; font-size: .9rem; color: var(--muted); }
+  .try .tr b { color: var(--green); } .try .tr em { color: var(--red); font-style: normal; font-weight: 600; }
+
+  /* Progreso */
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kpi { padding: 14px; border-radius: 16px; background: var(--soft); min-width: 0; }
+  .kpi b { display: block; font-size: 1.3rem; font-weight: 600; letter-spacing: -.01em; }
+  .kpi span { color: var(--muted); font-size: .76rem; }
+  .chart { width: 100%; height: 130px; display: block; }
+  .chart rect { transform-box: fill-box; transform-origin: bottom; animation: growY .7s var(--ease) both; }
+  @keyframes growY { from { transform: scaleY(0); } }
+  .chart text { fill: var(--muted); font-size: 10px; font-family: var(--font); }
+  .rows { border-top: 1px solid var(--line); }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); align-items: center; }
+  .row .a { font-weight: 500; }
+  .row .b { color: var(--muted); font-size: .85rem; text-align: right; }
+  .row .c { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: .8rem; }
+  .empty { color: var(--muted); font-size: .9rem; padding: 12px 0; }
+  .ghost { display: block; margin: 32px auto 0; color: var(--muted); font-size: .85rem; }
+
+  /* Pantalla de juego */
+  .overlay { position: fixed; inset: 0; background: var(--bg); z-index: 10; animation: fade .25s var(--ease); }
+  .overlay.out { animation: fade .2s var(--ease) reverse forwards; }
+  #play { display: flex; flex-direction: column;
+    padding: max(14px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  #play > * { width: 100%; max-width: 520px; margin-inline: auto; }
+  .ptop { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .ptop .x { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); }
+  .ptop .x svg { width: 16px; height: 16px; }
+  .pinfo { text-align: center; font-size: .78rem; color: var(--muted); min-width: 64px; }
+  .pinfo b { color: var(--text); font-size: 1.1rem; display: block; line-height: 1.2; }
+  .pbar { height: 3px; border-radius: 3px; background: var(--empty); margin-top: 12px; overflow: hidden; }
+  .pbar > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s linear; }
+  .stage { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 14px; min-height: 0; }
+  .qbox { display: grid; gap: 10px; justify-items: center; }
+  .qbox.in { animation: slideIn .28s var(--ease) both; }
+  .qbox.out { animation: slideOut .16s var(--ease) forwards; }
+  .qtag { font-size: .72rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+  .qtext { font-size: clamp(1.9rem, 9vw, 3rem); font-weight: 600; letter-spacing: -.02em; line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .qtext.long { font-size: clamp(1.1rem, 5vw, 1.45rem); font-weight: 500; letter-spacing: 0; line-height: 1.4; max-width: 30ch; }
+  .answer { min-height: 62px; min-width: 150px; padding: 6px 18px; border-radius: 16px; border: 1.5px solid var(--line);
+    font-size: clamp(1.8rem, 8vw, 2.4rem); font-weight: 600; font-variant-numeric: tabular-nums; display: flex; align-items: center; justify-content: center; gap: 2px;
+    transition: border-color .2s, color .2s; }
+  .answer .ph { color: var(--empty); }
+  .answer .caret { width: 2px; height: 1.05em; background: var(--accent); animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .answer.ok { border-color: var(--green); color: var(--green); animation: pop .35s var(--spring); }
+  .answer.bad { border-color: var(--red); color: var(--red); animation: shake .3s; }
+  @keyframes pop { from { transform: scale(.94); } }
+  @keyframes shake { 25%, 75% { transform: translateX(-5px); } 50% { transform: translateX(5px); } }
+  .feedback { min-height: 3.2em; font-size: .9rem; color: var(--muted); max-width: 34ch; }
+  .feedback > * { animation: fade .3s var(--ease); }
+  .feedback b { color: var(--red); }
+  .feedback .good { color: var(--green); font-weight: 600; }
+  .pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+  .pad button { height: clamp(46px, 8.3dvh, 60px); border-radius: 14px; background: var(--soft); font-size: 1.3rem; font-weight: 500;
+    font-variant-numeric: tabular-nums; transition: transform .12s var(--ease), background-color .2s; user-select: none; touch-action: manipulation; }
+  .pad button:active { transform: scale(.93); background: var(--empty); }
+  .pad .go { background: var(--accent); color: var(--accent-ink); grid-row: span 2; height: auto; font-size: .95rem; font-weight: 600; }
+  .pad .go:active { background: var(--accent); opacity: .85; }
+  .pad .fn { font-size: .95rem; color: var(--muted); }
+  .pad svg { width: 22px; height: 22px; }
+  .hintline { text-align: center; color: var(--muted); font-size: .72rem; margin-top: 8px; }
+  @media (hover: none) { .hintline { display: none; } }
+
+  /* Resultado */
+  #result { overflow-y: auto; z-index: 11; }
+  .big { font-size: 4rem; font-weight: 700; letter-spacing: -.03em; line-height: 1; margin: 20px 0 4px; font-variant-numeric: tabular-nums; }
+  .badge { display: inline-block; margin-top: 10px; padding: 3px 10px; border-radius: 99px; font-size: .78rem; font-weight: 600;
+    background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); animation: pop .5s var(--spring) .2s both; }
+  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 28px; }
+  .btn { padding: 14px; border-radius: 14px; font-weight: 600; background: var(--soft); text-align: center; }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .btn.block { display: block; width: 100%; margin-top: 18px; }
+  .mist { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  .mist .y { color: var(--red); text-decoration: line-through; }
+  .mist .r { color: var(--green); font-weight: 600; text-align: right; }
+  .mist .q { font-weight: 500; overflow-wrap: anywhere; }
+  .mist .s { grid-column: 1 / -1; color: var(--muted); font-size: .85rem; }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+<main>
+  <!-- PRACTICAR -->
+  <section id="tab-home">
+    <h1><small id="hello">Hola</small>Cuanti</h1>
+    <div class="today">
+      <div class="ring" aria-hidden="true">
+        <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--empty)" stroke-width="3"/>
+          <circle id="ringArc" cx="18" cy="18" r="15.5" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 100" pathLength="100"/></svg>
+        <b id="ringTxt" class="num">0</b>
+      </div>
+      <div>
+        <div class="t1" id="todayT1">Meta de hoy</div>
+        <div class="t2" id="todayT2"></div>
+        <div class="streak" id="streak" hidden><i></i><span></span></div>
+      </div>
+    </div>
+
+    <h2>Dificultad</h2>
+    <div class="seg" id="diffSeg" role="group" aria-label="Dificultad">
+      <span class="knob"></span>
+      <button data-v="auto">Auto</button><button data-v="f">Fácil</button><button data-v="m">Media</button><button data-v="d">Difícil</button><button data-v="x">Experto</button>
+    </div>
+    <div class="note" id="diffNote"></div>
+
+    <h2>Formato</h2>
+    <div class="seg" id="fmtSeg" role="group" aria-label="Formato de la sesión">
+      <span class="knob"></span>
+      <button data-v="sprint">Sprint 60 s</button><button data-v="ten">10 preguntas</button><button data-v="free">Libre</button>
+    </div>
+
+    <div id="topicsWrap"></div>
+  </section>
+
+  <!-- LECCIONES -->
+  <section id="tab-learn" hidden></section>
+
+  <!-- PROGRESO -->
+  <section id="tab-stats" hidden>
+    <h1><small>Tu avance</small>Progreso</h1>
+    <h2>Totales</h2>
+    <div class="kpis">
+      <div class="kpi"><b class="num" id="kTotal">0</b><span>respuestas</span></div>
+      <div class="kpi"><b class="num" id="kAcc">—</b><span>precisión</span></div>
+      <div class="kpi"><b class="num" id="kTime">—</b><span>por respuesta</span></div>
+    </div>
+    <h2>Aciertos · últimos 14 días</h2>
+    <svg class="chart" id="chart" viewBox="0 0 320 130" preserveAspectRatio="none" role="img" aria-label="Aciertos por día"></svg>
+    <h2>Nivel por tema</h2>
+    <div class="rows" id="topicRows"></div>
+    <h2>Mejores marcas · Sprint 60 s</h2>
+    <div class="rows" id="bestRows"></div>
+    <h2>Sesiones recientes</h2>
+    <div class="rows" id="sessRows"></div>
+    <h2>Meta diaria de aciertos</h2>
+    <div class="seg" id="goalSeg" role="group" aria-label="Meta diaria de aciertos">
+      <span class="knob"></span>
+      <button data-v="20">20</button><button data-v="40">40</button><button data-v="80">80</button><button data-v="150">150</button>
+    </div>
+    <button class="ghost" id="resetBtn">Borrar todo el progreso</button>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Secciones">
+  <button data-tab="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Practicar</button>
+  <button data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5C4.5 4 8 4 12 6c4-2 7.5-2 10-.5V19c-2.5-1.5-6-1.5-10 .5-4-2-7.5-2-10-.5zM12 6v13.5"/></svg>Lecciones</button>
+  <button data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Progreso</button>
+</nav>
+
+<!-- JUEGO -->
+<div id="play" class="overlay" hidden>
+  <div class="ptop">
+    <button class="x" id="quit" aria-label="Terminar sesión"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="pinfo"><b class="num" id="pMain">60</b><span id="pSub">segundos</span></div>
+    <div class="pinfo"><b class="num" id="pScore">0</b><span>aciertos</span></div>
+  </div>
+  <div class="pbar"><span id="pBar"></span></div>
+  <div class="stage">
+    <div class="qbox" id="qBox">
+      <div class="qtag" id="qTag"></div>
+      <div class="qtext" id="qText"></div>
+    </div>
+    <div class="answer" id="ans" aria-live="polite"></div>
+    <div class="feedback" id="fb"></div>
+  </div>
+  <div class="pad" id="pad">
+    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="fn" data-k="back" aria-label="Borrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H9l-6 7 6 7h12zM18 9l-6 6M12 9l6 6"/></svg></button>
+    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="fn" data-k="neg" aria-label="Cambiar signo">±</button>
+    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="go" data-k="ok">Listo</button>
+    <button class="fn" data-k="skip">Saltar</button><button data-k="0">0</button><button data-k=",">,</button>
+  </div>
+  <div class="hintline">Escribe con el teclado · Enter envía · Espacio salta · Esc sale</div>
+</div>
+
+<!-- RESULTADO -->
+<div id="result" class="overlay" hidden>
+  <main class="enter" id="resultMain">
+    <h1><small id="rTitle"></small>Resultado</h1>
+    <div><div class="big" id="rBig">0</div><div style="color:var(--muted)" id="rSub"></div><div id="rBadge" class="badge" hidden></div></div>
+    <div><h2>Resumen</h2>
+      <div class="kpis">
+        <div class="kpi"><b class="num" id="rAcc">—</b><span>precisión</span></div>
+        <div class="kpi"><b class="num" id="rTime">—</b><span>por respuesta</span></div>
+        <div class="kpi"><b class="num" id="rLvl">—</b><span>nivel medio</span></div>
+      </div></div>
+    <div id="rMistWrap"><h2>Para repasar</h2><div id="rMist"></div></div>
+    <div class="btns">
+      <button class="btn press" id="rHome">Volver</button>
+      <button class="btn primary press" id="rAgain">Otra vez</button>
+    </div>
+  </main>
+</div>
+
+<script>
+'use strict';
+/* ================= Utilidades ================= */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const rd = x => Math.round((x + Number.EPSILON) * 1e4) / 1e4; // respuestas con hasta 4 decimales
+const fmt = x => typeof x === 'number' && isFinite(x)
+  ? rd(x).toLocaleString('es', { maximumFractionDigits: 4, useGrouping: Math.abs(x) >= 10000 }) : String(x);
+const d1 = x => (Math.round(x * 10) / 10).toLocaleString('es', { maximumFractionDigits: 1 });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const gcd = (a, b) => b ? gcd(b, a % b) : Math.abs(a);
+const lcm = (a, b) => a / gcd(a, b) * b;
+const sgn = n => n < 0 ? `− ${-n}` : `+ ${n}`;
+const coef = (a, v = 'x') => a === 1 ? v : a === -1 ? `−${v}` : `${a}${v}`;
+
+/* ================= Temas y generadores =================
+   gen(L) con L de 1 a 10 devuelve { q, a, tip?, long?, tol? (relativa), abs? (absoluta) }.
+   Los ejercicios se generan al azar: nunca se acaban. */
+const TOPICS = {
+  suma: { name: 'Suma', sym: '+', gen(L) {
+    if (L === 9) { const a = rnd(11, 99), b = rnd(11, 99), c = rnd(11, 99), d = rnd(11, 99); return { q: `${a} + ${b} + ${c} + ${d}`, a: a + b + c + d, tip: 'Busca parejas que sumen decenas redondas y empieza por ellas.' }; }
+    if (L === 10) { const a = rnd(1000, 9999) / 10, b = rnd(100, 9999) / 100; return { q: `${fmt(a)} + ${fmt(b)}`, a: a + b, tip: 'Alinea las comas: suma enteros y decimales por separado.' }; }
+    const R = [[1,9,1,9],[10,99,2,9],[10,99,10,99],[100,999,10,99],[100,999,100,999],[1000,9999,100,999],[1000,9999,1000,9999],[10000,99999,1000,9999]][L-1];
+    const a = rnd(R[0], R[1]), b = rnd(R[2], R[3]);
+    return { q: `${a} + ${b}`, a: a + b, tip: 'Suma de izquierda a derecha: primero lo grande, luego decenas y unidades.' };
+  }},
+  resta: { name: 'Resta', sym: '−', gen(L) {
+    const R = [[2,18,1,9],[10,99,2,9],[20,99,10,99],[100,999,10,99],[100,999,100,999],[1000,9999,100,999],[1000,9999,1000,9999],[10000,99999,1000,9999],[10,99,10,99],[100,999,100,999]][L-1];
+    let a = rnd(R[0], R[1]), b = rnd(R[2], R[3]);
+    if (b > a) [a, b] = [b, a];
+    if (L >= 9 && Math.random() < .5) [a, b] = [b, a]; // resultados negativos
+    const u = b % 10;
+    const tip = u >= 7 ? `Compensa: restar ${b} es restar ${b + 10 - u} y sumar ${10 - u}.` : 'Cuenta hacia arriba desde el número pequeño hasta el grande.';
+    return { q: `${a} − ${b}`, a: a - b, tip };
+  }},
+  mult: { name: 'Multiplicación', sym: '×', gen(L) {
+    const R = [[2,9,2,9],[2,12,2,12],[11,19,2,9],[20,99,2,9],[11,19,11,19],[100,999,2,9],[20,99,11,19],[20,99,20,99],[100,999,11,99],[100,999,100,999]][L-1];
+    const a = rnd(R[0], R[1]), b = rnd(R[2], R[3]);
+    let tip = `Descompón: ${a} × ${b} = ${a} × ${b - b % 10} + ${a} × ${b % 10}.`;
+    if (a === 5 || b === 5) tip = '× 5 = × 10 y ÷ 2.';
+    else if (a === 11 || b === 11) tip = '× 11: separa las cifras y pon su suma en medio.';
+    else if (a === 9 || b === 9) tip = '× 9 = × 10 menos el número.';
+    else if (b < 10) tip = a < 10 ? 'Tabla de multiplicar: repásala en voz alta.' : `Descompón: ${a - a % 10} × ${b} + ${a % 10} × ${b}.`;
+    else if (b % 10 === 0) tip = `Multiplica ${a} × ${b / 10} y añade un cero.`;
+    return { q: `${a} × ${b}`, a: a * b, tip };
+  }},
+  div: { name: 'División', sym: '÷', gen(L) {
+    if (L >= 8 && Math.random() < .5) {
+      const d = pick([4, 5, 20, 25, 50]); let n; do { n = rnd(d + 1, d * (L === 10 ? 40 : 12)); } while (n % d === 0);
+      return { q: `${n} ÷ ${d}`, a: n / d, tip: d === 25 ? '÷ 25 = × 4 y ÷ 100.' : d === 5 ? '÷ 5 = × 2 y ÷ 10.' : d === 50 ? '÷ 50 = × 2 y ÷ 100.' : d === 20 ? '÷ 20 = ÷ 2 y ÷ 10.' : '÷ 4 = la mitad de la mitad.' };
+    }
+    const R = [[2,9,2,9],[2,12,2,12],[2,9,11,19],[2,9,20,99],[11,19,11,19],[2,9,100,999],[11,19,20,99],[20,99,20,99],[11,99,100,999],[100,999,100,999]][L-1];
+    const d = rnd(R[0], R[1]), q = rnd(R[2], R[3]);
+    return { q: `${d * q} ÷ ${d}`, a: q, tip: `Piensa al revés: ¿${d} por cuánto da ${d * q}?` };
+  }},
+  dec: { name: 'Decimales', sym: '0,5', gen(L) {
+    const t1 = () => rnd(1, 99) / 10, t2 = () => rnd(1, 999) / 100;
+    if (L <= 2) { const a = t1(), b = t1(); return { q: `${fmt(a)} + ${fmt(b)}`, a: a + b, tip: 'Suma las partes enteras y las décimas por separado.' }; }
+    if (L <= 4) { let a = t2() + rnd(1, 20), b = t2(); a = rd(a); return { q: `${fmt(a)} − ${fmt(b)}`, a: a - b, tip: 'Completa con ceros para que ambos tengan las mismas cifras decimales.' }; }
+    if (L <= 6) { const a = pick([0.5, 1.5, 2.5, 0.25, 0.2, 1.2, 0.4, 0.75, 3.5]), b = rnd(2, 40); return { q: `${fmt(a)} × ${b}`, a: a * b, tip: 'Multiplica sin la coma y luego coloca tantas cifras decimales como tenía el factor.' }; }
+    if (L <= 8) { const a = rnd(2, 99) / 10, b = rnd(2, 99) / 10; return { q: `${fmt(a)} × ${fmt(b)}`, a: a * b, tip: 'Una décima por una décima = centésimas: cuenta 2 cifras decimales.' }; }
+    const d = pick([0.2, 0.25, 0.5, 0.05, 1.5, 0.4, 0.12, 0.3]), q = rnd(2, 60);
+    return { q: `${fmt(rd(d * q))} ÷ ${fmt(d)}`, a: q, tip: 'Multiplica ambos por 10 o 100 hasta que el divisor sea entero.' };
+  }},
+  pct: { name: 'Porcentajes', sym: '%', gen(L) {
+    const t = rnd(0, 99);
+    if (L <= 2) { const p = pick([10, 50, 25, 20]); const n = p === 25 ? rnd(1, 40) * 4 : rnd(2, 60) * 10; return { q: `${p}% de ${n}`, a: n * p / 100, tip: '10% = mover la coma; 50% = la mitad; 25% = la mitad de la mitad.' }; }
+    if (L <= 4) { const p = pick([5, 15, 30, 40, 75, 60]); const n = rnd(2, 40) * 20; return { q: `${p}% de ${n}`, a: n * p / 100, tip: '15% = 10% + la mitad de ese 10%. 5% = la mitad del 10%.' }; }
+    if (L <= 6) {
+      if (t < 50) { const n = rnd(2, 30) * 20, p = pick([5, 10, 15, 20, 25, 30, 40, 60, 75, 80]); return { q: `¿Qué porcentaje es ${n * p / 100} de ${n}?`, a: p, long: true, tip: 'Parte ÷ total × 100.' }; }
+      const p = rnd(1, 19) * 5, n = rnd(2, 25) * 20; return { q: `${p}% de ${n}`, a: n * p / 100, tip: 'x% de y = y% de x: el 8% de 50 es el 50% de 8 = 4.' };
+    }
+    if (L <= 8) {
+      const n = rnd(2, 50) * 20, p = pick([5, 10, 15, 20, 25, 30, 40]);
+      if (t < 50) return { q: `Un artículo de ${n} sube ${p}%. ¿Nuevo precio?`, a: n * (1 + p / 100), long: true, tip: `Subir ${p}% = multiplicar por ${fmt(1 + p / 100)}.` };
+      return { q: `Un artículo de ${n} tiene ${p}% de descuento. ¿Cuánto pagas?`, a: n * (1 - p / 100), long: true, tip: `Descontar ${p}% = pagar el ${100 - p}%.` };
+    }
+    if (t < 40) { const a = rnd(2, 40) * 20, p = pick([10, 20, 25, 40, 50, 60, 75, 80, -10, -20, -25, -40, -50]); return { q: `Pasa de ${a} a ${rd(a * (1 + p / 100))}. ¿Variación en %?`, a: p, long: true, tip: '(nuevo − viejo) ÷ viejo × 100. Negativo si baja.' }; }
+    if (t < 70) { const p = pick([12.5, 37.5, 62.5, 87.5]), n = rnd(1, 30) * 8; return { q: `${fmt(p)}% de ${n}`, a: n * p / 100, tip: '12,5% = 1/8 · 37,5% = 3/8 · 62,5% = 5/8 · 87,5% = 7/8.' }; }
+    const n = rnd(2, 20) * 100, p1 = pick([10, 20]), p2 = pick([10, 20, 50]);
+    return { q: `${n} con ${p1}% de descuento y luego otro ${p2}%. ¿Precio final?`, a: n * (1 - p1 / 100) * (1 - p2 / 100), long: true, tip: 'Los descuentos sucesivos se multiplican, no se suman.' };
+  }},
+  frac: { name: 'Fracciones', sym: '¾', gen(L) {
+    const t = rnd(0, 99);
+    const dens = L <= 2 ? [2, 4] : L <= 4 ? [2, 4, 5, 10] : L <= 6 ? [4, 5, 8, 10, 20] : [8, 16, 20, 25, 40];
+    const d = pick(dens); let n = rnd(1, d - 1); while (gcd(n, d) !== 1) n = rnd(1, d - 1);
+    if (t < 35) { const N = d * rnd(2, L <= 4 ? 12 : 40); return { q: `${n}/${d} de ${N}`, a: N * n / d, tip: `Divide entre ${d} y multiplica por ${n}.` }; }
+    if (t < 60) return { q: `${n}/${d} en decimal`, a: n / d, tip: `${n} ÷ ${d}. Útiles: 1/8 = 0,125 · 1/20 = 0,05 · 1/25 = 0,04.` };
+    if (L >= 5 && t < 85) {
+      const d2 = pick(dens.filter(x => x <= 20)); let n2 = rnd(1, d2 - 1); while (gcd(n2, d2) !== 1) n2 = rnd(1, d2 - 1); const r = n / d + n2 / d2;
+      if (Math.abs(rd(r) - r) < 1e-9) return { q: `${n}/${d} + ${n2}/${d2} en decimal`, a: r, long: true, tip: 'Pasa cada fracción a decimal y súmalas.' };
+    }
+    return { q: `${n}/${d} en porcentaje`, a: n / d * 100, tip: 'Fracción × 100. Ej.: 3/4 = 0,75 = 75%.' };
+  }},
+  pot: { name: 'Potencias y raíces', sym: 'x²', gen(L) {
+    const t = rnd(0, 99);
+    const sq = [10, 15, 15, 25, 25, 50, 30, 125, 99, 130][L-1];
+    if (L === 8 && t < 60) { const k = rnd(1, 12), n = k * 10 + 5; return { q: `${n}²`, a: n * n, tip: `Termina en 5: ${k} × ${k + 1} = ${k * (k + 1)} y pega 25.` }; }
+    if (L >= 3 && t < 30) { const n = rnd(2, Math.min(sq, 40)); return { q: `√${n * n}`, a: n, tip: 'La última cifra orienta: si el número termina en 6, la raíz termina en 4 o 6.' }; }
+    if (L >= 5 && t < 45) { const n = rnd(2, 12); return { q: `2^${n}`, a: 2 ** n, tip: '2¹⁰ = 1024. Desde ahí, divide o multiplica por 2.' }; }
+    if (L >= 7 && t < 60) { const n = rnd(2, L === 10 ? 20 : 10); return L >= 9 && Math.random() < .5 ? { q: `∛${n ** 3}`, a: n, tip: 'La última cifra del cubo delata la de la raíz (8 → 2, 7 → 3).' } : { q: `${n}³`, a: n ** 3, tip: `${n}³ = ${n}² × ${n} = ${n * n} × ${n}.` }; }
+    const n = rnd(2, sq), r = n % 10, b = n - r;
+    const tip = n > 20 && r ? `(a + b)²: ${b}² + 2·${b}·${r} + ${r}² = ${b * b} + ${2 * b * r} + ${r * r}.` : 'Memoriza los cuadrados hasta 20: son la base de todo lo demás.';
+    return { q: `${n}²`, a: n * n, tip };
+  }},
+  mcd: { name: 'Divisibilidad', sym: 'mcd', gen(L) {
+    const coprimes = (lo, hi) => { let x, y; do { x = rnd(lo, hi); y = rnd(lo, hi); } while (x === y || gcd(x, y) !== 1); return [x, y]; };
+    if (L <= 2) { const b = rnd(3, 9), a = rnd(20, 99); return { q: `Residuo de ${a} ÷ ${b}`, a: a % b, tip: `${b} × ${Math.floor(a / b)} = ${b * Math.floor(a / b)}; lo que sobra hasta ${a} es el residuo.` }; }
+    if (L <= 4) { const g = rnd(2, 12), [x, y] = coprimes(2, 9); return { q: `MCD(${g * x}, ${g * y})`, a: g, tip: 'El MCD es el mayor número que divide a ambos. Prueba con divisores comunes de mayor a menor.' }; }
+    if (L <= 6) { let a, b; do { a = rnd(4, 24); b = rnd(4, 24); } while (a === b || lcm(a, b) > 240); return { q: `MCM(${a}, ${b})`, a: lcm(a, b), tip: 'MCM = a × b ÷ MCD(a, b).' }; }
+    if (L <= 8) {
+      if (Math.random() < .5) { let a, b, c; do { a = rnd(2, 12); b = rnd(2, 12); c = rnd(2, 12); } while (new Set([a, b, c]).size < 3 || lcm(lcm(a, b), c) > 360); return { q: `MCM(${a}, ${b}, ${c})`, a: lcm(lcm(a, b), c), tip: 'Calcula el MCM de dos y luego con el tercero.' }; }
+      const g = rnd(6, 30), [x, y] = coprimes(3, 15); return { q: `MCD(${g * x}, ${g * y})`, a: g, tip: 'Euclides: MCD(a, b) = MCD(b, a mod b) hasta llegar a 0.' };
+    }
+    if (Math.random() < .5) { let a, b; do { a = rnd(2, 12) * 2; b = rnd(2, 15) * 2; } while (a === b || lcm(a, b) > 180); return { q: `Un bus pasa cada ${a} min y otro cada ${b} min. Si salen juntos, ¿en cuántos minutos vuelven a coincidir?`, a: lcm(a, b), long: true, tip: 'Coincidir de nuevo = mínimo común múltiplo.' }; }
+    const n = pick([12, 18, 20, 24, 28, 30, 36, 40, 48, 60, 72, 90, 100, 120]); let c = 0; for (let i = 1; i <= n; i++) if (n % i === 0) c++;
+    return { q: `¿Cuántos divisores tiene ${n}?`, a: c, long: true, tip: 'Factoriza: si n = pᵃ·qᵇ, tiene (a+1)(b+1) divisores.' };
+  }},
+  serie: { name: 'Series', sym: '…', gen(L) {
+    let s, tip;
+    const kind = clamp(L + rnd(-1, 0), 1, 10);
+    if (kind <= 2) { const a = rnd(1, 20), d = rnd(2, 9); s = [0, 1, 2, 3, 4].map(i => a + d * i); tip = `Suma ${d} cada vez.`; }
+    else if (kind <= 4) { const a = rnd(10, 90), d = rnd(-15, 15) || 7; s = [0, 1, 2, 3, 4].map(i => a + d * i); tip = `Diferencia constante: ${d > 0 ? '+' : '−'}${Math.abs(d)}.`; }
+    else if (kind === 5) { const a = rnd(1, 5), r = rnd(2, 3); s = [0, 1, 2, 3, 4].map(i => a * r ** i); tip = `Multiplica por ${r} cada vez.`; }
+    else if (kind === 6) { const o = rnd(1, 8), c = rnd(0, 5); s = [0, 1, 2, 3, 4].map(i => (o + i) ** 2 + c); tip = c ? `Cuadrados (${o}², ${o + 1}²…) más ${c}.` : 'Cuadrados consecutivos.'; }
+    else if (kind === 7) { const a = rnd(1, 20), d = rnd(1, 4); s = [a]; for (let i = 1; i < 5; i++) s.push(s[i - 1] + d * i); tip = `Las diferencias crecen: +${d}, +${2 * d}, +${3 * d}…`; }
+    else if (kind === 8) { const a = rnd(1, 10), b = rnd(20, 50), d1 = rnd(2, 5), d2 = -rnd(1, 4); s = [a, b, a + d1, b + d2, a + 2 * d1]; tip = `Dos series intercaladas: +${d1} en una, −${-d2} en la otra.`; }
+    else if (kind === 9) { const a = rnd(1, 6), b = rnd(1, 8); s = [a, b]; while (s.length < 5) s.push(s[s.length - 1] + s[s.length - 2]); tip = 'Cada término es la suma de los dos anteriores.'; }
+    else { const a = rnd(1, 6), m = rnd(2, 3), c = rnd(-3, 4) || 1; s = [a]; while (s.length < 5) s.push(s[s.length - 1] * m + c); tip = `Regla: × ${m} y ${c > 0 ? '+' : '−'} ${Math.abs(c)}.`; }
+    const ans = s.pop();
+    return { q: `${s.join(', ')}, ?`, a: ans, tip };
+  }},
+  tres: { name: 'Regla de tres', sym: '∝', gen(L) {
+    const t = rnd(0, 99);
+    if (L <= 4 || t < 35) {
+      const p = rnd(2, L <= 2 ? 9 : L <= 5 ? 25 : 60), a = rnd(2, L <= 2 ? 6 : 12); let b; do { b = rnd(2, L <= 2 ? 10 : 30); } while (b === a);
+      const item = pick(['cuadernos', 'kilos de arroz', 'entradas', 'litros de leche', 'camisas']);
+      return { q: `Si ${a} ${item} cuestan ${a * p}, ¿cuánto cuestan ${b}?`, a: b * p, long: true, tip: `Valor de 1: ${a * p} ÷ ${a} = ${p}; luego × ${b}.` };
+    }
+    if (L <= 7 || t < 70) {
+      const T = pick([12, 24, 30, 36, 48, 60, 72, 120]); const divs = []; for (let i = 2; i < T; i++) if (T % i === 0) divs.push(i);
+      const a = pick(divs); let b; do { b = pick(divs); } while (b === a);
+      return { q: `${a} obreros tardan ${T / a} días en una obra. ¿Cuántos días tardan ${b} obreros?`, a: T / b, long: true, tip: `Inversa: trabajo total = ${a} × ${T / a} = ${T}; ÷ ${b}.` };
+    }
+    const v = rnd(4, 12) * 10, h = rnd(2, 6), h2 = pick([1.5, 2.5, 3, 4, 0.5]);
+    return { q: `Un carro recorre ${v * h} km en ${h} h. A la misma velocidad, ¿cuántos km en ${fmt(h2)} h?`, a: v * h2, long: true, tip: `Velocidad = ${v * h} ÷ ${h} = ${v} km/h.` };
+  }},
+  fin: { name: 'Finanzas', sym: '$', gen(L) {
+    const t = rnd(0, 99);
+    if (L <= 2) { const n = rnd(1, 40) * 25; return t < 50 ? { q: `IVA (16%) de ${n}`, a: n * .16, tip: '16% = 10% + 5% + 1%.' } : { q: `${n} más IVA (16%)`, a: n * 1.16, tip: 'Precio con IVA = precio × 1,16.' }; }
+    if (L <= 4) { const c = rnd(2, 40) * 10, p = pick([10, 20, 25, 30, 40, 50]); return { q: `Compras a ${c} y vendes a ${rd(c * (1 + p / 100))}. ¿% de ganancia sobre el costo?`, a: p, long: true, tip: 'Ganancia ÷ costo × 100.' }; }
+    if (L <= 6) {
+      if (t < 50) { const C = rnd(1, 20) * 500, r = pick([4, 5, 6, 8, 10, 12]), n = rnd(1, 5); return { q: `Interés simple: ${C} al ${r}% anual durante ${n} años. ¿Interés total?`, a: C * r / 100 * n, long: true, tip: 'Interés = capital × tasa × tiempo.' }; }
+      const tasa = rnd(30, 60), d = rnd(2, 40); return t < 75 ? { q: `Si 1 $ = ${tasa} Bs, ¿cuántos Bs son ${d} $?`, a: d * tasa, long: true, tip: 'De dólares a bolívares se multiplica por la tasa.' } : { q: `Si 1 $ = ${tasa} Bs, ¿cuántos $ son ${d * tasa} Bs?`, a: d, long: true, tip: 'De bolívares a dólares se divide entre la tasa.' };
+    }
+    if (L <= 8) { const C = rnd(1, 50) * 100, r = pick([5, 10, 20]); return { q: `${C} al ${r}% anual compuesto. ¿Saldo tras 2 años?`, a: C * (1 + r / 100) ** 2, long: true, tip: `Compuesto: ${C} × ${fmt(1 + r / 100)} × ${fmt(1 + r / 100)}. El segundo año gana intereses sobre los intereses.` }; }
+    if (t < 40) { const r = pick([2, 3, 4, 6, 8, 9, 12, 18, 24]); return { q: `Según la regla del 72, ¿en cuántos años se duplica una inversión al ${r}% anual?`, a: 72 / r, long: true, tip: 'Años ≈ 72 ÷ tasa.' }; }
+    if (t < 70) { const C = rnd(1, 20) * 1000; return { q: `${C} al 10% anual compuesto. ¿Saldo tras 3 años?`, a: C * 1.331, long: true, tip: '1,1³ = 1,331.' }; }
+    const g = pick([10, 20, 25, 50]); return { q: `Si una inversión pierde ${g}%, ¿qué % debe ganar para recuperarse?`, a: rd(g / (100 - g) * 100), long: true, abs: .1, tip: `Recuperar = pérdida ÷ lo que queda: ${g} ÷ ${100 - g} × 100.` };
+  }},
+  ecu: { name: 'Ecuaciones', sym: 'x', gen(L) {
+    const x = L >= 9 ? rnd(-12, 15) : rnd(1, L <= 4 ? 12 : 20);
+    if (L <= 2) { const a = rnd(2, 30); return Math.random() < .5 ? { q: `x + ${a} = ${x + a}`, a: x, tip: 'Lo que suma pasa al otro lado restando.' } : { q: `x − ${a} = ${x - a}`, a: x, tip: 'Lo que resta pasa sumando.' }; }
+    if (L <= 4) { const a = rnd(2, 12); return Math.random() < .6 ? { q: `${a}x = ${a * x}`, a: x, tip: `Lo que multiplica pasa dividiendo: ${a * x} ÷ ${a}.` } : { q: `x ÷ ${a} = ${x}`, a: x * a, tip: 'Lo que divide pasa multiplicando.' }; }
+    if (L <= 6) { const a = rnd(2, 9), b = rnd(-20, 20) || 5; return { q: `${a}x ${sgn(b)} = ${a * x + b}`, a: x, tip: 'Primero quita lo que suma o resta; después divide.' }; }
+    if (L <= 8) { let a, c; do { a = rnd(2, 9); c = rnd(1, 8); } while (a === c); const b = rnd(-15, 15) || 3, d = a * x + b - c * x; return { q: `${coef(a)} ${sgn(b)} = ${coef(c)} ${sgn(d)}`, a: x, tip: 'Junta las x en un lado y los números en el otro.' }; }
+    if (Math.random() < .5) { const a = rnd(2, 6), b = rnd(-9, 9) || 2; return { q: `${a}(x ${sgn(b)}) = ${a * (x + b)}`, a: x, tip: `Divide entre ${a} primero y luego despeja.` }; }
+    const a = pick([2, 3, 4, 5]), b = rnd(-9, 9) || 4, X = x * a; return { q: `x/${a} ${sgn(b)} = ${x + b}`, a: X, tip: `Resta ${b} y multiplica por ${a}.` };
+  }},
+  prom: { name: 'Promedios', sym: 'x̄', gen(L) {
+    if (L <= 3) {
+      const k = L === 1 ? 3 : 4, m = rnd(5, 50); const xs = []; for (let i = 0; i < k - 1; i++) xs.push(m + rnd(-6, 6));
+      const last = m * k - xs.reduce((a, b) => a + b, 0); if (last <= 0) return TOPICS.prom.gen(L); xs.push(last);
+      return { q: `Promedio de ${xs.join(', ')}`, a: m, tip: 'Suma todo y divide entre la cantidad. Atajo: elige una base y promedia las diferencias.' };
+    }
+    if (L <= 5) { const k = L === 4 ? 5 : 6; const xs = Array.from({ length: k }, () => rnd(1, 40)); const s = [...xs].sort((a, b) => a - b); const med = k % 2 ? s[(k - 1) / 2] : (s[k / 2 - 1] + s[k / 2]) / 2; return { q: `Mediana de ${xs.join(', ')}`, a: med, tip: 'Ordena de menor a mayor y toma el del medio (o el promedio de los dos centrales).' }; }
+    if (L <= 7) { const n = rnd(3, 6), m1 = rnd(10, 16), m2 = m1 + rnd(1, 2); return { q: `El promedio de ${n} notas es ${m1}. ¿Qué nota necesitas en la siguiente para que el promedio sea ${m2}?`, a: m2 * (n + 1) - m1 * n, long: true, tip: `Total necesario ${m2} × ${n + 1} menos lo que ya tienes ${m1} × ${n}.` }; }
+    const W = pick([[40, 60], [30, 70], [25, 75], [20, 30, 50], [30, 30, 40], [10, 40, 50]]); const g = W.map(() => rnd(10, 20));
+    return { q: `Notas ${g.join(', ')} con pesos ${W.map(w => w + '%').join(', ')}. ¿Promedio ponderado?`, a: W.reduce((s, w, i) => s + w * g[i], 0) / 100, long: true, tip: 'Multiplica cada nota por su peso y suma.' };
+  }},
+  prob: { name: 'Probabilidad', sym: 'P', gen(L) {
+    const pr = (num, den, q, tip) => ({ q: `${q} (en %)`, a: num / den * 100, abs: .1, long: true, tip: `${tip} = ${num}/${den} ≈ ${d1(num / den * 100)}%.` });
+    if (L <= 3) { const ev = pick([['un número par', 3], ['más de 4', 2], ['un 6', 1], ['menos de 3', 2], ['un número primo', 3], ['algo distinto de 1', 5], ['un múltiplo de 3', 2]]); return pr(ev[1], 6, `Probabilidad de sacar ${ev[0]} con un dado`, 'Casos favorables ÷ casos posibles'); }
+    if (L <= 6) { const tt = pick([4, 5, 10, 20, 25, 50]), r = rnd(1, tt - 1); return Math.random() < .6 ? pr(r, tt, `Bolsa con ${r} rojas y ${tt - r} azules. Probabilidad de sacar roja`, 'Rojas ÷ total') : pr(tt - r, tt, `Bolsa con ${r} rojas y ${tt - r} azules. Probabilidad de NO sacar roja`, '1 − P(roja)'); }
+    if (L <= 8) {
+      if (Math.random() < .4) { const e = pick([['dos caras', 1], ['al menos una cara', 3], ['exactamente una cara', 2]]); return pr(e[1], 4, `Lanzas dos monedas. Probabilidad de ${e[0]}`, 'Hay 4 resultados: CC, CS, SC, SS'); }
+      const s = rnd(2, 12), w = [1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1][s - 2]; return pr(w, 36, `Lanzas dos dados. Probabilidad de que sumen ${s}`, `Hay 36 combinaciones; ${w} suman ${s}`);
+    }
+    const r = rnd(2, 6), b = rnd(2, 6), tt = r + b;
+    return Math.random() < .6 ? pr(r * (r - 1), tt * (tt - 1), `Bolsa con ${r} rojas y ${b} azules. Sacas 2 sin devolver. Probabilidad de que ambas sean rojas`, `${r}/${tt} × ${r - 1}/${tt - 1}`)
+      : pr(r * r, tt * tt, `Bolsa con ${r} rojas y ${b} azules. Sacas 2 devolviendo la primera. Probabilidad de que ambas sean rojas`, `${r}/${tt} × ${r}/${tt}`);
+  }},
+  est: { name: 'Estimación', sym: '≈', gen(L) {
+    const tol = L <= 3 ? .1 : L <= 6 ? .07 : .05, t = rnd(0, 99);
+    let q, a;
+    if (t < 45) { const x = rnd(L <= 4 ? 21 : 101, L <= 4 ? 99 : 999), y = rnd(L <= 6 ? 11 : 101, L <= 6 ? 99 : 999); q = `${x} × ${y}`; a = x * y; }
+    else if (t < 75) { const y = rnd(11, L <= 5 ? 49 : 99), x = rnd(y * 10, y * 300); q = `${x} ÷ ${y}`; a = x / y; }
+    else { const p = rnd(11, 89), n = rnd(101, L <= 5 ? 999 : 9999); q = `${p}% de ${n}`; a = n * p / 100; }
+    return { q: `${q} ≈ ?`, a, tol, tip: `Redondea a números cómodos y compensa. Vale si quedas a ±${Math.round(tol * 100)}%.` };
+  }},
+};
+const CATS = [
+  ['Aritmética', ['suma', 'resta', 'mult', 'div', 'dec']],
+  ['Números', ['pot', 'frac', 'mcd', 'serie']],
+  ['Proporciones y dinero', ['pct', 'tres', 'fin']],
+  ['Álgebra y datos', ['ecu', 'prom', 'prob', 'est']],
+];
+const MIX = ['suma', 'resta', 'mult', 'div', 'pct', 'frac', 'pot', 'dec'];
+const ALL = Object.keys(TOPICS);
+const DIFF = { auto: ['Adaptativa', null], f: ['Fácil', [1, 3]], m: ['Media', [4, 6]], d: ['Difícil', [7, 8]], x: ['Experto', [9, 10]] };
+const DIFF_NOTE = { auto: 'Cada tema sube de nivel cuando aciertas rápido y baja cuando fallas.', f: 'Niveles 1–3: números pequeños y operaciones directas.', m: 'Niveles 4–6: dos y tres cifras, problemas cortos.', d: 'Niveles 7–8: varios pasos, decimales y problemas aplicados.', x: 'Niveles 9–10: lo más exigente de cada tema.' };
+
+/* ================= Lecciones =================
+   Cada lección enseña una técnica, la resuelve paso a paso y la practica con su propio generador. */
+const LESSONS = [
+  { id: 'izq', topic: 'suma', title: 'Sumar de izquierda a derecha', desc: 'Como lees: de lo grande a lo pequeño.',
+    lead: 'En la escuela se suma desde las unidades, pero tu cabeza piensa primero en lo grande. Sumar de izquierda a derecha te da enseguida una aproximación y evita «llevar».',
+    how: ['Suma las centenas.', 'Suma las decenas y acumula.', 'Suma las unidades y acumula.'],
+    ex: ['467 + 285', '400 + 200 = 600', '60 + 80 = 140 → 740', '7 + 5 = 12 → 752'],
+    careful: 'Di en voz baja el total parcial (600, 740…) para no perderlo.',
+    gen: i => { const a = rnd(100, 999), b = rnd(100, 999); return { q: `${a} + ${b}`, a: a + b, tip: 'Centenas, luego decenas, luego unidades.' }; } },
+  { id: 'comp', topic: 'resta', title: 'Restar compensando', desc: 'Redondea el que restas y corrige.',
+    lead: 'Restar 98 es incómodo; restar 100 es trivial. Redondea el número que restas a una decena o centena cercana y luego devuelve la diferencia.',
+    how: ['Redondea el sustraendo hacia arriba.', 'Resta el número redondo.', 'Suma lo que te pasaste.'],
+    ex: ['534 − 98', '534 − 100 = 434', 'Te pasaste por 2', '434 + 2 = 436'],
+    careful: 'Si redondeas hacia arriba al restar, compensa sumando (no restando).',
+    gen: i => { const b = rnd(1, i < 5 ? 9 : 49) * 10 - rnd(1, 3), a = rnd(b + 10, b + 900); return { q: `${a} − ${b}`, a: a - b, tip: `Resta ${b + (10 - b % 10)} y suma ${10 - b % 10}.` }; } },
+  { id: 'x5', topic: 'mult', title: 'Multiplicar por 5, 25 y 50', desc: 'Son fracciones de 10, 100 y 100.',
+    lead: '5 es la mitad de 10, 50 la mitad de 100 y 25 la cuarta parte de 100. Multiplicar por ellos es multiplicar por un número redondo y dividir.',
+    how: ['× 5: multiplica por 10 y divide entre 2.', '× 50: multiplica por 100 y divide entre 2.', '× 25: multiplica por 100 y divide entre 4.'],
+    ex: ['36 × 25', '36 × 100 = 3600', '3600 ÷ 4', '= 900'],
+    careful: 'Con números impares sale ,5 al dividir entre 2: 47 × 5 = 470 ÷ 2 = 235.',
+    gen: i => { const m = pick([5, 25, 50]), n = m === 25 ? rnd(2, 40) * (i < 4 ? 4 : 2) : rnd(12, 98); return { q: `${n} × ${m}`, a: n * m, tip: m === 25 ? '× 100 y ÷ 4.' : m === 50 ? '× 100 y ÷ 2.' : '× 10 y ÷ 2.' }; } },
+  { id: 'x11', topic: 'mult', title: 'Multiplicar por 11', desc: 'Abre el número y pon la suma en medio.',
+    lead: 'Para un número de dos cifras, el resultado × 11 es la primera cifra, la suma de ambas en el centro y la última cifra.',
+    how: ['Separa las dos cifras: 3 _ 6.', 'Pon su suma en medio: 3 9 6.', 'Si la suma pasa de 9, lleva 1 a la izquierda.'],
+    ex: ['78 × 11', '7 _ 8', '7 + 8 = 15: escribe 5 y lleva 1', '(7+1) 5 8 = 858'],
+    careful: 'Con tres cifras (abc × 11): a, a+b, b+c, c, llevando de derecha a izquierda.',
+    gen: i => { const n = i < 6 ? rnd(11, 99) : rnd(100, 999); return { q: `${n} × 11`, a: n * 11, tip: 'Primera cifra, suma de vecinas, última cifra.' }; } },
+  { id: 'x9', topic: 'mult', title: 'Multiplicar por 9, 99 y 999', desc: 'Multiplica por 10, 100, 1000 y resta.',
+    lead: '9 es 10 − 1. Así que n × 9 = n × 10 − n. Lo mismo con 99 (100 − 1) y 999 (1000 − 1).',
+    how: ['Añade los ceros: n × 10, × 100 o × 1000.', 'Resta el número original.'],
+    ex: ['47 × 99', '47 × 100 = 4700', '4700 − 47', '= 4653'],
+    careful: 'Funciona con 98 (100 − 2), 95 (100 − 5)… Resta 2n o 5n.',
+    gen: i => { const m = pick(i < 3 ? [9] : i < 7 ? [9, 99] : [99, 999, 98]), n = rnd(12, 99); return { q: `${n} × ${m}`, a: n * m, tip: `${n} × ${m + (m === 98 ? 2 : 1)} − ${m === 98 ? 2 : 1} × ${n}.` }; } },
+  { id: 'desc', topic: 'mult', title: 'Descomponer para multiplicar', desc: 'Parte un factor en piezas fáciles.',
+    lead: 'La propiedad distributiva es la llave maestra del cálculo mental: 47 × 6 = 40 × 6 + 7 × 6.',
+    how: ['Separa el número grande en decenas y unidades.', 'Multiplica cada parte.', 'Suma los resultados.'],
+    ex: ['47 × 6', '40 × 6 = 240', '7 × 6 = 42', '240 + 42 = 282'],
+    careful: 'A veces conviene restar: 49 × 6 = 50 × 6 − 6 = 294.',
+    gen: i => { const a = i < 5 ? rnd(12, 99) : rnd(101, 499), b = rnd(3, 9); return { q: `${a} × ${b}`, a: a * b, tip: `${a - a % 10} × ${b} + ${a % 10} × ${b}.` }; } },
+  { id: 'sq5', topic: 'pot', title: 'Cuadrados que terminan en 5', desc: 'Un producto y un 25 al final.',
+    lead: 'Cualquier número que termina en 5 elevado al cuadrado termina en 25. Delante va el número sin el 5 multiplicado por su siguiente.',
+    how: ['Quita el 5: de 65 queda 6.', 'Multiplica por el siguiente: 6 × 7 = 42.', 'Pega 25 al final: 4225.'],
+    ex: ['85²', '8 × 9 = 72', 'Pega 25', '= 7225'],
+    careful: 'Sirve también para 105², 115²…: 10 × 11 = 110 → 11025.',
+    gen: i => { const k = rnd(1, i < 6 ? 9 : 14), n = k * 10 + 5; return { q: `${n}²`, a: n * n, tip: `${k} × ${k + 1} = ${k * (k + 1)} y 25.` }; } },
+  { id: 'sqab', topic: 'pot', title: 'Elevar al cuadrado cualquier número', desc: '(a + b)² = a² + 2ab + b².',
+    lead: 'Separa el número en una decena redonda y unas unidades. El cuadrado es: decena², más dos veces el producto, más unidades².',
+    how: ['43 = 40 + 3.', '40² = 1600.', '2 × 40 × 3 = 240.', '3² = 9 → suma todo.'],
+    ex: ['43²', '1600', '+ 240', '+ 9 = 1849'],
+    careful: 'Para 48 es más fácil (50 − 2)²: 2500 − 200 + 4 = 2304.',
+    gen: i => { const n = rnd(21, i < 6 ? 49 : 99); return { q: `${n}²`, a: n * n, tip: `${n - n % 10}² + 2·${n - n % 10}·${n % 10} + ${n % 10}².` }; } },
+  { id: 'dsq', topic: 'mult', title: 'Diferencia de cuadrados', desc: '48 × 52 = 50² − 2².',
+    lead: 'Cuando dos números están a la misma distancia de uno redondo, su producto es el cuadrado del redondo menos el cuadrado de la distancia: (m − d)(m + d) = m² − d².',
+    how: ['Busca el punto medio: entre 48 y 52 está 50.', 'Distancia: 2.', 'Resultado: 50² − 2² = 2500 − 4.'],
+    ex: ['37 × 43', 'Medio 40, distancia 3', '1600 − 9', '= 1591'],
+    careful: 'Solo funciona si la suma de ambos es par (tienen punto medio entero).',
+    gen: i => { const m = rnd(2, 9) * 10 + (i > 6 ? pick([0, 5]) : 0), d = rnd(1, i < 5 ? 3 : 7); return { q: `${m - d} × ${m + d}`, a: (m - d) * (m + d), tip: `${m}² − ${d}² = ${m * m} − ${d * d}.` }; } },
+  { id: 'div5', topic: 'div', title: 'Dividir entre 5 y 25', desc: 'Al revés que multiplicar.',
+    lead: 'Dividir entre 5 es multiplicar por 2 y dividir entre 10. Dividir entre 25 es multiplicar por 4 y dividir entre 100.',
+    how: ['÷ 5: dobla y quita un cero (o mueve la coma).', '÷ 25: multiplica por 4 y mueve la coma dos lugares.'],
+    ex: ['350 ÷ 25', '350 × 4 = 1400', '1400 ÷ 100', '= 14'],
+    careful: '÷ 50 = × 2 y ÷ 100. ÷ 125 = × 8 y ÷ 1000.',
+    gen: i => { const m = pick([5, 25, 50]), q = rnd(3, i < 5 ? 40 : 200) / (i > 6 ? 2 : 1); return { q: `${fmt(q * m)} ÷ ${m}`, a: q, tip: m === 5 ? '× 2 y ÷ 10.' : m === 25 ? '× 4 y ÷ 100.' : '× 2 y ÷ 100.' }; } },
+  { id: 'pctp', topic: 'pct', title: 'Porcentajes por partes', desc: 'Arma cualquier % con 10%, 5% y 1%.',
+    lead: 'El 10% se obtiene moviendo la coma un lugar; el 1%, dos lugares; el 5% es la mitad del 10%. Con esas piezas armas cualquier porcentaje.',
+    how: ['Calcula el 10% y el 1%.', 'Combina: 17% = 10% + 5% + 1% + 1%.', 'Suma las piezas.'],
+    ex: ['17% de 300', '10% = 30, 5% = 15', '1% = 3, dos veces = 6', '30 + 15 + 6 = 51'],
+    careful: 'Atajo: x% de y = y% de x. El 16% de 25 es el 25% de 16 = 4.',
+    gen: i => { const p = pick([11, 12, 15, 17, 21, 35, 45, 55, 9, 19, 31, 65]), n = rnd(1, i < 5 ? 9 : 40) * 100; return { q: `${p}% de ${n}`, a: n * p / 100, tip: `10% de ${n} = ${n / 10}; 1% = ${n / 100}.` }; } },
+  { id: 'fracp', topic: 'frac', title: 'Fracciones que conviene saber', desc: 'Octavos, quintos y veinteavos en %.',
+    lead: 'Memorizar unas pocas equivalencias acelera porcentajes, descuentos y probabilidades.',
+    how: ['1/2 = 50%, 1/4 = 25%, 1/5 = 20%, 1/10 = 10%.', '1/8 = 12,5% → 3/8 = 37,5%, 5/8 = 62,5%, 7/8 = 87,5%.', '1/20 = 5%, 1/25 = 4%, 1/40 = 2,5%.'],
+    ex: ['7/8 en %', '1/8 = 12,5%', '7 × 12,5', '= 87,5%'],
+    careful: '1/3 ≈ 33,3% y 1/6 ≈ 16,7%: no son exactos, redondea.',
+    gen: i => { const d = pick(i < 4 ? [2, 4, 5, 10] : [8, 20, 25, 40, 5]); let n = rnd(1, d - 1); while (gcd(n, d) !== 1) n = rnd(1, d - 1); return { q: `${n}/${d} en %`, a: n / d * 100, tip: `1/${d} = ${fmt(100 / d)}%; × ${n}.` }; } },
+  { id: 'tres', topic: 'tres', title: 'Regla de tres sin fórmulas', desc: 'Reduce a la unidad y escala.',
+    lead: 'Directa: si una cantidad crece, la otra también. Inversa: si una crece, la otra baja. En ambos casos pasa por «cuánto vale 1».',
+    how: ['Directa: valor de 1 = total ÷ cantidad; luego × la nueva cantidad.', 'Inversa: total fijo = cantidad × valor; luego ÷ la nueva cantidad.', 'Pregúntate: ¿tiene sentido que suba o baje?'],
+    ex: ['4 obreros tardan 6 días; ¿8 obreros?', 'Inversa: más obreros, menos días', 'Trabajo = 4 × 6 = 24', '24 ÷ 8 = 3 días'],
+    careful: 'Antes de calcular, decide si es directa o inversa. Es el error más común.',
+    gen: i => TOPICS.tres.gen(clamp(i, 1, 8)) },
+  { id: 'ecu', topic: 'ecu', title: 'Despejar ecuaciones', desc: 'Deshaz las operaciones en orden inverso.',
+    lead: 'Una ecuación es una balanza: lo que hagas en un lado hazlo en el otro. Para aislar la x, deshaz las operaciones empezando por la última.',
+    how: ['Quita lo que suma o resta (pasa con signo contrario).', 'Quita lo que multiplica (pasa dividiendo).', 'Comprueba sustituyendo.'],
+    ex: ['3x + 7 = 25', '3x = 25 − 7 = 18', 'x = 18 ÷ 3', 'x = 6'],
+    careful: 'Si hay x en ambos lados, júntalas primero: 5x + 2 = 2x + 14 → 3x = 12.',
+    gen: i => TOPICS.ecu.gen(clamp(i, 1, 10)) },
+  { id: 'est', topic: 'est', title: 'Estimar con criterio', desc: 'Redondea y compensa.',
+    lead: 'Estimar no es adivinar. Redondea a números cómodos y, si puedes, redondea uno hacia arriba y otro hacia abajo para que los errores se cancelen.',
+    how: ['Redondea cada número a 1 o 2 cifras significativas.', 'Calcula con los redondos.', 'Ajusta: si subiste mucho uno, baja un poco el resultado.'],
+    ex: ['48 × 62', '≈ 50 × 60', '= 3000', 'Real: 2976 (error < 1%)'],
+    careful: 'En divisiones, redondea ambos en la misma dirección para mantener el cociente.',
+    gen: i => TOPICS.est.gen(clamp(i, 1, 10)) },
+  { id: 'prom', topic: 'prom', title: 'Promedios rápidos', desc: 'Base más promedio de diferencias.',
+    lead: 'Para promediar números parecidos, elige una base y promedia solo las diferencias. Para un promedio ponderado, multiplica cada valor por su peso.',
+    how: ['Elige una base cómoda (p. ej. 80).', 'Escribe las diferencias: +2, −3, +7.', 'Promedia las diferencias y súmalas a la base.'],
+    ex: ['82, 77, 87, 78', 'Base 80: +2, −3, +7, −2', 'Suma 4 ÷ 4 = 1', 'Promedio = 81'],
+    careful: 'Ponderado: 15 (40%) y 18 (60%) = 6 + 10,8 = 16,8.',
+    gen: i => TOPICS.prom.gen(clamp(i, 1, 10)) },
+  { id: 'prob', topic: 'prob', title: 'Probabilidad básica', desc: 'Favorables entre posibles.',
+    lead: 'La probabilidad es casos favorables ÷ casos posibles. Para eventos seguidos e independientes se multiplican las probabilidades.',
+    how: ['Cuenta todos los resultados posibles.', 'Cuenta los que cumplen la condición.', 'Divide y pasa a %.'],
+    ex: ['Dos monedas: ¿al menos una cara?', 'Posibles: CC, CS, SC, SS = 4', 'Favorables: 3', '3/4 = 75%'],
+    careful: 'Sin devolver, el total baja: 3 rojas de 5, dos seguidas = 3/5 × 2/4 = 30%.',
+    gen: i => TOPICS.prob.gen(clamp(i, 1, 10)) },
+  { id: 'fin', topic: 'fin', title: 'Interés compuesto y regla del 72', desc: 'El dinero que crece sobre sí mismo.',
+    lead: 'Con interés simple ganas siempre sobre el capital inicial. Con interés compuesto, los intereses también generan intereses, y el crecimiento se acelera.',
+    how: ['Simple: interés = capital × tasa × años.', 'Compuesto: saldo = capital × (1 + tasa)ⁿ.', 'Regla del 72: años para duplicar ≈ 72 ÷ tasa.'],
+    ex: ['1000 al 10% compuesto, 2 años', '1000 × 1,1 = 1100', '1100 × 1,1 = 1210', 'Simple daría 1200'],
+    careful: 'Perder 50% exige ganar 100% para volver al inicio: pérdidas y ganancias no son simétricas.',
+    gen: i => TOPICS.fin.gen(clamp(i, 1, 10)) },
+];
+
+/* ================= Estado guardado ================= */
+const KEY = 'cuanti.v1';
+const blank = () => ({ topics: {}, days: {}, sessions: [], best: {}, lessons: {}, goal: 40, fmt: 'sprint', diff: 'auto' });
+let S = blank();
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(blank(), JSON.parse(raw)); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const T = k => (S.topics[k] ||= { lvl: 1, n: 0, ok: 0, ms: 0 });
+const nameOf = k => k === 'mix' ? 'Mixto esencial' : k === 'all' ? 'Desafío total' : k.startsWith('L:') ? (LESSONS.find(l => l.id === k.slice(2))?.title || 'Lección') : TOPICS[k]?.name || k;
+
+/* ================= Selectores ================= */
+function setSeg(sel, val) {
+  const seg = $(sel); let on = null;
+  seg.querySelectorAll('button').forEach(b => { const p = b.dataset.v === String(val); b.setAttribute('aria-pressed', p); if (p) on = b; });
+  const k = seg.querySelector('.knob');
+  if (on) requestAnimationFrame(() => { k.style.width = on.offsetWidth + 'px'; k.style.transform = `translateX(${on.offsetLeft}px)`; });
+}
+const refreshSegs = () => { setSeg('#diffSeg', S.diff); setSeg('#fmtSeg', S.fmt); setSeg('#goalSeg', S.goal); };
+addEventListener('resize', refreshSegs);
+
+/* ================= Inicio ================= */
+function streak() {
+  let n = 0; const d = new Date();
+  if (!(S.days[dayKey(d)]?.ok > 0)) d.setDate(d.getDate() - 1);
+  while (S.days[dayKey(d)]?.ok > 0) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+const lvlLabel = k => S.diff === 'auto' ? `Nv ${Math.floor(T(k).lvl)}` : DIFF[S.diff][0];
+function renderHome() {
+  const h = new Date().getHours();
+  $('#hello').textContent = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  const today = S.days[dayKey()] || { n: 0, ok: 0 };
+  const pct = clamp(today.ok / S.goal, 0, 1);
+  requestAnimationFrame(() => $('#ringArc').setAttribute('stroke-dasharray', `${pct * 100} 100`));
+  $('#ringTxt').textContent = today.ok;
+  $('#todayT1').textContent = pct >= 1 ? 'Meta cumplida' : 'Meta de hoy';
+  $('#todayT2').textContent = pct >= 1 ? `${today.ok} aciertos hoy. Lo que sigue es extra.` : `${today.ok} de ${S.goal} aciertos`;
+  const st = streak();
+  $('#streak').hidden = !st; $('#streak span').textContent = `${st} ${st === 1 ? 'día' : 'días'} seguidos`;
+  $('#diffNote').textContent = DIFF_NOTE[S.diff];
+  refreshSegs();
+  const avg = ks => Math.floor(ks.reduce((s, k) => s + T(k).lvl, 0) / ks.length);
+  const lab = ks => S.diff === 'auto' ? `nivel ${avg(ks)}` : DIFF[S.diff][0].toLowerCase();
+  let html = `<h2>Sesiones rápidas</h2><div class="duo">
+    <button class="hero press" data-topic="mix"><span class="nm">Mixto esencial</span><span class="lv">+ − × ÷ % · ${lab(MIX)}</span></button>
+    <button class="hero alt press" data-topic="all"><span class="nm">Desafío total</span><span class="lv">Los ${ALL.length} temas · ${lab(ALL)}</span></button></div>`;
+  for (const [cat, keys] of CATS) {
+    html += `<h2>${cat}</h2><div class="topics">`;
+    for (const k of keys) {
+      const lv = T(k).lvl;
+      html += `<button class="topic press" data-topic="${k}"><span class="sym">${TOPICS[k].sym}</span><span class="nm">${TOPICS[k].name}</span>
+        <span class="lv"><span class="num" style="min-width:3em">${lvlLabel(k)}</span><span class="bar"><span style="width:${(lv - 1) / 9 * 100}%"></span></span></span></button>`;
+    }
+    html += '</div>';
+  }
+  $('#topicsWrap').innerHTML = html;
+}
+
+/* ================= Juego ================= */
+let G = null;
+const FMT = { sprint: 'Sprint 60 s', ten: '10 preguntas', free: 'Libre', lesson: 'Práctica guiada' };
+
+function show(el) { el.classList.remove('out'); el.hidden = false; }
+function hide(el, then) {
+  if (el.hidden) return then && then();
+  el.classList.add('out');
+  setTimeout(() => { el.hidden = true; el.classList.remove('out'); then && then(); }, 190);
+}
+
+function start(topic) {
+  const lesson = topic.startsWith('L:') ? LESSONS.find(l => l.id === topic.slice(2)) : null;
+  const fmtk = lesson ? 'lesson' : S.fmt;
+  G = { topic, lesson, fmt: fmtk, n: 0, ok: 0, ms: 0, mistakes: [], q: null, input: '', t0: 0, start: performance.now(), lock: false, timer: null, lvls: [] };
+  hide($('#result')); show($('#play'));
+  document.body.style.overflow = 'hidden';
+  $('#pSub').textContent = fmtk === 'sprint' ? 'segundos' : fmtk === 'free' ? 'respondidas' : 'pregunta';
+  if (fmtk === 'sprint') G.timer = setInterval(tick, 200);
+  tick(); next(true);
+}
+const total = () => G.fmt === 'lesson' ? 10 : G.fmt === 'ten' ? 10 : 0;
+function tick() {
+  if (!G) return;
+  if (G.fmt === 'sprint') {
+    const left = Math.max(0, 60 - (performance.now() - G.start) / 1000);
+    $('#pMain').textContent = Math.ceil(left);
+    $('#pBar').style.width = `${(1 - left / 60) * 100}%`;
+    if (left <= 0 && !G.lock) finish();
+  } else if (total()) {
+    $('#pMain').textContent = `${Math.min(G.n + 1, total())}/${total()}`;
+    $('#pBar').style.width = `${G.n / total() * 100}%`;
+  } else { $('#pMain').textContent = G.n; $('#pBar').style.width = '0'; }
+  $('#pScore').textContent = G.ok;
+}
+function makeQ() {
+  if (G.lesson) { const q = G.lesson.gen(G.n + 1); q.k = G.lesson.topic; q.L = clamp(G.n + 1, 1, 10); q.tag = G.lesson.title; return q; }
+  const k = G.topic === 'mix' ? pick(MIX) : G.topic === 'all' ? pick(ALL) : G.topic;
+  const r = DIFF[S.diff][1];
+  const L = r ? rnd(r[0], r[1]) : clamp(Math.floor(T(k).lvl), 1, 10);
+  const q = TOPICS[k].gen(L); q.k = k; q.L = L; q.tag = `${TOPICS[k].name} · nivel ${L}`;
+  return q;
+}
+function next(first) {
+  let q, tries = 0; do { q = makeQ(); } while (G.q && q.q === G.q.q && ++tries < 8);
+  q.a = rd(q.a);
+  const paint = () => {
+    G.q = q; G.input = ''; G.t0 = performance.now(); G.lock = false;
+    $('#qTag').textContent = q.tag;
+    const qt = $('#qText'); qt.textContent = q.q; qt.classList.toggle('long', !!q.long || q.q.length > 26);
+    $('#fb').innerHTML = q.tol ? `<span>Aproximada · margen ±${Math.round(q.tol * 100)}%</span>` : q.abs ? '<span>Basta con un decimal</span>' : '';
+    $('#ans').className = 'answer';
+    const box = $('#qBox'); box.classList.remove('out', 'in'); void box.offsetWidth; box.classList.add('in');
+    draw();
+  };
+  if (first) return paint();
+  $('#qBox').classList.remove('in'); $('#qBox').classList.add('out');
+  setTimeout(paint, 150);
+}
+function draw() {
+  $('#ans').innerHTML = G.input ? `<span>${esc(G.input)}</span><span class="caret"></span>` : `<span class="ph">?</span><span class="caret"></span>`;
+}
+const parse = s => (!s || s === '-' || s === ',') ? NaN : parseFloat(s.replace(',', '.'));
+const isRight = (q, v) => q.tol ? Math.abs(v - q.a) <= Math.abs(q.a) * q.tol : q.abs ? Math.abs(v - q.a) <= q.abs + 1e-9 : Math.abs(v - q.a) < 0.00005;
+
+function key(k) {
+  if (!G || G.lock) return;
+  if (k === 'back') G.input = G.input.slice(0, -1);
+  else if (k === 'neg') G.input = G.input.startsWith('-') ? G.input.slice(1) : '-' + G.input;
+  else if (k === ',') { if (!G.input.includes(',')) G.input += G.input.replace('-', '') ? ',' : '0,'; }
+  else if (k === 'ok') return submit(false);
+  else if (k === 'skip') return submit(true);
+  else if (/^\d$/.test(k)) { if (G.input.replace(/[-,]/g, '').length < 10) G.input += k; }
+  draw();
+  // Avance automático cuando la respuesta exacta ya está escrita (no en aproximadas).
+  const v = parse(G.input);
+  if (!G.q.tol && !G.q.abs && !isNaN(v) && isRight(G.q, v) && !G.input.endsWith(',')) submit(false);
+}
+function submit(skip) {
+  const v = parse(G.input), a = $('#ans');
+  if (!skip && isNaN(v)) { a.classList.remove('bad'); void a.offsetWidth; a.classList.add('bad'); return; }
+  G.lock = true;
+  const q = G.q, dt = performance.now() - G.t0, ok = !skip && isRight(q, v);
+  const st = T(q.k); st.n++; st.ms += dt;
+  if (ok) st.ok++;
+  // Nivel adaptativo: solo en modo Auto y fuera de lecciones.
+  if (S.diff === 'auto' && !G.lesson) {
+    const target = (q.long ? 12000 : 5000) + q.L * 600;
+    st.lvl = clamp(st.lvl + (ok ? (dt < target ? .34 : .15) : -.5), 1, 10.99);
+  }
+  const day = (S.days[dayKey()] ||= { n: 0, ok: 0 }); day.n++; if (ok) day.ok++;
+  G.n++; G.ms += dt; G.lvls.push(q.L); if (ok) G.ok++;
+  save();
+  if (ok) {
+    a.classList.add('ok');
+    if (q.tol || q.abs) $('#fb').innerHTML = `<span><span class="good">Bien.</span> Exacto: ${fmt(q.a)}</span>`;
+    setTimeout(advance, q.tol || q.abs ? 900 : 200);
+  } else {
+    G.mistakes.push({ q: q.q, you: skip ? '—' : G.input, a: q.a, tip: q.tip });
+    a.classList.add('bad');
+    a.innerHTML = `<span>${fmt(q.a)}</span>`;
+    $('#fb').innerHTML = `<span>${skip ? 'Saltada.' : `Escribiste <b>${esc(G.input)}</b>.`} ${q.tip ? esc(q.tip) : ''}</span>`;
+    setTimeout(advance, G.fmt === 'sprint' ? 1700 : 2700);
+  }
+  tick();
+}
+function advance() {
+  if (!G) return;
+  if (total() && G.n >= total()) return finish();
+  if (G.fmt === 'sprint' && performance.now() - G.start >= 60000) return finish();
+  next();
+}
+function finish() {
+  if (!G) return;
+  clearInterval(G.timer);
+  const g = G; G = null;
+  if (!g.n) { hide($('#play'), () => { document.body.style.overflow = ''; renderAll(); }); return; }
+  const avgL = g.lvls.reduce((a, b) => a + b, 0) / g.lvls.length;
+  S.sessions.unshift({ d: Date.now(), topic: g.topic, fmt: g.fmt, n: g.n, ok: g.ok, ms: Math.round(g.ms) });
+  S.sessions = S.sessions.slice(0, 60);
+  let badge = '';
+  if (g.fmt === 'sprint' && g.ok > (S.best[g.topic] || 0)) { if (S.best[g.topic]) badge = 'Nueva mejor marca'; S.best[g.topic] = g.ok; }
+  if (g.lesson) {
+    const prev = S.lessons[g.lesson.id] || 0;
+    S.lessons[g.lesson.id] = Math.max(prev, g.ok);
+    if (g.ok >= 8 && prev < 8) badge = 'Lección completada';
+  }
+  save();
+  $('#rTitle').textContent = `${FMT[g.fmt]} · ${nameOf(g.topic)}`;
+  $('#rBig').textContent = g.ok;
+  $('#rSub').textContent = `${g.ok === 1 ? 'acierto' : 'aciertos'} de ${g.n}` + (g.lesson && g.ok < 8 ? ' · completa la lección con 8 o más' : '');
+  $('#rBadge').hidden = !badge; $('#rBadge').textContent = badge;
+  $('#rAcc').textContent = `${Math.round(g.ok / g.n * 100)}%`;
+  $('#rTime').textContent = `${d1(g.ms / g.n / 1000)} s`;
+  $('#rLvl').textContent = d1(avgL);
+  $('#rMistWrap').hidden = !g.mistakes.length;
+  $('#rMist').innerHTML = g.mistakes.slice(0, 20).map(m => `<div class="mist"><span class="q">${esc(m.q)}</span><span class="r">${fmt(m.a)}</span>
+    <span class="s">${m.you !== '—' ? `Tu respuesta: <span class="y">${esc(m.you)}</span> · ` : ''}${esc(m.tip || '')}</span></div>`).join('');
+  $('#rAgain').onclick = () => start(g.topic);
+  $('#rHome').onclick = () => hide($('#result'), () => { document.body.style.overflow = ''; renderAll(); if (g.lesson) openLesson(g.lesson.id); });
+  const m = $('#resultMain'); m.classList.remove('enter'); void m.offsetWidth; m.classList.add('enter');
+  show($('#result')); $('#result').scrollTop = 0;
+  $('#play').hidden = true;
+}
+
+/* ================= Lecciones ================= */
+let curLesson = null;
+function renderLessons() {
+  curLesson = null;
+  const done = LESSONS.filter(l => (S.lessons[l.id] || 0) >= 8).length;
+  const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>';
+  $('#tab-learn').innerHTML = `<h1><small>Aprende la técnica, luego practícala</small>Lecciones</h1>
+    <div class="lprog"><span class="num">${done}/${LESSONS.length}</span><span class="bar"><span style="width:${done / LESSONS.length * 100}%"></span></span><span>completadas</span></div>
+    <h2>Técnicas</h2><div class="lgroup">${LESSONS.map((l, i) => {
+      const ok = (S.lessons[l.id] || 0) >= 8;
+      return `<button class="litem press${ok ? ' done' : ''}" data-lesson="${l.id}"><span class="n num">${ok ? '✓' : i + 1}</span><span><span class="t">${l.title}</span><span class="d">${l.desc}</span></span>${chev}</button>`;
+    }).join('')}</div>`;
+  $('#tab-learn').classList.remove('enter'); void $('#tab-learn').offsetWidth; $('#tab-learn').classList.add('enter');
+}
+function openLesson(id) {
+  const l = LESSONS.find(x => x.id === id); if (!l) return;
+  curLesson = l;
+  const best = S.lessons[l.id] || 0, i = LESSONS.indexOf(l);
+  const nextL = LESSONS[i + 1];
+  const el = $('#tab-learn');
+  el.innerHTML = `<button class="back" id="lBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>Lecciones</button>
+    <div class="lesson">
+      <h1><small>Lección ${i + 1} · ${TOPICS[l.topic].name}</small>${l.title}</h1>
+      <h2>La idea</h2><p class="lead">${l.lead}</p>
+      <h2>Cómo se hace</h2><ol>${l.how.map(s => `<li>${s}</li>`).join('')}</ol>
+      <h2>Ejemplo resuelto</h2>
+      <div class="worked"><div class="wq">${l.ex[0]}</div><div class="ws">${l.ex.slice(1).map((s, j) => `<div style="animation-delay:${.15 + j * .22}s">${s}</div>`).join('')}</div></div>
+      <h2>Ojo</h2><p class="careful">${l.careful}</p>
+      <h2>Pruébalo</h2>
+      <div class="try"><div class="tq" id="tryQ"></div>
+        <form id="tryF" autocomplete="off"><input id="tryI" inputmode="decimal" placeholder="?" aria-label="Tu respuesta"><button class="btn primary press" style="padding:10px 16px">Comprobar</button></form>
+        <div class="tr" id="tryR"></div></div>
+      <button class="btn primary press block" id="lPractice">Práctica guiada · 10 ejercicios</button>
+      <p class="note" style="text-align:center">${best ? `Tu mejor resultado: ${best}/10.` : ''} Con 8 o más la lección queda completada.</p>
+      ${nextL ? `<button class="btn press block" id="lNext">Siguiente: ${nextL.title}</button>` : ''}
+    </div>`;
+  el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter');
+  window.scrollTo(0, 0);
+  newTry();
+  $('#lBack').onclick = () => { renderLessons(); window.scrollTo(0, 0); };
+  $('#lPractice').onclick = () => start('L:' + l.id);
+  if (nextL) $('#lNext').onclick = () => openLesson(nextL.id);
+  $('#tryF').onsubmit = e => {
+    e.preventDefault();
+    const inp = $('#tryI'), q = curLesson.tryQ, v = parse(inp.value.replace('.', ',').replace('−', '-'));
+    if (isNaN(v)) return;
+    if (inp.dataset.done) return newTry();
+    inp.classList.remove('ok', 'bad'); void inp.offsetWidth;
+    if (isRight(q, v)) { inp.classList.add('ok'); $('#tryR').innerHTML = `<b>Correcto.</b> ${q.tol || q.abs ? `Exacto: ${fmt(q.a)}. ` : ''}Pulsa Enter para otro.`; }
+    else { inp.classList.add('bad'); $('#tryR').innerHTML = `<em>Era ${fmt(q.a)}.</em> ${esc(q.tip || '')}`; }
+    inp.dataset.done = '1'; $('#tryF button').textContent = 'Otro';
+  };
+}
+function newTry() {
+  const q = curLesson.gen(rnd(2, 6)); q.a = rd(q.a); curLesson.tryQ = q;
+  const tq = $('#tryQ'); tq.textContent = q.q; tq.classList.toggle('long', !!q.long || q.q.length > 22);
+  tq.style.animation = 'none'; void tq.offsetWidth; tq.style.animation = 'slideIn .28s var(--ease)';
+  const inp = $('#tryI'); inp.value = ''; inp.className = ''; delete inp.dataset.done;
+  $('#tryR').textContent = ''; $('#tryF button').textContent = 'Comprobar';
+}
+
+/* ================= Progreso ================= */
+function renderStats() {
+  const all = Object.values(S.topics);
+  const n = all.reduce((s, t) => s + t.n, 0), ok = all.reduce((s, t) => s + t.ok, 0), ms = all.reduce((s, t) => s + t.ms, 0);
+  $('#kTotal').textContent = n.toLocaleString('es');
+  $('#kAcc').textContent = n ? `${Math.round(ok / n * 100)}%` : '—';
+  $('#kTime').textContent = n ? `${d1(ms / n / 1000)} s` : '—';
+
+  const days = []; const d = new Date(); d.setDate(d.getDate() - 13);
+  for (let i = 0; i < 14; i++) { days.push({ k: dayKey(d), lab: d.getDate(), v: S.days[dayKey(d)]?.ok || 0 }); d.setDate(d.getDate() + 1); }
+  const max = Math.max(S.goal, ...days.map(x => x.v));
+  const W = 320, H = 130, top = 6, bot = 18, bw = W / 14;
+  const y = v => top + (H - top - bot) * (1 - v / max);
+  let svg = `<line x1="0" x2="${W}" y1="${y(S.goal)}" y2="${y(S.goal)}" stroke="var(--muted)" stroke-opacity=".4" stroke-dasharray="3 4"/>`;
+  days.forEach((x, i) => {
+    const h = (H - top - bot) * x.v / max;
+    svg += `<rect style="animation-delay:${i * 25}ms" x="${i * bw + 4}" y="${H - bot - Math.max(h, x.v ? 2 : 0)}" width="${bw - 8}" height="${Math.max(h, x.v ? 2 : 0)}" rx="3" fill="${x.v >= S.goal ? 'var(--accent)' : 'color-mix(in srgb, var(--accent) 40%, transparent)'}"><title>${x.k}: ${x.v} aciertos</title></rect>`;
+    if (i % 2 === 1) svg += `<text x="${i * bw + bw / 2}" y="${H - 4}" text-anchor="middle">${x.lab}</text>`;
+  });
+  $('#chart').innerHTML = svg;
+
+  $('#topicRows').innerHTML = CATS.flatMap(c => c[1]).map(k => {
+    const s = T(k);
+    return `<div class="row"><span class="a">${TOPICS[k].name}</span><span class="b num">${s.n ? `${Math.round(s.ok / s.n * 100)}% · ${d1(s.ms / s.n / 1000)} s · ${s.n} resp.` : 'Sin practicar'}</span>
+      <span class="c"><span class="num" style="min-width:3em">Nv ${Math.floor(s.lvl)}</span><span class="bar"><span style="width:${(s.lvl - 1) / 9 * 100}%"></span></span></span></div>`;
+  }).join('');
+
+  const best = Object.entries(S.best).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  $('#bestRows').innerHTML = best.length ? best.map(([k, v]) => `<div class="row"><span class="a">${nameOf(k)}</span><span class="b num">${v} aciertos</span></div>`).join('')
+    : '<div class="empty">Juega un Sprint de 60 s para marcar tu primera referencia.</div>';
+
+  $('#sessRows').innerHTML = S.sessions.length ? S.sessions.slice(0, 8).map(s => {
+    const dt = new Date(s.d);
+    return `<div class="row"><span class="a">${esc(nameOf(s.topic))}</span><span class="b num">${s.ok}/${s.n}</span>
+      <span class="c">${FMT[s.fmt]} · ${dt.toLocaleDateString('es', { day: 'numeric', month: 'short' })}, ${dt.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })} · ${d1(s.ms / s.n / 1000)} s por respuesta</span></div>`;
+  }).join('') : '<div class="empty">Aún no hay sesiones.</div>';
+  refreshSegs();
+}
+function renderAll() {
+  renderHome(); renderStats();
+  if (!$('#tab-learn').hidden) curLesson ? null : renderLessons();
+}
+
+/* ================= Navegación y eventos ================= */
+function goTab(tab) {
+  $$('nav.tabs button').forEach(x => x.dataset.tab === tab ? x.setAttribute('aria-current', 'page') : x.removeAttribute('aria-current'));
+  for (const t of ['home', 'learn', 'stats']) {
+    const el = $(`#tab-${t}`);
+    el.hidden = t !== tab;
+    if (t === tab) { el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
+  }
+  if (tab === 'stats') renderStats();
+  if (tab === 'learn') renderLessons();
+  if (tab === 'home') renderHome();
+  window.scrollTo(0, 0);
+}
+document.querySelector('nav.tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) goTab(b.dataset.tab); });
+$('#diffSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.diff = b.dataset.v; save(); renderHome(); });
+$('#fmtSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.fmt = b.dataset.v; save(); refreshSegs(); });
+$('#goalSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.goal = +b.dataset.v; save(); renderStats(); renderHome(); });
+$('#topicsWrap').addEventListener('click', e => { const b = e.target.closest('[data-topic]'); if (b) start(b.dataset.topic); });
+$('#tab-learn').addEventListener('click', e => { const b = e.target.closest('[data-lesson]'); if (b) openLesson(b.dataset.lesson); });
+$('#pad').addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (!b) return; e.preventDefault(); key(b.dataset.k); });
+$('#quit').addEventListener('click', () => finish());
+$('#resetBtn').addEventListener('click', () => { if (confirm('¿Borrar niveles, rachas, lecciones y sesiones? No se puede deshacer.')) { S = blank(); save(); renderAll(); } });
+document.addEventListener('keydown', e => {
+  if (!G || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 'Escape') { e.preventDefault(); return finish(); }
+  const m = { Enter: 'ok', Backspace: 'back', '-': 'neg', ',': ',', '.': ',', ' ': 'skip' };
+  const k = /^\d$/.test(e.key) ? e.key : m[e.key];
+  if (k) { e.preventDefault(); key(k); }
+});
+
+// Botón «atrás» de Android (lo llama el APK): cierra lo que esté abierto antes de salir.
+window.cuantiBack = () => {
+  if (G) { finish(); return true; }
+  if (!$('#result').hidden) { $('#rHome').click(); return true; }
+  if (!$('#tab-learn').hidden && curLesson) { renderLessons(); window.scrollTo(0, 0); return true; }
+  if ($('#tab-home').hidden) { goTab('home'); return true; }
+  return false;
+};
+renderAll();
+$('#tab-home').classList.add('enter');
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>

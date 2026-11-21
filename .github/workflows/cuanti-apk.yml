@@ -1,0 +1,65 @@
+# Compila el APK de Cuanti (calculo/) en cada cambio de esa carpeta, o a mano desde Actions → Run workflow.
+# Sin secretos: APK de prueba (firma de depuración) en «Artifacts» de la ejecución.
+# Con los secretos CUANTI_KEYSTORE_B64, CUANTI_KEYSTORE_PASSWORD, CUANTI_KEY_ALIAS y CUANTI_KEY_PASSWORD:
+# APK firmado con tu clave, que además se publica como Release en main. Ver calculo/README.md.
+name: APK de Cuanti
+on:
+  push:
+    paths: ['calculo/**', '.github/workflows/cuanti-apk.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: calculo/android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Preparar clave de firma (si existe)
+        id: key
+        env:
+          KS_B64: ${{ secrets.CUANTI_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/cuanti.keystore"
+            echo "CUANTI_KEYSTORE=$RUNNER_TEMP/cuanti.keystore" >> "$GITHUB_ENV"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Compilar
+        env:
+          CUANTI_KEYSTORE_PASSWORD: ${{ secrets.CUANTI_KEYSTORE_PASSWORD }}
+          CUANTI_KEY_ALIAS: ${{ secrets.CUANTI_KEY_ALIAS }}
+          CUANTI_KEY_PASSWORD: ${{ secrets.CUANTI_KEY_PASSWORD }}
+        run: |
+          if [ "${{ steps.key.outputs.signed }}" = "true" ]; then
+            gradle --no-daemon assembleRelease
+            cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/Cuanti.apk"
+          else
+            gradle --no-daemon assembleDebug
+            cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/Cuanti-prueba.apk"
+          fi
+          rm -f "$RUNNER_TEMP/cuanti.keystore"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Cuanti-apk
+          path: Cuanti*.apk
+      - name: Publicar Release (solo firmado y en main)
+        if: steps.key.outputs.signed == 'true' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: cuanti-latest
+          name: Cuanti (APK)
+          body: APK de Cuanti compilado desde calculo/. Descárgalo en el teléfono y ábrelo para instalar.
+          files: Cuanti.apk
+          make_latest: false
